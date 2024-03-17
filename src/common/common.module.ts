@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { ValidationService } from './validation.service';
 
 @Module({
   imports: [
@@ -11,6 +12,6 @@ import * as winston from 'winston';
       transports: [new winston.transports.Console()],
     }),
   ],
-  providers: [PrismaService],
+  providers: [PrismaService, ValidationService],
 })
 export class CommonModule {}
