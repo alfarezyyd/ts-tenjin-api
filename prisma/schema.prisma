@@ -40,4 +40,6 @@ model Address {
   telephone     String @db.VarChar(13)
   User          User   @relation(fields: [userId], references: [id])
   userId        BigInt @db.UnsignedBigInt
+
+  @@map("addresses")
 }

@@ -13,5 +13,6 @@ import { ValidationService } from './validation.service';
     }),
   ],
   providers: [PrismaService, ValidationService],
+  exports: [PrismaService, ValidationService],
 })
 export class CommonModule {}

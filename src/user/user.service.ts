@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidationService } from '../common/validation.service';
 import { UserValidation } from './user.validation';
 import { PrismaService } from '../common/prisma.service';
-import { User } from '@prisma/client';
+import { User, userGender } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -21,7 +21,7 @@ export class UserService {
     await this.prismaService.user.create({
       data: createUserRequest,
     });
-    return 'Success! new user created';
+    return 'Success! new user have been created';
   }
 
   findAll() {
@@ -30,21 +30,56 @@ export class UserService {
 
   async findOne(id: bigint): Promise<User> {
     return this.prismaService.user
-      .findUniqueOrThrow({
+      .findFirstOrThrow({
         where: {
           id: id,
         },
       })
       .catch((reason) => {
-        throw reason.message();
+        throw new HttpException(reason.message(), 400);
       });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: bigint, updateUserDto: UpdateUserDto): Promise<string> {
+    let userPrisma: User = await this.prismaService.user
+      .findFirstOrThrow({
+        where: {
+          id: id,
+        },
+      })
+      .catch((reason) => {
+        throw new HttpException(reason.message(), 400);
+      });
+    userPrisma = {
+      ...userPrisma,
+      ...updateUserDto,
+      gender: userGender[updateUserDto.gender],
+    };
+
+    await this.prismaService.user.update({
+      data: userPrisma,
+      where: {
+        id: id,
+      },
+    });
+    return 'Success! user have been updated';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: bigint): Promise<string> {
+    this.prismaService.user
+      .findFirstOrThrow({
+        where: {
+          id: id,
+        },
+      })
+      .catch((reason) => {
+        throw new HttpException(reason.message(), 400);
+      });
+    await this.prismaService.user.delete({
+      where: {
+        id: id,
+      },
+    });
+    return `Success! user have been deleted`;
   }
 }
