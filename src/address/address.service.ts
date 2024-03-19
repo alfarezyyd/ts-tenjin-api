@@ -27,7 +27,7 @@ export class AddressService {
     await this.prismaService.address.create({
       data: { ...validateAddress, userId: userId },
     });
-    return 'Success! new address have been created';
+    return 'Success! new address has been created';
   }
 
   async findAllByUserId(userId: bigint): Promise<ResponseAddressDto[]> {
@@ -45,7 +45,7 @@ export class AddressService {
       responseAddressDto.label = addressByUser.label;
       responseAddressDto.detail = addressByUser.detail;
       responseAddressDto.notes = addressByUser.notes;
-      responseAddressDto.receiver_name = addressByUser.receiver_name;
+      responseAddressDto.receiver_name = addressByUser.receiverName;
       responseAddressDto.telephone = addressByUser.telephone;
       allResponseAddressDto.push(responseAddressDto);
     }
@@ -82,7 +82,7 @@ export class AddressService {
         id: addressId,
       },
     });
-    return 'Success! address have been updated';
+    return 'Success! address has been updated';
   }
 
   async remove(userId: bigint, addressId: bigint): Promise<string> {
@@ -101,6 +101,6 @@ export class AddressService {
         id: searchedAddress.id,
       },
     });
-    return 'Success! address have been deleted';
+    return 'Success! address has been deleted';
   }
 }

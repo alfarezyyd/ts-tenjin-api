@@ -21,7 +21,7 @@ export class UserService {
     await this.prismaService.user.create({
       data: createUserRequest,
     });
-    return 'Success! new user have been created';
+    return 'Success! new user has been created';
   }
 
   findAll() {
@@ -62,7 +62,7 @@ export class UserService {
         id: id,
       },
     });
-    return 'Success! user have been updated';
+    return 'Success! user has been updated';
   }
 
   async remove(id: bigint): Promise<string> {
@@ -80,6 +80,6 @@ export class UserService {
         id: id,
       },
     });
-    return `Success! user have been deleted`;
+    return `Success! user has been deleted`;
   }
 }
