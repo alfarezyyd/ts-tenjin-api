@@ -19,27 +19,147 @@ enum userGender {
 }
 
 model User {
-  id         BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  name       String     @db.VarChar(255)
-  gender     userGender @default(MAN)
-  email      String     @unique @db.VarChar(255)
-  telephone  String     @unique @db.VarChar(13)
-  pin        String     @db.Char(6)
-  photo_path String     @db.VarChar(255)
-  address    Address[]
+  id        BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  name      String     @db.VarChar(255)
+  gender    userGender @default(MAN)
+  email     String     @unique @db.VarChar(255)
+  telephone String     @unique @db.VarChar(13)
+  pin       String     @db.Char(6)
+  photoPath String     @db.VarChar(255)
+  address   Address[]
+  store     Store[]
+  Cart      Cart[]
 
   @@map("users")
 }
 
 model Address {
-  id            BigInt @id @default(autoincrement()) @db.UnsignedBigInt
-  label         String @db.VarChar(30)
-  detail        String @db.VarChar(200)
-  notes         String @db.VarChar(45)
-  receiver_name String @db.VarChar(50)
-  telephone     String @db.VarChar(13)
-  User          User   @relation(fields: [userId], references: [id])
-  userId        BigInt @db.UnsignedBigInt
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  label        String @db.VarChar(30)
+  detail       String @db.VarChar(200)
+  notes        String @db.VarChar(45)
+  receiverName String @db.VarChar(50)
+  telephone    String @db.VarChar(13)
+  User         User   @relation(fields: [userId], references: [id])
+  userId       BigInt @db.UnsignedBigInt
 
   @@map("addresses")
+}
+
+model Store {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  name         String @db.VarChar(60)
+  domain       String @db.VarChar(24)
+  slogan       String @db.VarChar(48)
+  locationName String @db.VarChar(25)
+  city         String @db.VarChar(50)
+  zipCode      String @db.Char(5)
+  detail       String @db.VarChar(200)
+  description  String @db.VarChar(140)
+  photoPath    String @db.VarChar(255)
+  User         User   @relation(fields: [userId], references: [id])
+  userId       BigInt @db.UnsignedBigInt
+
+  @@map("stores")
+}
+
+model Expedition {
+  id   Int    @id @default(autoincrement()) @db.UnsignedSmallInt
+  name String @db.VarChar(255)
+
+  @@map("expeditions")
+}
+
+model Category {
+  id             Int        @id @default(autoincrement()) @db.UnsignedInt
+  name           String     @db.VarChar(255)
+  parentCategory Category   @relation("parentChildCategory", fields: [categoryId], references: [id])
+  Category       Category[] @relation("parentChildCategory")
+  categoryId     Int        @db.UnsignedInt
+
+  @@map("categories")
+}
+
+enum productCondition {
+  NEW
+  SECOND
+}
+
+enum productStatus {
+  ACTIVE
+  NON_ACTIVE
+}
+
+model Product {
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  slug            String            @db.VarChar(50)
+  name            String            @db.VarChar(50)
+  condition       productCondition  @default(NEW)
+  description     String?           @db.Text
+  price           Int               @db.UnsignedInt
+  minimumOrder    Int               @db.SmallInt
+  status          productStatus     @default(ACTIVE)
+  stock           Int               @db.SmallInt
+  sku             String            @db.VarChar(50)
+  weight          Int               @db.Int
+  width           Int               @db.Int
+  height          Int               @db.Int
+  ProductResource ProductResource[]
+  ProductsOnCarts ProductsOnCarts[]
+
+  @@map("products")
+}
+
+model ProductResource {
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath String   @db.VarChar(255)
+  videoUrl  String   @db.VarChar(255)
+  product   Product? @relation(fields: [productId], references: [id])
+  productId BigInt?  @db.UnsignedBigInt
+
+  @@map("product_resources")
+}
+
+model Cart {
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  user            User              @relation(fields: [userId], references: [id])
+  userId          BigInt            @db.UnsignedBigInt
+  ProductsOnCarts ProductsOnCarts[]
+  Order           Order[]
+
+  @@map("carts")
+}
+
+model ProductsOnCarts {
+  product   Product @relation(fields: [productId], references: [id])
+  productId BigInt  @db.UnsignedBigInt
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  cartId    BigInt  @db.UnsignedBigInt
+  quantity  Int
+  price     Int
+  note      String  @db.VarChar(255)
+
+  @@id([productId, cartId])
+}
+
+enum orderStatus {
+  PROCESSED
+  CONFIRMED
+  SENT
+  FINISHED
+}
+
+enum orderPaymentMethod {
+  CASH_ON_DELIVERY
+  TRANSFER
+}
+
+model Order {
+  id            BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  totalPrice    Int                @db.UnsignedMediumInt
+  status        orderStatus        @default(PROCESSED)
+  paymentMethod orderPaymentMethod
+  createAt      DateTime           @default(now())
+  cart          Cart               @relation(fields: [cartId], references: [id])
+  cartId        BigInt             @db.UnsignedBigInt
 }
