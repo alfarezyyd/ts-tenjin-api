@@ -24,8 +24,8 @@ model User {
   gender    userGender @default(MAN)
   email     String     @unique @db.VarChar(255)
   telephone String     @unique @db.VarChar(13)
-  pin       String     @db.Char(6)
-  photoPath String     @db.VarChar(255)
+  pin       String?    @db.Char(6)
+  photoPath String?    @db.VarChar(255)
   address   Address[]
   store     Store[]
   Cart      Cart[]

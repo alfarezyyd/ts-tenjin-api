@@ -1,18 +1,15 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
 import { User } from '@prisma/client';
-import { GenderEnum } from '../user/enum/gender.enum';
 import { RefinementCtx, z } from 'zod';
 
 export class ConvertHelper {
-  static async;
-
   static async userPrismaIntoUserResponse(
     userPrisma: User,
   ): Promise<ResponseUserDto> {
     return {
-      id: userPrisma.id,
+      id: userPrisma.id.toString(),
       name: userPrisma.name,
-      gender: GenderEnum[userPrisma.gender],
+      gender: userPrisma.gender,
       email: userPrisma.email,
       telephone: userPrisma.telephone,
       pin: userPrisma.pin,

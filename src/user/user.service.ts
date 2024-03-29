@@ -19,13 +19,13 @@ export class UserService {
       createUserDto,
     );
     await this.prismaService.user.create({
-      data: createUserRequest,
+      data: {
+        ...createUserRequest,
+        gender: userGender[createUserDto.gender],
+      },
     });
-    return 'Success! new user has been created';
-  }
 
-  findAll() {
-    return `This action returns all user`;
+    return 'Success! new user has been created';
   }
 
   async findOne(id: bigint): Promise<User> {

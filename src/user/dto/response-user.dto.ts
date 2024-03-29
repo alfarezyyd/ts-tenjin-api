@@ -1,11 +1,9 @@
-import { GenderEnum } from '../enum/gender.enum';
-
 export class ResponseUserDto {
-  id: bigint;
+  id: string;
   name: string;
-  gender: GenderEnum;
+  gender: string;
   email: string;
   telephone: string;
-  pin: string;
-  photoPath: string;
+  pin?: string | null;
+  photoPath?: string | null;
 }

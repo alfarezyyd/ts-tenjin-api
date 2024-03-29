@@ -17,7 +17,7 @@ import { ResponseUserDto } from './dto/response-user.dto';
 import { ConvertHelper } from '../helper/convert.helper';
 import { User } from '@prisma/client';
 
-@Controller('api/user')
+@Controller('api/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
