@@ -1,8 +1,8 @@
 export class ResponseAddressDto {
-  id: bigint;
+  id: string;
   label: string;
   detail: string;
   notes: string;
-  receiver_name: string;
+  receiverName: string;
   telephone: string;
 }

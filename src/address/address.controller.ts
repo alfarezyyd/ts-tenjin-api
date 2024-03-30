@@ -14,16 +14,18 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseAddressDto } from './dto/response-address.dto';
 
-@Controller('api/user/address')
+@Controller('api/users/addresses')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
 
   @Post(':id')
-  create(
+  async create(
     @Param('id', ParseIntPipe) id: bigint,
     @Body() createAddressDto: CreateAddressDto,
-  ) {
-    return this.addressService.create(id, createAddressDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      data: await this.addressService.create(id, createAddressDto),
+    };
   }
 
   @Get(':userId')
@@ -43,14 +45,22 @@ export class AddressController {
     @Param('addressId', ParseIntPipe) addressId: bigint,
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
-    return this.addressService.update(userId, addressId, updateAddressDto);
+    return {
+      data: await this.addressService.update(
+        userId,
+        addressId,
+        updateAddressDto,
+      ),
+    };
   }
 
-  @Delete(':userId:/:addressId')
-  remove(
+  @Delete(':userId/:addressId')
+  async remove(
     @Param('userId', ParseIntPipe) userId: bigint,
     @Param('addressId', ParseIntPipe) addressId: bigint,
-  ) {
-    return this.addressService.remove(userId, addressId);
+  ): Promise<WebResponse<string>> {
+    return {
+      data: await this.addressService.remove(userId, addressId),
+    };
   }
 }

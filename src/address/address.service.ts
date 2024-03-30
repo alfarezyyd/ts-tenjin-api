@@ -19,10 +19,18 @@ export class AddressService {
     userId: bigint,
     createAddressDto: CreateAddressDto,
   ): Promise<string> {
-    const validateAddress = this.validationService.validate(
-      AddressValidation.CREATE,
+    const validateAddress: CreateAddressDto = this.validationService.validate(
+      AddressValidation.SAVE,
       createAddressDto,
     );
+
+    await this.prismaService.user
+      .findFirstOrThrow({
+        where: { id: userId },
+      })
+      .catch((reason) => {
+        throw new HttpException(reason.message(), 400);
+      });
 
     await this.prismaService.address.create({
       data: { ...validateAddress, userId: userId },
@@ -41,11 +49,11 @@ export class AddressService {
     const allResponseAddressDto: ResponseAddressDto[] = [];
     for (const addressByUser of allAddressByUser) {
       const responseAddressDto: ResponseAddressDto = new ResponseAddressDto();
-      responseAddressDto.id = addressByUser.id;
+      responseAddressDto.id = addressByUser.id.toString();
       responseAddressDto.label = addressByUser.label;
       responseAddressDto.detail = addressByUser.detail;
       responseAddressDto.notes = addressByUser.notes;
-      responseAddressDto.receiver_name = addressByUser.receiverName;
+      responseAddressDto.receiverName = addressByUser.receiverName;
       responseAddressDto.telephone = addressByUser.telephone;
       allResponseAddressDto.push(responseAddressDto);
     }
@@ -58,10 +66,7 @@ export class AddressService {
     updateAddressDto: UpdateAddressDto,
   ): Promise<string> {
     const validateUpdateAddressDto: UpdateUserDto =
-      this.validationService.validate(
-        AddressValidation.UPDATE,
-        updateAddressDto,
-      );
+      this.validationService.validate(AddressValidation.SAVE, updateAddressDto);
     let addressPrisma: Address = await this.prismaService.address
       .findFirstOrThrow({
         where: {
@@ -76,7 +81,8 @@ export class AddressService {
       ...addressPrisma,
       ...validateUpdateAddressDto,
     };
-    this.prismaService.address.update({
+    console.log(addressPrisma);
+    await this.prismaService.address.update({
       data: addressPrisma,
       where: {
         id: addressId,
@@ -96,7 +102,7 @@ export class AddressService {
       .catch((reason) => {
         throw new HttpException(reason, 400);
       });
-    this.prismaService.address.delete({
+    await this.prismaService.address.delete({
       where: {
         id: searchedAddress.id,
       },
