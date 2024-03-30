@@ -1,10 +1,30 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
-import { Address, Store, User } from '@prisma/client';
+import { Address, Product, Store, User } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseStoreDto } from '../store/dto/response-store.dto';
 import { ResponseAddressDto } from '../address/dto/response-address.dto';
+import { ResponseProductDto } from '../product/dto/response-product.dto';
 
 export class ConvertHelper {
+  static async productPrismaIntoProductResponse(
+    productPrisma: Product,
+  ): Promise<ResponseProductDto> {
+    return {
+      id: productPrisma.id.toString(),
+      name: productPrisma.name,
+      condition: productPrisma.condition,
+      description: productPrisma.description,
+      price: productPrisma.price,
+      minimumOrder: productPrisma.minimumOrder,
+      status: productPrisma.status,
+      stock: productPrisma.stock,
+      sku: productPrisma.sku,
+      weight: productPrisma.weight,
+      height: productPrisma.height,
+      width: productPrisma.width,
+    };
+  }
+
   static async storePrismaIntoStoreResponse(
     storePrisma: Store,
   ): Promise<ResponseStoreDto> {
@@ -49,12 +69,12 @@ export class ConvertHelper {
     };
   }
 
-  static async convertStringIntoEnum<T>(
+  static convertStringIntoEnum<T>(
     arg: string,
     ctx: RefinementCtx,
     msg: string,
     classEnum: T,
-  ): Promise<any> {
+  ): string {
     if (!Object.values(classEnum).includes(arg.toUpperCase())) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -62,7 +82,7 @@ export class ConvertHelper {
       });
       return z.NEVER;
     } else {
-      return classEnum[arg];
+      return arg.toUpperCase();
     }
   }
 }

@@ -1,17 +1,16 @@
 import { z, ZodType } from 'zod';
-import { ConditionEnum } from './enum/condition.enum';
-import { StatusEnum } from './enum/status.enum';
 import { ConvertHelper } from '../helper/convert.helper';
+import { productCondition, productStatus } from '@prisma/client';
 
 export class ProductValidation {
-  static readonly CREATE: ZodType = z.object({
+  static readonly SAVE: ZodType = z.object({
     name: z.string().min(1).max(100),
     condition: z.string().transform((arg, ctx) => {
       return ConvertHelper.convertStringIntoEnum(
         arg,
         ctx,
         'Product condition not valid',
-        ConditionEnum,
+        productCondition,
       );
     }),
     description: z.string().optional(),
@@ -21,8 +20,8 @@ export class ProductValidation {
       return ConvertHelper.convertStringIntoEnum(
         arg,
         ctx,
-        'Product condition not valid',
-        StatusEnum,
+        'Product status not valid',
+        productStatus,
       );
     }),
     stock: z.number().min(1),

@@ -5,3 +5,4 @@ SELECT *
 FROM users;
 SELECT * FROM addresses;
 SELECT * FROM stores;
+SELECT * FROM products;
