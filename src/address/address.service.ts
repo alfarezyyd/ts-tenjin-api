@@ -7,6 +7,7 @@ import { AddressValidation } from './address.validation';
 import { Address } from '@prisma/client';
 import { ResponseAddressDto } from './dto/response-address.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { ConvertHelper } from '../helper/convert.helper';
 
 @Injectable()
 export class AddressService {
@@ -29,7 +30,7 @@ export class AddressService {
         where: { id: userId },
       })
       .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
+        throw new HttpException(reason.message, 400);
       });
 
     await this.prismaService.address.create({
@@ -48,13 +49,8 @@ export class AddressService {
 
     const allResponseAddressDto: ResponseAddressDto[] = [];
     for (const addressByUser of allAddressByUser) {
-      const responseAddressDto: ResponseAddressDto = new ResponseAddressDto();
-      responseAddressDto.id = addressByUser.id.toString();
-      responseAddressDto.label = addressByUser.label;
-      responseAddressDto.detail = addressByUser.detail;
-      responseAddressDto.notes = addressByUser.notes;
-      responseAddressDto.receiverName = addressByUser.receiverName;
-      responseAddressDto.telephone = addressByUser.telephone;
+      const responseAddressDto: ResponseAddressDto =
+        await ConvertHelper.addressPrismaIntoAddressResponse(addressByUser);
       allResponseAddressDto.push(responseAddressDto);
     }
     return allResponseAddressDto;
@@ -75,7 +71,7 @@ export class AddressService {
         },
       })
       .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
+        throw new HttpException(reason.message, 400);
       });
     addressPrisma = {
       ...addressPrisma,

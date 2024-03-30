@@ -1,4 +1,5 @@
 export class ResponseStoreDto {
+  id: string;
   name: string;
   domain: string;
   slogan: string;

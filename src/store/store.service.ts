@@ -5,6 +5,8 @@ import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import { StoreValidation } from './store.validation';
 import { Store } from '@prisma/client';
+import { ResponseStoreDto } from './dto/response-store.dto';
+import { ConvertHelper } from '../helper/convert.helper';
 
 @Injectable()
 export class StoreService {
@@ -18,9 +20,20 @@ export class StoreService {
     createStoreDto: CreateStoreDto,
   ): Promise<string> {
     const createStoreRequest = this.validationService.validate(
-      StoreValidation.CREATE,
+      StoreValidation.SAVE,
       createStoreDto,
     );
+
+    await this.prismaService.user
+      .findFirstOrThrow({
+        where: {
+          id: userId,
+        },
+      })
+      .catch((reason) => {
+        throw new HttpException(reason.message, 400);
+      });
+
     await this.prismaService.store.create({
       data: {
         ...createStoreRequest,
@@ -30,56 +43,51 @@ export class StoreService {
     return 'Success! the store have been created';
   }
 
-  async findOne(userId: bigint, storeId: bigint): Promise<Store> {
-    return this.prismaService.store
-      .findFirstOrThrow({
+  async findOne(userId: bigint): Promise<ResponseStoreDto> {
+    return ConvertHelper.storePrismaIntoStoreResponse(
+      await this.prismaService.store.findFirstOrThrow({
         where: {
-          id: storeId,
           userId: userId,
         },
-      })
-      .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
-      });
+      }),
+    ).catch((reason) => {
+      throw new HttpException(reason.message, 400);
+    });
   }
 
   async update(
     userId: bigint,
-    storeId: bigint,
     updateStoreDto: UpdateStoreDto,
   ): Promise<string> {
     const updateStoreRequest = await this.validationService.validate(
-      StoreValidation.UPDATE,
+      StoreValidation.SAVE,
       updateStoreDto,
     );
     let storePrisma: Store = await this.prismaService.store
       .findFirstOrThrow({
         where: {
-          id: storeId,
           userId: userId,
         },
       })
       .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
+        throw new HttpException(reason.message, 400);
       });
     storePrisma = {
-      ...updateStoreRequest,
       ...storePrisma,
+      ...updateStoreRequest,
     };
-    this.prismaService.store.update({
+    await this.prismaService.store.update({
+      data: storePrisma,
       where: {
-        id: storeId,
         userId: userId,
       },
-      data: storePrisma,
     });
     return `Success! store has been updated`;
   }
 
-  async remove(userId: bigint, storeId: bigint): Promise<string> {
+  async remove(userId: bigint): Promise<string> {
     const storePrisma: Store = await this.prismaService.store.delete({
       where: {
-        id: storeId,
         userId: userId,
       },
     });

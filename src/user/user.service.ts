@@ -36,7 +36,7 @@ export class UserService {
         },
       })
       .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
+        throw new HttpException(reason.message, 400);
       });
   }
 
@@ -48,7 +48,7 @@ export class UserService {
         },
       })
       .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
+        throw new HttpException(reason.message, 400);
       });
     userPrisma = {
       ...userPrisma,
@@ -73,7 +73,7 @@ export class UserService {
         },
       })
       .catch((reason) => {
-        throw new HttpException(reason.message(), 400);
+        throw new HttpException(reason.message, 400);
       });
     await this.prismaService.user.delete({
       where: {

@@ -5,15 +5,16 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { WebResponse } from '../model/web.response';
+import { ResponseStoreDto } from './dto/response-store.dto';
 
-@Controller('store')
+@Controller('api/stores')
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
@@ -27,32 +28,29 @@ export class StoreController {
     };
   }
 
-  @Get(':userId/:storeId')
+  @Get(':userId')
   async findOne(
     @Param('userId') userId: bigint,
-    @Param('storeId') storeId: bigint,
-  ) {
-    return this.storeService.findOne(userId, storeId);
-  }
-
-  @Patch(':userId/:storeId')
-  async update(
-    @Param('userId') userId: bigint,
-    @Param('storeId') storeId: bigint,
-    @Body() updateStoreDto: UpdateStoreDto,
-  ): Promise<WebResponse<string>> {
+  ): Promise<WebResponse<ResponseStoreDto>> {
     return {
-      data: await this.storeService.update(userId, storeId, updateStoreDto),
+      data: await this.storeService.findOne(userId),
     };
   }
 
-  @Delete('userId/:storeId')
-  async remove(
+  @Put(':userId')
+  async update(
     @Param('userId') userId: bigint,
-    @Param('storeId') storeId: bigint,
+    @Body() updateStoreDto: UpdateStoreDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.storeService.remove(userId, storeId),
+      data: await this.storeService.update(userId, updateStoreDto),
+    };
+  }
+
+  @Delete(':userId')
+  async remove(@Param('userId') userId: bigint): Promise<WebResponse<string>> {
+    return {
+      data: await this.storeService.remove(userId),
     };
   }
 }

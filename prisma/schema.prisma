@@ -47,18 +47,18 @@ model Address {
 }
 
 model Store {
-  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
-  name         String @db.VarChar(60)
-  domain       String @db.VarChar(24)
-  slogan       String @db.VarChar(48)
-  locationName String @db.VarChar(25)
-  city         String @db.VarChar(50)
-  zipCode      String @db.Char(5)
-  detail       String @db.VarChar(200)
-  description  String @db.VarChar(140)
-  photoPath    String @db.VarChar(255)
-  User         User   @relation(fields: [userId], references: [id])
-  userId       BigInt @db.UnsignedBigInt
+  id           BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  name         String  @db.VarChar(60)
+  domain       String  @db.VarChar(24)
+  slogan       String  @db.VarChar(48)
+  locationName String  @db.VarChar(25)
+  city         String  @db.VarChar(50)
+  zipCode      String  @db.Char(5)
+  detail       String  @db.VarChar(200)
+  description  String  @db.VarChar(140)
+  photoPath    String? @db.VarChar(255)
+  User         User    @relation(fields: [userId], references: [id])
+  userId       BigInt  @unique @db.UnsignedBigInt
 
   @@map("stores")
 }
