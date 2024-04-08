@@ -5,6 +5,8 @@ import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import { ExpeditionValidation } from './expedition.validation';
 import { Expedition } from '@prisma/client';
+import { ResponseExpeditionDto } from './dto/response-expedition.dto';
+import { ConvertHelper } from '../helper/convert.helper';
 
 @Injectable()
 export class ExpeditionService {
@@ -24,13 +26,21 @@ export class ExpeditionService {
     return 'Success! new expedition has been created!';
   }
 
-  async findAll() {
-    const allExpedition: Expedition[] =
+  async findAll(): Promise<ResponseExpeditionDto[]> {
+    const allExpeditionPrisma: Expedition[] =
       await this.prismaService.expedition.findMany({});
-    return allExpedition;
+    const allExpeditionResponse: ResponseExpeditionDto[] = [];
+    for (const expeditionPrisma of allExpeditionPrisma) {
+      allExpeditionResponse.push(
+        await ConvertHelper.expeditionPrismaIntoExpeditionResponse(
+          expeditionPrisma,
+        ),
+      );
+    }
+    return allExpeditionResponse;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<ResponseExpeditionDto> {
     const expeditionPrisma: Expedition = await this.prismaService.expedition
       .findFirstOrThrow({
         where: {
@@ -40,7 +50,9 @@ export class ExpeditionService {
       .catch((reason) => {
         throw new HttpException(reason.message, 400);
       });
-    return expeditionPrisma;
+    return ConvertHelper.expeditionPrismaIntoExpeditionResponse(
+      expeditionPrisma,
+    );
   }
 
   async update(id: number, updateExpeditionDto: UpdateExpeditionDto) {

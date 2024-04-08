@@ -1,9 +1,10 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
-import { Address, Product, Store, User } from '@prisma/client';
+import { Address, Expedition, Product, Store, User } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseStoreDto } from '../store/dto/response-store.dto';
 import { ResponseAddressDto } from '../address/dto/response-address.dto';
 import { ResponseProductDto } from '../product/dto/response-product.dto';
+import { ResponseExpeditionDto } from '../expedition/dto/response-expedition.dto';
 
 export class ConvertHelper {
   static async productPrismaIntoProductResponse(
@@ -84,5 +85,14 @@ export class ConvertHelper {
     } else {
       return arg.toUpperCase();
     }
+  }
+
+  static async expeditionPrismaIntoExpeditionResponse(
+    expeditionPrisma: Expedition,
+  ): Promise<ResponseExpeditionDto> {
+    return {
+      id: expeditionPrisma.id.toString(),
+      name: expeditionPrisma.name,
+    };
   }
 }
