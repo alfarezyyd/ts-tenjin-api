@@ -7,22 +7,28 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseProductDto } from './dto/response-product.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/stores/products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post(':storeId')
+  @UseInterceptors(FilesInterceptor('images'))
   async create(
     @Param('storeId', ParseIntPipe) storeId: bigint,
     @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() images: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
+    createProductDto.images = images;
     return {
       data: await this.productService.create(storeId, createProductDto),
     };

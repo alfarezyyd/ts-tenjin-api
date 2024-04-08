@@ -12,4 +12,5 @@ export class CreateProductDto {
   weight: number;
   height: number;
   width: number;
+  images?: Array<Express.Multer.File>;
 }
