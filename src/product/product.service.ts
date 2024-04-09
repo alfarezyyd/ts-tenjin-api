@@ -36,27 +36,37 @@ export class ProductService {
         throw new HttpException(reason.message, 404);
       });
 
-    await this.prismaService.product.create({
+    const productPrisma = await this.prismaService.product.create({
       data: {
         ...createProductRequest,
         slug: await CommonHelper.slugifyProductName(createProductRequest.name),
         storeId: storeId,
       },
     });
-    createProductDto.images.forEach((value) => {
-      const folderName =
-        this.configService.get<string>('MULTER_DEST') +
-        storeId +
-        '/' +
-        createProductDto.sku +
-        '/';
-      fs.mkdir(folderName, (err) => {});
-      fs.writeFile(
-        folderName + CommonHelper.generateFileName(value),
-        value.buffer,
-        (err) => {},
-      );
-    });
+    console.log(createProductDto.images);
+    const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${createProductDto.sku}/`;
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdir(folderPath, (err) => {
+        if (err) {
+          throw new HttpException(err.message, 500);
+        }
+      });
+    }
+    for (const value of createProductDto.images) {
+      const generatedRandomSuffix: string =
+        CommonHelper.generateFileName(value);
+      await this.prismaService.productResource.create({
+        data: {
+          productId: productPrisma.id,
+          imagePath: generatedRandomSuffix,
+        },
+      });
+      fs.writeFile(folderPath + generatedRandomSuffix, value.buffer, (err) => {
+        if (err) {
+          throw new HttpException(err, 500);
+        }
+      });
+    }
     return 'Success! new product has been created';
   }
 

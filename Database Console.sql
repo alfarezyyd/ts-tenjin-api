@@ -6,3 +6,4 @@ FROM users;
 SELECT * FROM addresses;
 SELECT * FROM stores;
 SELECT * FROM products;
+SELECT * FROM product_resources;

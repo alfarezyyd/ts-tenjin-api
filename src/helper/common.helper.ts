@@ -12,7 +12,7 @@ export default class CommonHelper {
 
   static async deleteFolderRecursive(folderPath: string) {
     if (fs.existsSync(folderPath)) {
-      fs.readdirSync(folderPath).forEach((file, index) => {
+      fs.readdirSync(folderPath).forEach((file) => {
         const curPath = path.join(folderPath, file);
         if (fs.lstatSync(curPath).isDirectory()) {
           // Memeriksa apakah itu direktori
@@ -28,11 +28,6 @@ export default class CommonHelper {
 
   static generateFileName(multerFile: Express.Multer.File) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    return (
-      multerFile.originalname +
-      '-' +
-      uniqueSuffix +
-      path.extname(multerFile.originalname)
-    );
+    return `${uniqueSuffix}-${multerFile.originalname}`;
   }
 }
