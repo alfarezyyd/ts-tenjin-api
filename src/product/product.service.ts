@@ -7,12 +7,15 @@ import { ProductValidation } from './product.validation';
 import CommonHelper from '../helper/common.helper';
 import { Product } from '@prisma/client';
 import { ConvertHelper } from '../helper/convert.helper';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'node:fs';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly validationService: ValidationService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(
@@ -39,6 +42,20 @@ export class ProductService {
         slug: await CommonHelper.slugifyProductName(createProductRequest.name),
         storeId: storeId,
       },
+    });
+    createProductDto.images.forEach((value) => {
+      const folderName =
+        this.configService.get<string>('MULTER_DEST') +
+        storeId +
+        '/' +
+        createProductDto.sku +
+        '/';
+      fs.mkdir(folderName, (err) => {});
+      fs.writeFile(
+        folderName + CommonHelper.generateFileName(value),
+        value.buffer,
+        (err) => {},
+      );
     });
     return 'Success! new product has been created';
   }

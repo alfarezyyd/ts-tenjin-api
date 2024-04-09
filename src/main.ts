@@ -3,12 +3,14 @@ import { AppModule } from './app.module';
 import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
 import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import MulterExceptionFilter from './exception/MulterExceptionFilter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Exception Filter
   app.useGlobalFilters(new PrismaExceptionFilter());
   app.useGlobalFilters(new ValidationExceptionFilter());
+  app.useGlobalFilters(new MulterExceptionFilter());
 
   // Open API Swagger for Documentation
   const config = new DocumentBuilder()
@@ -19,7 +21,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // Interceptor
   await app.listen(3000);
 }
 

@@ -77,7 +77,6 @@ export class AddressService {
       ...addressPrisma,
       ...validateUpdateAddressDto,
     };
-    console.log(addressPrisma);
     await this.prismaService.address.update({
       data: addressPrisma,
       where: {
