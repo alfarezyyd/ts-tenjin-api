@@ -44,7 +44,7 @@ export class ProductService {
       },
     });
 
-    const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${createProductDto.sku}/`;
+    const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${productPrisma.id}/`;
     if (!fs.existsSync(folderPath)) {
       fs.mkdir(folderPath, (err) => {
         if (err) {
@@ -117,26 +117,72 @@ export class ProductService {
       ...validateUpdateProduct,
       slug: await CommonHelper.slugifyProductName(validateUpdateProduct.name),
     };
+    const productResources: { productId: any; imagePath: string }[] = [];
+    if (updateProductDto.images != null) {
+      const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${productPrisma.id}/`;
+      await CommonHelper.deleteFolderRecursive(folderPath);
+      fs.mkdir(folderPath, (err) => {
+        if (err) {
+          throw new HttpException(err.message, 500);
+        }
+      });
+      for (const value of updateProductDto.images) {
+        const generatedRandomFileName: string =
+          CommonHelper.generateFileName(value);
+        const productResource: { productId: any; imagePath: string } = {
+          productId: productPrisma.id,
+          imagePath: generatedRandomFileName,
+        };
+        productResources.push(productResource);
+        fs.writeFile(
+          folderPath + generatedRandomFileName,
+          value.buffer,
+          (err) => {
+            if (err) {
+              throw new HttpException(err, 500);
+            }
+          },
+        );
+      }
+      await this.prismaService.$transaction([
+        this.prismaService.productResource.deleteMany({
+          where: {
+            productId: id,
+          },
+        }),
+        this.prismaService.productResource.createMany({
+          data: productResources,
+        }),
+      ]);
+    }
+
     await this.prismaService.product.update({
       data: productPrisma,
       where: {
         id: id,
       },
     });
+
     return 'Success! product has been edited';
   }
 
   async remove(storeId: bigint, id: bigint) {
-    await this.prismaService.productResource.deleteMany();
-    const productPrisma = await this.prismaService.product.delete({
-      where: {
-        storeId: storeId,
-        id: id,
-      },
-    });
-    if (productPrisma == null) {
-      throw new HttpException('Product not found', 404);
-    }
+    const [, productPrisma] = await this.prismaService.$transaction([
+      this.prismaService.productResource.deleteMany({
+        where: {
+          productId: id,
+        },
+      }),
+      this.prismaService.product.delete({
+        where: {
+          storeId: storeId,
+          id: id,
+        },
+      }),
+    ]);
+    await CommonHelper.deleteFolderRecursive(
+      `${this.configService.get<string>('MULTER_DEST')}/${productPrisma.storeId}/${productPrisma.id}/`,
+    );
     return `Success! product has been deleted`;
   }
 }
