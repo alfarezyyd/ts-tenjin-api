@@ -43,7 +43,7 @@ export class ProductService {
         storeId: storeId,
       },
     });
-    console.log(createProductDto.images);
+
     const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${createProductDto.sku}/`;
     if (!fs.existsSync(folderPath)) {
       fs.mkdir(folderPath, (err) => {
@@ -52,21 +52,28 @@ export class ProductService {
         }
       });
     }
+    const productResources: { productId: any; imagePath: string }[] = [];
     for (const value of createProductDto.images) {
-      const generatedRandomSuffix: string =
+      const generatedRandomFileName: string =
         CommonHelper.generateFileName(value);
-      await this.prismaService.productResource.create({
-        data: {
-          productId: productPrisma.id,
-          imagePath: generatedRandomSuffix,
+      const productResource: { productId: any; imagePath: string } = {
+        productId: productPrisma.id,
+        imagePath: generatedRandomFileName,
+      };
+      productResources.push(productResource);
+      fs.writeFile(
+        folderPath + generatedRandomFileName,
+        value.buffer,
+        (err) => {
+          if (err) {
+            throw new HttpException(err, 500);
+          }
         },
-      });
-      fs.writeFile(folderPath + generatedRandomSuffix, value.buffer, (err) => {
-        if (err) {
-          throw new HttpException(err, 500);
-        }
-      });
+      );
     }
+    await this.prismaService.productResource.createMany({
+      data: productResources,
+    });
     return 'Success! new product has been created';
   }
 
@@ -120,6 +127,7 @@ export class ProductService {
   }
 
   async remove(storeId: bigint, id: bigint) {
+    await this.prismaService.productResource.deleteMany();
     const productPrisma = await this.prismaService.product.delete({
       where: {
         storeId: storeId,
