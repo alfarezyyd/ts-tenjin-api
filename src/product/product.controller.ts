@@ -28,7 +28,8 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() images: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
-    createProductDto.images = images;
+    console.log(images);
+    console.log(createProductDto);
     return {
       data: await this.productService.create(storeId, createProductDto),
     };

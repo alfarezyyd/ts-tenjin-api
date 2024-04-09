@@ -114,11 +114,11 @@ model Product {
 }
 
 model ProductResource {
-  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
-  imagePath String   @db.VarChar(255)
-  videoUrl  String   @db.VarChar(255)
-  product   Product? @relation(fields: [productId], references: [id])
-  productId BigInt?  @db.UnsignedBigInt
+  id        BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath String? @db.VarChar(255)
+  videoUrl  String? @db.VarChar(255)
+  product   Product @relation(fields: [productId], references: [id])
+  productId BigInt  @db.UnsignedBigInt
 
   @@map("product_resources")
 }

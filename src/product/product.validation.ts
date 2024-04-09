@@ -14,8 +14,8 @@ export class ProductValidation {
       );
     }),
     description: z.string().optional(),
-    price: z.number(),
-    minimumOrder: z.number().min(1),
+    price: z.coerce.number(),
+    minimumOrder: z.coerce.number().min(1),
     status: z.string().transform((arg, ctx) => {
       return ConvertHelper.convertStringIntoEnum(
         arg,
@@ -24,10 +24,10 @@ export class ProductValidation {
         productStatus,
       );
     }),
-    stock: z.number().min(1),
+    stock: z.coerce.number().min(1),
     sku: z.string().min(1),
-    weight: z.number().min(1),
-    height: z.number().min(1),
-    width: z.number().min(1),
+    weight: z.coerce.number().min(1),
+    height: z.coerce.number().min(1),
+    width: z.coerce.number().min(1),
   });
 }
