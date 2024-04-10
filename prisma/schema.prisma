@@ -29,6 +29,7 @@ model User {
   address   Address[]
   store     Store[]
   Cart      Cart[]
+  Order     Order[]
 
   @@map("users")
 }
@@ -170,6 +171,8 @@ model Order {
   addressId     BigInt             @db.UnsignedBigInt
   expedition    Expedition         @relation(fields: [expeditionId], references: [id])
   expeditionId  Int                @db.UnsignedSmallInt
+  user          User               @relation(fields: [userId], references: [id])
+  userId        BigInt             @db.UnsignedBigInt
   ProductOrder  ProductOrder[]
 }
 

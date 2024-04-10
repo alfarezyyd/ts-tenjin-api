@@ -1,4 +1,4 @@
-import { string, z, ZodType } from 'zod';
+import { number, string, z, ZodType } from 'zod';
 import ConvertHelper from '../helper/convert.helper';
 import { OrderPaymentMethod } from './enum/OrderPaymentMethod';
 
@@ -18,10 +18,18 @@ export class OrderValidation {
       }),
     addressId: z.number(),
     expeditionId: z.number(),
-    productsOrdersDto: z.object({
-      productId: z.number(),
-      quantity: z.number(),
-      note: z.optional(string().min(1)),
-    }),
+    userId: z.number(),
+    productsOrdersDto: z.array(
+      z.object({
+        productId: z.number(),
+        quantity: z.number(),
+        subTotalPrice: z.optional(number()).transform((arg) => {
+          if (arg == undefined) {
+            return null;
+          }
+        }),
+        note: z.optional(string().min(1)),
+      }),
+    ),
   });
 }

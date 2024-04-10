@@ -1,10 +1,12 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import CreateOrderDto from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import { OrderValidation } from './order.validation';
 import { Product } from '@prisma/client';
+import ResponseOrderDto from './dto/response-order.dto';
+import { ProductOrderDto } from './dto/product-order.dto';
+import ConvertHelper from '../helper/convert.helper';
 
 @Injectable()
 export class OrderService {
@@ -13,14 +15,13 @@ export class OrderService {
     private readonly validationService: ValidationService,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto): Promise<string> {
     const validatedCreateOrderDto = await this.validationService.validate(
       OrderValidation.SAVE,
       createOrderDto,
     );
-
-    const productsId: bigint[] = createOrderDto.productsOrdersDto.map(
-      (productOrder) => productOrder.productId,
+    const productsId: bigint[] = validatedCreateOrderDto.productsOrdersDto.map(
+      (productOrderDto: ProductOrderDto) => productOrderDto.productId,
     );
     const productsPrisma: Product[] = await this.prismaService.product.findMany(
       {
@@ -34,52 +35,111 @@ export class OrderService {
     if (productsPrisma.length !== productsId.length) {
       throw new HttpException("Some product doesn't exist", 404);
     }
+
     const productMap = new Map<bigint, Product>();
-    productsPrisma.forEach((product) => {
-      productMap.set(product.id, product);
+    productsPrisma.forEach((productPrisma: Product) => {
+      productMap.set(productPrisma.id, productPrisma);
     });
-
     let totalPrice = 0;
-    createOrderDto.productsOrdersDto.forEach((productOrderDto) => {
-      const productPrisma = productMap.get(productOrderDto.productId);
+    for (const [
+      index,
+      productOrderDto,
+    ] of validatedCreateOrderDto.productsOrdersDto.entries()) {
+      const productPrisma = productMap.get(BigInt(productOrderDto.productId));
       if (productPrisma) {
-        productOrderDto.subTotalPrice =
-          productOrderDto.quantity * productPrisma.price;
-        totalPrice += productOrderDto.subTotalPrice;
+        const subTotalPrice = productOrderDto.quantity * productPrisma.price;
+        totalPrice += subTotalPrice;
+        validatedCreateOrderDto.productsOrdersDto[index].subTotalPrice =
+          subTotalPrice;
+        console.log(validatedCreateOrderDto.productsOrdersDto[index]);
       }
-    });
+    }
 
-    await this.prismaService.order.create({
+    console.log(totalPrice);
+    const orderPrisma = await this.prismaService.order.create({
       data: {
         paymentMethod: validatedCreateOrderDto.paymentMethod,
         address: {
-          connect: validatedCreateOrderDto.addressId,
+          connect: {
+            id: validatedCreateOrderDto.addressId,
+          },
         },
         expedition: {
-          connect: validatedCreateOrderDto.expeditionId,
+          connect: {
+            id: validatedCreateOrderDto.expeditionId,
+          },
+        },
+        user: {
+          connect: {
+            id: validatedCreateOrderDto.userId,
+          },
         },
         totalPrice: totalPrice,
       },
+      select: {
+        id: true,
+      },
     });
+
+    for (const [index] of validatedCreateOrderDto.productsOrdersDto.entries()) {
+      validatedCreateOrderDto.productsOrdersDto[index].orderId = orderPrisma.id;
+    }
+
     await this.prismaService.productOrder.createMany({
       data: validatedCreateOrderDto.productsOrdersDto,
     });
     return 'Success! new order has been created';
   }
 
-  findAll() {
-    return `This action returns all order`;
+  async findAllByUserId(userId: bigint): Promise<ResponseOrderDto[]> {
+    const ordersPrisma = await this.prismaService.order.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        ProductOrder: true,
+        expedition: true,
+      },
+    });
+    const responseOrdersDto: ResponseOrderDto[] = [];
+    for (const orderPrisma of ordersPrisma) {
+      const responseOrderDto = new ResponseOrderDto();
+      responseOrderDto.paymentMethod = orderPrisma.paymentMethod;
+      const productsOrderDto: ProductOrderDto[] = [];
+      for (const productOrderPrisma of orderPrisma.ProductOrder) {
+        productsOrderDto.push(
+          await ConvertHelper.productOrderPrismaIntoProductOrderDto(
+            productOrderPrisma,
+          ),
+        );
+        responseOrderDto.productsOrdersDto = productsOrderDto;
+      }
+      responseOrdersDto.push(responseOrderDto);
+    }
+    return responseOrdersDto;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
-  }
-
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async findOne(userId: bigint, orderId: bigint): Promise<ResponseOrderDto> {
+    const orderPrisma = await this.prismaService.order
+      .findFirstOrThrow({
+        where: {
+          id: orderId,
+          userId: userId,
+        },
+        include: {
+          address: true,
+          expedition: true,
+          ProductOrder: true,
+        },
+      })
+      .catch((reason) => {
+        throw new HttpException(reason.message, 404);
+      });
+    return ConvertHelper.orderPrismaIntoOrderResponse(
+      orderPrisma,
+      orderPrisma.address,
+      orderPrisma.expedition,
+      orderPrisma.ProductOrder,
+    );
   }
 }

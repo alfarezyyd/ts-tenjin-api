@@ -1,11 +1,21 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
-import { Address, Expedition, Product, Store, User } from '@prisma/client';
+import {
+  Address,
+  Expedition,
+  Order,
+  Product,
+  ProductOrder,
+  Store,
+  User,
+} from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseStoreDto } from '../store/dto/response-store.dto';
 import { ResponseAddressDto } from '../address/dto/response-address.dto';
 import { ResponseProductDto } from '../product/dto/response-product.dto';
 import { ResponseExpeditionDto } from '../expedition/dto/response-expedition.dto';
 import ResponseProductCartDto from '../cart/dto/response-product-cart.dto';
+import { ProductOrderDto } from '../order/dto/product-order.dto';
+import ResponseOrderDto from '../order/dto/response-order.dto';
 
 export default class ConvertHelper {
   static async productPrismaIntoProductResponse(
@@ -110,5 +120,41 @@ export default class ConvertHelper {
         productOnCart.product,
       );
     return responseProductCartDto;
+  }
+
+  static async productOrderPrismaIntoProductOrderDto(
+    productOrderPrisma: ProductOrder,
+  ): Promise<ProductOrderDto> {
+    return {
+      quantity: productOrderPrisma.quantity,
+      orderId: productOrderPrisma.orderId,
+      subTotalPrice: productOrderPrisma.subTotalPrice,
+      productId: productOrderPrisma.productId,
+      note: productOrderPrisma.note,
+    };
+  }
+
+  static async orderPrismaIntoOrderResponse(
+    orderPrisma: Order,
+    addressPrisma: Address,
+    expeditionPrisma: Expedition,
+    productsOrder: ProductOrder[],
+  ): Promise<ResponseOrderDto> {
+    const allProductsOrderDto: ProductOrderDto[] = [];
+    for (const value of productsOrder) {
+      allProductsOrderDto.push(
+        await this.productOrderPrismaIntoProductOrderDto(value),
+      );
+    }
+    return {
+      expedition:
+        await ConvertHelper.expeditionPrismaIntoExpeditionResponse(
+          expeditionPrisma,
+        ),
+      paymentMethod: orderPrisma.paymentMethod,
+      productsOrdersDto: allProductsOrderDto,
+      address:
+        await ConvertHelper.addressPrismaIntoAddressResponse(addressPrisma),
+    };
   }
 }
