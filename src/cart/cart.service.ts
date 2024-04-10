@@ -23,7 +23,7 @@ export class CartService {
   async findAllProductByCartId(
     cartId: bigint,
   ): Promise<ResponseProductCartDto[]> {
-    const productsOnCarts = await this.prismaService.productsOnCarts.findMany({
+    const productsCarts = await this.prismaService.productsCarts.findMany({
       where: {
         cartId: cartId,
       },
@@ -32,7 +32,7 @@ export class CartService {
       },
     });
     const responsesProductCartDto: ResponseProductCartDto[] = [];
-    for (const productOnCart of productsOnCarts) {
+    for (const productOnCart of productsCarts) {
       responsesProductCartDto.push(
         await ConvertHelper.productCartPrismaIntoProductCartResponse(
           productOnCart,
@@ -43,16 +43,15 @@ export class CartService {
   }
 
   async detachProductFromCart(cartId: bigint, productId: bigint) {
-    const productsOnCartsPrisma =
-      await this.prismaService.productsOnCarts.delete({
-        where: {
-          productId_cartId: {
-            productId: productId,
-            cartId: cartId,
-          },
+    const productsCartsPrisma = await this.prismaService.productsCarts.delete({
+      where: {
+        productId_cartId: {
+          productId: productId,
+          cartId: cartId,
         },
-      });
-    if (productsOnCartsPrisma == null) {
+      },
+    });
+    if (productsCartsPrisma == null) {
       throw new HttpException(`Products `, 404);
     }
     return `Product successfully deleted from cart`;
@@ -72,22 +71,17 @@ export class CartService {
         throw new HttpException(reason.message, 404);
       });
 
-    await this.prismaService.productsOnCarts
-      .create({
-        data: {
-          quantity: createProductCartDto.quantity,
-          price: createProductCartDto.quantity * productPrice.price,
-          product: {
-            connect: { id: createProductCartDto.productId },
-          },
-          cart: {
-            connect: { id: createProductCartDto.cartId },
-          },
-          note: createProductCartDto.note,
+    await this.prismaService.productsCarts.create({
+      data: {
+        quantity: createProductCartDto.quantity,
+        price: createProductCartDto.quantity * productPrice.price,
+        product: {
+          connect: { id: createProductCartDto.productId },
         },
-      })
-      .catch((reason) => {
-        console.log(reason);
-      });
+        cart: {
+          connect: { id: createProductCartDto.cartId },
+        },
+      },
+    });
   }
 }
