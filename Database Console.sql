@@ -7,3 +7,4 @@ SELECT * FROM addresses;
 SELECT * FROM stores;
 SELECT * FROM products;
 SELECT * FROM product_resources;
+SELECT * FROM products_on_carts;

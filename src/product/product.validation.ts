@@ -1,5 +1,5 @@
 import { z, ZodType } from 'zod';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 import { productCondition, productStatus } from '@prisma/client';
 
 export class ProductValidation {

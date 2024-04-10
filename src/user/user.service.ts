@@ -5,12 +5,14 @@ import { ValidationService } from '../common/validation.service';
 import { UserValidation } from './user.validation';
 import { PrismaService } from '../common/prisma.service';
 import { User, userGender } from '@prisma/client';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
+    private readonly cartService: CartService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<string> {
@@ -18,13 +20,14 @@ export class UserService {
       UserValidation.CREATE,
       createUserDto,
     );
-    await this.prismaService.user.create({
+    const userPrisma = await this.prismaService.user.create({
       data: {
         ...createUserRequest,
         gender: userGender[createUserDto.gender],
       },
     });
 
+    await this.cartService.create(userPrisma.id);
     return 'Success! new user has been created';
   }
 

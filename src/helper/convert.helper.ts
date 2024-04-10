@@ -5,8 +5,9 @@ import { ResponseStoreDto } from '../store/dto/response-store.dto';
 import { ResponseAddressDto } from '../address/dto/response-address.dto';
 import { ResponseProductDto } from '../product/dto/response-product.dto';
 import { ResponseExpeditionDto } from '../expedition/dto/response-expedition.dto';
+import ResponseProductCartDto from '../cart/dto/response-product-cart.dto';
 
-export class ConvertHelper {
+export default class ConvertHelper {
   static async productPrismaIntoProductResponse(
     productPrisma: Product,
   ): Promise<ResponseProductDto> {
@@ -94,5 +95,20 @@ export class ConvertHelper {
       id: expeditionPrisma.id.toString(),
       name: expeditionPrisma.name,
     };
+  }
+
+  static async productCartPrismaIntoProductCartResponse(
+    productOnCart: any,
+  ): Promise<ResponseProductCartDto> {
+    const responseProductCartDto: ResponseProductCartDto =
+      new ResponseProductCartDto();
+    responseProductCartDto.cartId = productOnCart.cartId.toString();
+    responseProductCartDto.price = productOnCart.price;
+    responseProductCartDto.quantity = productOnCart.quantity;
+    responseProductCartDto.product =
+      await ConvertHelper.productPrismaIntoProductResponse(
+        productOnCart.product,
+      );
+    return responseProductCartDto;
   }
 }

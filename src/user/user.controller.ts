@@ -14,7 +14,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseUserDto } from './dto/response-user.dto';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
 
 @Controller('api/users')

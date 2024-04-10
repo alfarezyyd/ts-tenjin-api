@@ -1,6 +1,6 @@
 import { z, ZodType } from 'zod';
 import { GenderEnum } from './enum/gender.enum';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 
 export class UserValidation {
   static readonly CREATE: ZodType = z.object({

@@ -5,6 +5,7 @@ import { AddressModule } from './address/address.module';
 import { ProductModule } from './product/product.module';
 import { StoreModule } from './store/store.module';
 import { ExpeditionModule } from './expedition/expedition.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ExpeditionModule } from './expedition/expedition.module';
     ProductModule,
     StoreModule,
     ExpeditionModule,
+    CartModule,
   ],
   controllers: [],
   providers: [],
