@@ -34,14 +34,15 @@ model User {
 }
 
 model Address {
-  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
-  label        String @db.VarChar(30)
-  detail       String @db.VarChar(200)
-  notes        String @db.VarChar(45)
-  receiverName String @db.VarChar(50)
-  telephone    String @db.VarChar(13)
-  User         User   @relation(fields: [userId], references: [id])
-  userId       BigInt @db.UnsignedBigInt
+  id           BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  label        String  @db.VarChar(30)
+  detail       String  @db.VarChar(200)
+  notes        String  @db.VarChar(45)
+  receiverName String  @db.VarChar(50)
+  telephone    String  @db.VarChar(13)
+  User         User    @relation(fields: [userId], references: [id])
+  userId       BigInt  @db.UnsignedBigInt
+  Order        Order[]
 
   @@map("addresses")
 }
@@ -65,8 +66,9 @@ model Store {
 }
 
 model Expedition {
-  id   Int    @id @default(autoincrement()) @db.UnsignedSmallInt
-  name String @db.VarChar(255)
+  id    Int     @id @default(autoincrement()) @db.UnsignedSmallInt
+  name  String  @db.VarChar(255)
+  Order Order[]
 
   @@map("expeditions")
 }
@@ -109,6 +111,7 @@ model Product {
   storeId         BigInt            @db.UnsignedBigInt
   ProductResource ProductResource[]
   ProductsCarts   ProductsCarts[]
+  ProductOrder    ProductOrder[]
 
   @@map("products")
 }
@@ -128,7 +131,6 @@ model Cart {
   user          User            @relation(fields: [userId], references: [id])
   userId        BigInt          @unique @db.UnsignedBigInt
   ProductsCarts ProductsCarts[]
-  Order         Order?
 
   @@map("carts")
 }
@@ -140,7 +142,6 @@ model ProductsCarts {
   cartId    BigInt  @db.UnsignedBigInt
   quantity  Int
   price     Int
-  note      String? @db.VarChar(255)
 
   @@unique([productId, cartId])
   @@map("products_carts")
@@ -151,6 +152,7 @@ enum orderStatus {
   CONFIRMED
   SENT
   FINISHED
+  CANCELLED
 }
 
 enum orderPaymentMethod {
@@ -164,6 +166,22 @@ model Order {
   status        orderStatus        @default(PROCESSED)
   paymentMethod orderPaymentMethod
   createAt      DateTime           @default(now())
-  cart          Cart               @relation(fields: [cartId], references: [id])
-  cartId        BigInt             @unique @db.UnsignedBigInt
+  address       Address            @relation(fields: [addressId], references: [id])
+  addressId     BigInt             @db.UnsignedBigInt
+  expedition    Expedition         @relation(fields: [expeditionId], references: [id])
+  expeditionId  Int                @db.UnsignedSmallInt
+  ProductOrder  ProductOrder[]
+}
+
+model ProductOrder {
+  product       Product @relation(fields: [productId], references: [id])
+  productId     BigInt  @db.UnsignedBigInt
+  order         Order   @relation(fields: [orderId], references: [id])
+  orderId       BigInt  @db.UnsignedBigInt
+  quantity      Int
+  subTotalPrice Int
+  note          String? @db.VarChar(255)
+
+  @@unique([productId, orderId])
+  @@map("product_orders")
 }
