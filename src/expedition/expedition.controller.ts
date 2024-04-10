@@ -14,7 +14,7 @@ import { UpdateExpeditionDto } from './dto/update-expedition.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseExpeditionDto } from './dto/response-expedition.dto';
 
-@Controller('expedition')
+@Controller('api/expedition')
 export class ExpeditionController {
   constructor(private readonly expeditionService: ExpeditionService) {}
 

@@ -6,7 +6,7 @@ import { ValidationService } from '../common/validation.service';
 import { StoreValidation } from './store.validation';
 import { Store } from '@prisma/client';
 import { ResponseStoreDto } from './dto/response-store.dto';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 
 @Injectable()
 export class StoreService {

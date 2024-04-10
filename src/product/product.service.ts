@@ -6,7 +6,7 @@ import { ValidationService } from '../common/validation.service';
 import { ProductValidation } from './product.validation';
 import CommonHelper from '../helper/common.helper';
 import { Product } from '@prisma/client';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
 

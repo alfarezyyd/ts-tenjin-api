@@ -7,7 +7,7 @@ import { AddressValidation } from './address.validation';
 import { Address } from '@prisma/client';
 import { ResponseAddressDto } from './dto/response-address.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 
 @Injectable()
 export class AddressService {

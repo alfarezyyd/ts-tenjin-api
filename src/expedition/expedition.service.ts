@@ -6,7 +6,7 @@ import { ValidationService } from '../common/validation.service';
 import { ExpeditionValidation } from './expedition.validation';
 import { Expedition } from '@prisma/client';
 import { ResponseExpeditionDto } from './dto/response-expedition.dto';
-import { ConvertHelper } from '../helper/convert.helper';
+import ConvertHelper from '../helper/convert.helper';
 
 @Injectable()
 export class ExpeditionService {
