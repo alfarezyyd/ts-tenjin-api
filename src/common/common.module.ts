@@ -1,21 +1,27 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import PrismaService from './prisma.service';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-import { ValidationService } from './validation.service';
+import ValidationService from './validation.service';
 import { MulterModule } from '@nestjs/platform-express';
-import { ConfigModule } from '@nestjs/config';
 import { MulterService } from './multer.service';
 
 @Module({
   imports: [
     WinstonModule.forRoot({
       level: 'debug',
-      format: winston.format.json(),
-      transports: [new winston.transports.Console()],
+      format: winston.format.combine(winston.format.json()),
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.colorize(),
+            winston.format.simple(),
+          ),
+        }),
+      ],
     }),
     MulterModule.registerAsync({
-      imports: [ConfigModule],
       useClass: MulterService,
     }),
   ],

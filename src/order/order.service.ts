@@ -1,11 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import CreateOrderDto from './dto/create-order.dto';
-import { PrismaService } from '../common/prisma.service';
-import { ValidationService } from '../common/validation.service';
+import PrismaService from '../common/prisma.service';
+import ValidationService from '../common/validation.service';
 import { OrderValidation } from './order.validation';
 import { Product } from '@prisma/client';
 import ResponseOrderDto from './dto/response-order.dto';
-import { ProductOrderDto } from './dto/product-order.dto';
+import ProductOrderDto from './dto/product-order.dto';
 import ConvertHelper from '../helper/convert.helper';
 
 @Injectable()
@@ -20,24 +20,24 @@ export class OrderService {
       OrderValidation.SAVE,
       createOrderDto,
     );
-    const productsId: bigint[] = validatedCreateOrderDto.productsOrdersDto.map(
-      (productOrderDto: ProductOrderDto) => productOrderDto.productId,
-    );
-    const productsPrisma: Product[] = await this.prismaService.product.findMany(
-      {
+    const allProductId: bigint[] =
+      validatedCreateOrderDto.productsOrdersDto.map(
+        (productOrderDto: ProductOrderDto) => productOrderDto.productId,
+      );
+    const allProductPrisma: Product[] =
+      await this.prismaService.product.findMany({
         where: {
           id: {
-            in: productsId,
+            in: allProductId,
           },
         },
-      },
-    );
-    if (productsPrisma.length !== productsId.length) {
+      });
+    if (allProductPrisma.length !== allProductId.length) {
       throw new HttpException("Some product doesn't exist", 404);
     }
 
     const productMap = new Map<bigint, Product>();
-    productsPrisma.forEach((productPrisma: Product) => {
+    allProductPrisma.forEach((productPrisma: Product) => {
       productMap.set(productPrisma.id, productPrisma);
     });
     let totalPrice = 0;
@@ -45,17 +45,18 @@ export class OrderService {
       index,
       productOrderDto,
     ] of validatedCreateOrderDto.productsOrdersDto.entries()) {
-      const productPrisma = productMap.get(BigInt(productOrderDto.productId));
+      const productPrisma: Product = productMap.get(
+        BigInt(productOrderDto.productId),
+      );
       if (productPrisma) {
-        const subTotalPrice = productOrderDto.quantity * productPrisma.price;
+        const subTotalPrice: number =
+          productOrderDto.quantity * productPrisma.price;
         totalPrice += subTotalPrice;
         validatedCreateOrderDto.productsOrdersDto[index].subTotalPrice =
           subTotalPrice;
-        console.log(validatedCreateOrderDto.productsOrdersDto[index]);
       }
     }
 
-    console.log(totalPrice);
     const orderPrisma = await this.prismaService.order.create({
       data: {
         paymentMethod: validatedCreateOrderDto.paymentMethod,
@@ -132,8 +133,11 @@ export class OrderService {
           ProductOrder: true,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 404);
+      .catch(() => {
+        throw new HttpException(
+          `Order with orderId ${orderId} and userId ${userId} not found`,
+          404,
+        );
       });
     return ConvertHelper.orderPrismaIntoOrderResponse(
       orderPrisma,

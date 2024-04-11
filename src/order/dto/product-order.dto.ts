@@ -1,4 +1,4 @@
-export class ProductOrderDto {
+export default class ProductOrderDto {
   productId: bigint;
   orderId: bigint;
   quantity: number;

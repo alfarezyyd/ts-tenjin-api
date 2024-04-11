@@ -24,7 +24,9 @@ export class StoreController {
     @Body() createStoreDto: CreateStoreDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.storeService.create(userId, createStoreDto),
+      result: {
+        message: await this.storeService.create(userId, createStoreDto),
+      },
     };
   }
 
@@ -33,7 +35,9 @@ export class StoreController {
     @Param('userId') userId: bigint,
   ): Promise<WebResponse<ResponseStoreDto>> {
     return {
-      data: await this.storeService.findOne(userId),
+      result: {
+        data: await this.storeService.findOne(userId),
+      },
     };
   }
 
@@ -43,14 +47,18 @@ export class StoreController {
     @Body() updateStoreDto: UpdateStoreDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.storeService.update(userId, updateStoreDto),
+      result: {
+        message: await this.storeService.update(userId, updateStoreDto),
+      },
     };
   }
 
   @Delete(':userId')
   async remove(@Param('userId') userId: bigint): Promise<WebResponse<string>> {
     return {
-      data: await this.storeService.remove(userId),
+      result: {
+        message: await this.storeService.remove(userId),
+      },
     };
   }
 }

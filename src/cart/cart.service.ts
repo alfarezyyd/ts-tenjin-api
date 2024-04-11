@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateProductCartDto } from './dto/create-product-cart.dto';
-import { PrismaService } from '../common/prisma.service';
-import { ValidationService } from '../common/validation.service';
+import PrismaService from '../common/prisma.service';
+import ValidationService from '../common/validation.service';
 import ResponseProductCartDto from './dto/response-product-cart.dto';
 import ConvertHelper from '../helper/convert.helper';
 
@@ -12,18 +12,10 @@ export class CartService {
     private readonly validationService: ValidationService,
   ) {}
 
-  async create(userId: bigint): Promise<void> {
-    await this.prismaService.cart.create({
-      data: {
-        userId: userId,
-      },
-    });
-  }
-
   async findAllProductByCartId(
     cartId: bigint,
   ): Promise<ResponseProductCartDto[]> {
-    const productsCarts = await this.prismaService.productsCarts.findMany({
+    const allProductInCart = await this.prismaService.productsCarts.findMany({
       where: {
         cartId: cartId,
       },
@@ -31,19 +23,19 @@ export class CartService {
         product: true,
       },
     });
-    const responsesProductCartDto: ResponseProductCartDto[] = [];
-    for (const productOnCart of productsCarts) {
-      responsesProductCartDto.push(
+    const allResponseProductCartDto: ResponseProductCartDto[] = [];
+    for (const productInCart of allProductInCart) {
+      allResponseProductCartDto.push(
         await ConvertHelper.productCartPrismaIntoProductCartResponse(
-          productOnCart,
+          productInCart,
         ),
       );
     }
-    return responsesProductCartDto;
+    return allResponseProductCartDto;
   }
 
   async detachProductFromCart(cartId: bigint, productId: bigint) {
-    const productsCartsPrisma = await this.prismaService.productsCarts.delete({
+    const productCartPrisma = await this.prismaService.productsCarts.delete({
       where: {
         productId_cartId: {
           productId: productId,
@@ -51,13 +43,18 @@ export class CartService {
         },
       },
     });
-    if (productsCartsPrisma == null) {
-      throw new HttpException(`Products `, 404);
+    if (productCartPrisma == null) {
+      throw new HttpException(
+        `Product with id ${productId} in cart with id ${cartId} not found`,
+        404,
+      );
     }
-    return `Product successfully deleted from cart`;
+    return `Product with id ${productId} successfully deleted from cart with id ${cartId}`;
   }
 
-  async appendProductIntoCart(createProductCartDto: CreateProductCartDto) {
+  async attachProductIntoCart(
+    createProductCartDto: CreateProductCartDto,
+  ): Promise<string> {
     const productPrice = await this.prismaService.product
       .findFirstOrThrow({
         where: {
@@ -67,8 +64,27 @@ export class CartService {
           price: true,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 404);
+      .catch(() => {
+        throw new HttpException(
+          `Product with productId ${createProductCartDto.productId} not found`,
+          404,
+        );
+      });
+
+    await this.prismaService.productsCarts
+      .findFirstOrThrow({
+        where: {
+          cartId: createProductCartDto.cartId,
+        },
+        select: {
+          cartId: true,
+        },
+      })
+      .catch(() => {
+        throw new HttpException(
+          `Cart with cartId ${createProductCartDto.cartId} not found`,
+          404,
+        );
       });
 
     await this.prismaService.productsCarts.create({
@@ -83,5 +99,6 @@ export class CartService {
         },
       },
     });
+    return `Success! attach product with productId ${createProductCartDto.productId} into cart with cartId ${createProductCartDto.cartId}`;
   }
 }

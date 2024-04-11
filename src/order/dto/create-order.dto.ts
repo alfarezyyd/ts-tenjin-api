@@ -1,4 +1,4 @@
-import { ProductOrderDto } from './product-order.dto';
+import ProductOrderDto from './product-order.dto';
 
 export default class CreateOrderDto {
   paymentMethod: string;

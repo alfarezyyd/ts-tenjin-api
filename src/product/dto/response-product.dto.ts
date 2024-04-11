@@ -1,4 +1,4 @@
-export class ResponseProductDto {
+export default class ResponseProductDto {
   id: string;
   name: string;
   condition: string;

@@ -1,4 +1,4 @@
-import { ResponseProductDto } from '../../product/dto/response-product.dto';
+import ResponseProductDto from '../../product/dto/response-product.dto';
 
 export default class ResponseProductCartDto {
   cartId: string;

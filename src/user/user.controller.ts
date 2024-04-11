@@ -27,34 +27,42 @@ export class UserController {
     @Body() createUserDto: CreateUserDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.userService.create(createUserDto),
+      result: {
+        message: await this.userService.create(createUserDto),
+      },
     };
   }
 
-  @Get(':id')
+  @Get(':userId')
   async findOne(
-    @Param('id', ParseIntPipe) id: bigint,
+    @Param('userId', ParseIntPipe) userId: bigint,
   ): Promise<WebResponse<ResponseUserDto>> {
-    const userDetail: User = await this.userService.findOne(id);
+    const userDetail: User = await this.userService.findOne(userId);
     return {
-      data: await ConvertHelper.userPrismaIntoUserResponse(userDetail),
+      result: {
+        data: await ConvertHelper.userPrismaIntoUserResponse(userDetail),
+      },
     };
   }
 
-  @Put(':id')
+  @Put(':userId')
   async update(
-    @Param('id', ParseIntPipe) id: bigint,
+    @Param('userId', ParseIntPipe) userId: bigint,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.userService.update(id, updateUserDto),
+      result: {
+        message: await this.userService.update(userId, updateUserDto),
+      },
     };
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: bigint): Promise<WebResponse<string>> {
+  @Delete(':userId')
+  async remove(@Param('userId') userId: bigint): Promise<WebResponse<string>> {
     return {
-      data: await this.userService.remove(id),
+      result: {
+        message: await this.userService.remove(userId),
+      },
     };
   }
 }

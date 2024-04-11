@@ -10,32 +10,49 @@ import {
 import { CartService } from './cart.service';
 import { CreateProductCartDto } from './dto/create-product-cart.dto';
 import ResponseProductCartDto from './dto/response-product-cart.dto';
+import { WebResponse } from '../model/web.response';
 
-@Controller('api/cart')
+@Controller('api/carts')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get(':cartId')
   async findAllProductByCartId(
     @Param('cartId', ParseIntPipe) cartId: bigint,
-  ): Promise<ResponseProductCartDto[]> {
-    return this.cartService.findAllProductByCartId(cartId);
+  ): Promise<WebResponse<ResponseProductCartDto[]>> {
+    return {
+      result: {
+        data: await this.cartService.findAllProductByCartId(cartId),
+      },
+    };
   }
 
   @Post(':cartId')
-  appendProductIntoCart(
-    @Param('cartId', ParseIntPipe) id: bigint,
+  async appendProductIntoCart(
+    @Param('cartId', ParseIntPipe) cartId: bigint,
     @Body() createProductCartDto: CreateProductCartDto,
-  ) {
-    createProductCartDto.cartId = id;
-    return this.cartService.appendProductIntoCart(createProductCartDto);
+  ): Promise<WebResponse<string>> {
+    createProductCartDto.cartId = cartId;
+    return {
+      result: {
+        message:
+          await this.cartService.attachProductIntoCart(createProductCartDto),
+      },
+    };
   }
 
   @Delete(':cartId/:productId')
-  detachProductFromCart(
+  async detachProductFromCart(
     @Param('cartId') cartId: bigint,
     @Param('productId') productId: bigint,
-  ) {
-    return this.cartService.detachProductFromCart(cartId, productId);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.cartService.detachProductFromCart(
+          cartId,
+          productId,
+        ),
+      },
+    };
   }
 }

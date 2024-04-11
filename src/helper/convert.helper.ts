@@ -10,11 +10,11 @@ import {
 } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseStoreDto } from '../store/dto/response-store.dto';
-import { ResponseAddressDto } from '../address/dto/response-address.dto';
-import { ResponseProductDto } from '../product/dto/response-product.dto';
-import { ResponseExpeditionDto } from '../expedition/dto/response-expedition.dto';
+import ResponseAddressDto from '../address/dto/response-address.dto';
+import ResponseProductDto from '../product/dto/response-product.dto';
+import ResponseExpeditionDto from '../expedition/dto/response-expedition.dto';
 import ResponseProductCartDto from '../cart/dto/response-product-cart.dto';
-import { ProductOrderDto } from '../order/dto/product-order.dto';
+import ProductOrderDto from '../order/dto/product-order.dto';
 import ResponseOrderDto from '../order/dto/response-order.dto';
 
 export default class ConvertHelper {

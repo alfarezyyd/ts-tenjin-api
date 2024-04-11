@@ -1,5 +1,8 @@
 export class WebResponse<T> {
-  data?: T;
+  result?: {
+    data?: T;
+    message?: string;
+  };
   errors?: any;
   paging?: Paging;
 }

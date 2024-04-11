@@ -1,13 +1,13 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
-import { ValidationService } from '../common/validation.service';
-import { PrismaService } from '../common/prisma.service';
-import { AddressValidation } from './address.validation';
 import { Address } from '@prisma/client';
-import { ResponseAddressDto } from './dto/response-address.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import ConvertHelper from '../helper/convert.helper';
+import ValidationService from '../common/validation.service';
+import PrismaService from '../common/prisma.service';
+import AddressValidation from './address.validation';
+import ResponseAddressDto from './dto/response-address.dto';
 
 @Injectable()
 export class AddressService {
@@ -20,21 +20,19 @@ export class AddressService {
     userId: bigint,
     createAddressDto: CreateAddressDto,
   ): Promise<string> {
-    const validateAddress: CreateAddressDto = this.validationService.validate(
-      AddressValidation.SAVE,
-      createAddressDto,
-    );
+    const validatedCreateAddressDto: CreateAddressDto =
+      this.validationService.validate(AddressValidation.SAVE, createAddressDto);
 
     await this.prismaService.user
       .findFirstOrThrow({
         where: { id: userId },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 400);
+      .catch(() => {
+        throw new HttpException(`User with userId ${userId} not found`, 404);
       });
 
     await this.prismaService.address.create({
-      data: { ...validateAddress, userId: userId },
+      data: { ...validatedCreateAddressDto, userId: userId },
     });
     return 'Success! new address has been created';
   }
@@ -49,9 +47,9 @@ export class AddressService {
 
     const allResponseAddressDto: ResponseAddressDto[] = [];
     for (const addressByUser of allAddressByUser) {
-      const responseAddressDto: ResponseAddressDto =
-        await ConvertHelper.addressPrismaIntoAddressResponse(addressByUser);
-      allResponseAddressDto.push(responseAddressDto);
+      allResponseAddressDto.push(
+        await ConvertHelper.addressPrismaIntoAddressResponse(addressByUser),
+      );
     }
     return allResponseAddressDto;
   }
@@ -61,7 +59,7 @@ export class AddressService {
     addressId: bigint,
     updateAddressDto: UpdateAddressDto,
   ): Promise<string> {
-    const validateUpdateAddressDto: UpdateUserDto =
+    const validatedUpdateAddressDto: UpdateUserDto =
       this.validationService.validate(AddressValidation.SAVE, updateAddressDto);
     let addressPrisma: Address = await this.prismaService.address
       .findFirstOrThrow({
@@ -70,38 +68,42 @@ export class AddressService {
           userId: userId,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 400);
+      .catch(() => {
+        throw new HttpException(
+          `Address with addressId ${addressId} and userId ${userId} not found`,
+          404,
+        );
       });
     addressPrisma = {
       ...addressPrisma,
-      ...validateUpdateAddressDto,
+      ...validatedUpdateAddressDto,
     };
     await this.prismaService.address.update({
       data: addressPrisma,
       where: {
         id: addressId,
+        userId: userId,
       },
     });
-    return 'Success! address has been updated';
+    return `Success! address with addressId ${addressId} has been updated`;
   }
 
   async remove(userId: bigint, addressId: bigint): Promise<string> {
-    const searchedAddress: Address = await this.prismaService.address
-      .findFirstOrThrow({
-        where: {
-          id: addressId,
-          userId: userId,
-        },
-      })
-      .catch((reason) => {
-        throw new HttpException(reason, 400);
-      });
-    await this.prismaService.address.delete({
+    const addressPrisma = await this.prismaService.address.delete({
       where: {
-        id: searchedAddress.id,
+        id: addressId,
+        userId: userId,
+      },
+      select: {
+        id: true,
       },
     });
-    return 'Success! address has been deleted';
+    if (addressPrisma == null) {
+      throw new HttpException(
+        `Address with addressId ${addressId} and userId ${userId} not found!`,
+        404,
+      );
+    }
+    return `Success! address with addressId ${addressId} and userId ${userId} has been deleted`;
   }
 }

@@ -1,4 +1,4 @@
-export class ResponseAddressDto {
+export default class ResponseAddressDto {
   id: string;
   label: string;
   detail: string;

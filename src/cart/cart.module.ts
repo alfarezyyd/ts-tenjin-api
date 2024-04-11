@@ -7,6 +7,5 @@ import { CommonModule } from '../common/common.module';
   imports: [CommonModule],
   controllers: [CartController],
   providers: [CartService],
-  exports: [CartService],
 })
 export class CartModule {}

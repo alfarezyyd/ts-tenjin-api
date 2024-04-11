@@ -1,10 +1,10 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { Logger } from 'winston';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
-export class PrismaService
+export default class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, string>
   implements OnModuleInit
 {

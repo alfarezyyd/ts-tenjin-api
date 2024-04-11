@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PrismaService } from '../common/prisma.service';
-import { ValidationService } from '../common/validation.service';
+import PrismaService from '../common/prisma.service';
+import ValidationService from '../common/validation.service';
 import { ProductValidation } from './product.validation';
 import CommonHelper from '../helper/common.helper';
 import { Product } from '@prisma/client';
@@ -22,7 +22,7 @@ export class ProductService {
     storeId: bigint,
     createProductDto: CreateProductDto,
   ): Promise<string> {
-    const createProductRequest = this.validationService.validate(
+    const validatedCreateProductRequest = this.validationService.validate(
       ProductValidation.SAVE,
       createProductDto,
     );
@@ -32,38 +32,43 @@ export class ProductService {
           id: storeId,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 404);
+      .catch(() => {
+        throw new HttpException(`Store with storeId ${storeId} not found`, 404);
       });
 
     const productPrisma = await this.prismaService.product.create({
       data: {
-        ...createProductRequest,
-        slug: await CommonHelper.slugifyProductName(createProductRequest.name),
+        ...validatedCreateProductRequest,
+        slug: await CommonHelper.slugifyProductName(
+          validatedCreateProductRequest.name,
+        ),
         storeId: storeId,
       },
     });
 
     const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${productPrisma.id}/`;
     if (!fs.existsSync(folderPath)) {
-      fs.mkdir(folderPath, (err) => {
-        if (err) {
-          throw new HttpException(err.message, 500);
+      fs.mkdir(folderPath, (fileSystemError) => {
+        if (fileSystemError) {
+          throw new HttpException(
+            'Error when trying to upload, try again later!',
+            500,
+          );
         }
       });
     }
-    const productResources: { productId: any; imagePath: string }[] = [];
-    for (const value of createProductDto.images) {
+    const allProductResource: { productId: any; imagePath: string }[] = [];
+    for (const productImage of createProductDto.productImages) {
       const generatedRandomFileName: string =
-        CommonHelper.generateFileName(value);
+        CommonHelper.generateFileName(productImage);
       const productResource: { productId: any; imagePath: string } = {
         productId: productPrisma.id,
         imagePath: generatedRandomFileName,
       };
-      productResources.push(productResource);
+      allProductResource.push(productResource);
       fs.writeFile(
         folderPath + generatedRandomFileName,
-        value.buffer,
+        productImage.buffer,
         (err) => {
           if (err) {
             throw new HttpException(err, 500);
@@ -72,7 +77,7 @@ export class ProductService {
       );
     }
     await this.prismaService.productResource.createMany({
-      data: productResources,
+      data: allProductResource,
     });
     return 'Success! new product has been created';
   }
@@ -81,23 +86,26 @@ export class ProductService {
     return `This action returns all product`;
   }
 
-  async findOne(storeId: bigint, id: bigint) {
+  async findOne(storeId: bigint, productId: bigint) {
     const productPrisma: Product = await this.prismaService.product
       .findFirstOrThrow({
         where: {
           storeId: storeId,
-          id: id,
+          id: productId,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 404);
+      .catch(() => {
+        throw new HttpException(
+          `Product with productId ${productId} and storeId ${storeId} not found`,
+          404,
+        );
       });
     return ConvertHelper.productPrismaIntoProductResponse(productPrisma);
   }
 
   async update(
     storeId: bigint,
-    id: bigint,
+    productId: bigint,
     updateProductDto: UpdateProductDto,
   ): Promise<string> {
     const validateUpdateProduct: UpdateProductDto =
@@ -106,11 +114,14 @@ export class ProductService {
       .findFirstOrThrow({
         where: {
           storeId: storeId,
-          id: id,
+          id: productId,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 404);
+      .catch(() => {
+        throw new HttpException(
+          `Product with productId ${productId} and storeId ${storeId} not found`,
+          404,
+        );
       });
     productPrisma = {
       ...productPrisma,
@@ -118,7 +129,7 @@ export class ProductService {
       slug: await CommonHelper.slugifyProductName(validateUpdateProduct.name),
     };
     const productResources: { productId: any; imagePath: string }[] = [];
-    if (updateProductDto.images != null) {
+    if (updateProductDto.productImages != null) {
       const folderPath = `${this.configService.get<string>('MULTER_DEST')}/${storeId}/${productPrisma.id}/`;
       await CommonHelper.deleteFolderRecursive(folderPath);
       fs.mkdir(folderPath, (err) => {
@@ -126,9 +137,9 @@ export class ProductService {
           throw new HttpException(err.message, 500);
         }
       });
-      for (const value of updateProductDto.images) {
+      for (const productImage of updateProductDto.productImages) {
         const generatedRandomFileName: string =
-          CommonHelper.generateFileName(value);
+          CommonHelper.generateFileName(productImage);
         const productResource: { productId: any; imagePath: string } = {
           productId: productPrisma.id,
           imagePath: generatedRandomFileName,
@@ -136,7 +147,7 @@ export class ProductService {
         productResources.push(productResource);
         fs.writeFile(
           folderPath + generatedRandomFileName,
-          value.buffer,
+          productImage.buffer,
           (err) => {
             if (err) {
               throw new HttpException(err, 500);
@@ -147,7 +158,7 @@ export class ProductService {
       await this.prismaService.$transaction([
         this.prismaService.productResource.deleteMany({
           where: {
-            productId: id,
+            productId: productId,
           },
         }),
         this.prismaService.productResource.createMany({
@@ -159,24 +170,24 @@ export class ProductService {
     await this.prismaService.product.update({
       data: productPrisma,
       where: {
-        id: id,
+        id: productId,
       },
     });
 
     return 'Success! product has been edited';
   }
 
-  async remove(storeId: bigint, id: bigint) {
+  async remove(storeId: bigint, productId: bigint) {
     const [, productPrisma] = await this.prismaService.$transaction([
       this.prismaService.productResource.deleteMany({
         where: {
-          productId: id,
+          productId: productId,
         },
       }),
       this.prismaService.product.delete({
         where: {
           storeId: storeId,
-          id: id,
+          id: productId,
         },
       }),
     ]);

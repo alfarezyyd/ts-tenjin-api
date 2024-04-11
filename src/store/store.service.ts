@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
-import { PrismaService } from '../common/prisma.service';
-import { ValidationService } from '../common/validation.service';
+import PrismaService from '../common/prisma.service';
+import ValidationService from '../common/validation.service';
 import { StoreValidation } from './store.validation';
 import { Store } from '@prisma/client';
 import { ResponseStoreDto } from './dto/response-store.dto';
@@ -30,8 +30,8 @@ export class StoreService {
           id: userId,
         },
       })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 400);
+      .catch(() => {
+        throw new HttpException(`User with userId ${userId} not found`, 404);
       });
 
     await this.prismaService.store.create({

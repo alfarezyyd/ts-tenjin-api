@@ -12,9 +12,9 @@ import { ExpeditionService } from './expedition.service';
 import { CreateExpeditionDto } from './dto/create-expedition.dto';
 import { UpdateExpeditionDto } from './dto/update-expedition.dto';
 import { WebResponse } from '../model/web.response';
-import { ResponseExpeditionDto } from './dto/response-expedition.dto';
+import ResponseExpeditionDto from './dto/response-expedition.dto';
 
-@Controller('api/expedition')
+@Controller('api/expeditions')
 export class ExpeditionController {
   constructor(private readonly expeditionService: ExpeditionService) {}
 
@@ -23,15 +23,20 @@ export class ExpeditionController {
     @Body() createExpeditionDto: CreateExpeditionDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.expeditionService.create(createExpeditionDto),
+      result: {
+        message: await this.expeditionService.create(createExpeditionDto),
+      },
     };
   }
 
   @Get()
   async findAll(): Promise<WebResponse<ResponseExpeditionDto[]>> {
-    const allResponseExpedition = await this.expeditionService.findAll();
+    const allResponseExpeditionDto: ResponseExpeditionDto[] =
+      await this.expeditionService.findAll();
     return {
-      data: allResponseExpedition,
+      result: {
+        data: allResponseExpeditionDto,
+      },
     };
   }
 
@@ -40,7 +45,9 @@ export class ExpeditionController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<ResponseExpeditionDto>> {
     return {
-      data: await this.expeditionService.findOne(id),
+      result: {
+        data: await this.expeditionService.findOne(id),
+      },
     };
   }
 
@@ -50,7 +57,9 @@ export class ExpeditionController {
     @Body() updateExpeditionDto: UpdateExpeditionDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.expeditionService.update(id, updateExpeditionDto),
+      result: {
+        message: await this.expeditionService.update(id, updateExpeditionDto),
+      },
     };
   }
 
@@ -59,7 +68,9 @@ export class ExpeditionController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.expeditionService.remove(id),
+      result: {
+        data: await this.expeditionService.remove(id),
+      },
     };
   }
 }

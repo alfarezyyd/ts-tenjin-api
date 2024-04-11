@@ -14,7 +14,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { WebResponse } from '../model/web.response';
-import { ResponseProductDto } from './dto/response-product.dto';
+import ResponseProductDto from './dto/response-product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/stores/products')
@@ -26,42 +26,54 @@ export class ProductController {
   async create(
     @Param('storeId', ParseIntPipe) storeId: bigint,
     @Body() createProductDto: CreateProductDto,
-    @UploadedFiles() images: Array<Express.Multer.File>,
+    @UploadedFiles() productImage: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
-    createProductDto.images = images;
+    createProductDto.productImages = productImage;
     return {
-      data: await this.productService.create(storeId, createProductDto),
+      result: {
+        message: await this.productService.create(storeId, createProductDto),
+      },
     };
   }
 
-  @Get(':storeId/:id')
+  @Get(':storeId/:productId')
   async findOne(
     @Param('storeId', ParseIntPipe) storeId: bigint,
-    @Param('id', ParseIntPipe) id: bigint,
+    @Param('productId', ParseIntPipe) productId: bigint,
   ): Promise<WebResponse<ResponseProductDto>> {
     return {
-      data: await this.productService.findOne(storeId, id),
+      result: {
+        data: await this.productService.findOne(storeId, productId),
+      },
     };
   }
 
-  @Put(':storeId/:id')
+  @Put(':storeId/:productId')
   async update(
     @Param('storeId', ParseIntPipe) storeId: bigint,
-    @Param('id', ParseIntPipe) id: bigint,
+    @Param('productId', ParseIntPipe) productId: bigint,
     @Body() updateProductDto: UpdateProductDto,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.productService.update(storeId, id, updateProductDto),
+      result: {
+        message: await this.productService.update(
+          storeId,
+          productId,
+          updateProductDto,
+        ),
+      },
     };
   }
 
-  @Delete(':storeId/:id')
+  @Delete(':storeId/:productId')
   async remove(
     @Param('storeId', ParseIntPipe) storeId: bigint,
-    @Param('id', ParseIntPipe) id: bigint,
+    @Param('productId', ParseIntPipe) productId: bigint,
   ): Promise<WebResponse<string>> {
     return {
-      data: await this.productService.remove(storeId, id),
+      result: {
+        message: await this.productService.remove(storeId, productId),
+      },
     };
   }
 }
