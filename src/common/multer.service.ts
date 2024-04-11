@@ -7,8 +7,6 @@ import { memoryStorage } from 'multer';
 
 @Injectable()
 export class MulterService implements MulterOptionsFactory {
-  constructor() {}
-
   createMulterOptions(): Promise<MulterModuleOptions> | MulterModuleOptions {
     return {
       storage: memoryStorage(),
