@@ -1,0 +1,146 @@
+### Create Index User
+PUT http://localhost:9200/zenith_users
+
+### Create Mapping for User
+PUT http://localhost:9200/zenith_users/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection": true,
+  "date_detection": true,
+  "dynamic_date_formats": [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ],
+  "properties": {
+    "name": {
+      "type": "text"
+    },
+    "gender": {
+      "type": "keyword"
+    },
+    "email": {
+      "type": "keyword"
+    },
+    "telephone": {
+      "type": "keyword"
+    },
+    "pin": {
+      "type": "keyword"
+    },
+    "photo_path": {
+      "type": "keyword"
+    }
+  }
+}
+
+### Create Index Store
+PUT http://localhost:9200/zenith_stores
+
+### Create Mapping for Store
+PUT http://localhost:9200/zenith_stores/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection": true,
+  "date_detection": true,
+  "dynamic_date_formats": [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ],
+  "properties": {
+    "name": {
+      "type": "text"
+    },
+    "domain": {
+      "type": "keyword"
+    },
+    "slogan": {
+      "type": "keyword"
+    },
+    "location_name": {
+      "type": "keyword"
+    },
+    "city": {
+      "type": "keyword"
+    },
+    "zip_code": {
+      "type": "keyword"
+    },
+    "detail": {
+      "type": "keyword"
+    },
+    "description": {
+      "type": "keyword"
+    },
+    "photo_path": {
+      "type": "keyword"
+    },
+    "user_id": {
+      "type": "keyword"
+    }
+  }
+}
+
+### Create Index Product
+PUT http://localhost:9200/zenith_products
+
+### Create Mapping for Product
+PUT http://localhost:9200/zenith_products/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection": true,
+  "date_detection": true,
+  "dynamic_date_formats": [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ],
+  "properties": {
+    "slug": {
+      "type": "text"
+    },
+    "name": {
+      "type": "text"
+    },
+    "condition": {
+      "type": "keyword"
+    },
+    "description": {
+      "type": "keyword"
+    },
+    "price": {
+      "type": "integer"
+    },
+    "minimum_order": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "keyword"
+    },
+    "stock": {
+      "type": "integer"
+    },
+    "sku": {
+      "type": "text"
+    },
+    "weight": {
+      "type": "integer"
+    },
+    "width": {
+      "type": "integer"
+    },
+    "height": {
+      "type": "integer"
+    },
+    "store_id": {
+      "type": "keyword"
+    }
+  }
+}
