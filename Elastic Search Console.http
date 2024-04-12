@@ -36,6 +36,39 @@ Content-Type: application/json
   }
 }
 
+### Test
+GET http://localhost:9200/zenith_users/_doc/4
+
+
+### Create Data In Index User
+POST http://localhost:9200/zenith_users/_create/test1
+Content-Type: application/json
+
+{
+  "name": "test",
+  "gender": "test",
+  "email": "test",
+  "telephone": "test",
+  "pin": "test",
+  "photo_path": "test"
+}
+
+### Test
+GET http://localhost:9200/zenith_users/_doc/3
+
+### Check Data In Index User
+POST http://localhost:9200/zenith_users/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 5000,
+  "from": 0
+}
+
+
 ### Create Index Store
 PUT http://localhost:9200/zenith_stores
 
