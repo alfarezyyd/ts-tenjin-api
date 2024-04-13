@@ -6,6 +6,8 @@ import { UserValidation } from './user.validation';
 import PrismaService from '../common/prisma.service';
 import { User, userGender } from '@prisma/client';
 import { HttpService } from '@nestjs/axios';
+import { AxiosError } from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -13,6 +15,7 @@ export class UserService {
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
     private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<string> {
@@ -20,46 +23,41 @@ export class UserService {
       UserValidation.CREATE,
       createUserDto,
     );
-    const userPrisma = await this.prismaService.user
-      .create({
-        data: {
-          ...createUserRequest,
-          gender: userGender[createUserDto.gender],
-        },
-      })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 400);
-      });
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma = await prismaTransaction.user
+        .create({
+          data: {
+            ...createUserRequest,
+            gender: userGender[createUserDto.gender],
+          },
+        })
+        .catch((reason) => {
+          throw new HttpException(reason.message, 400);
+        });
 
-    await this.prismaService.cart
-      .create({
-        data: {
-          userId: userPrisma.id,
-        },
-      })
-      .catch((reason) => {
-        throw new HttpException(reason.message, 400);
-      });
+      await this.prismaService.cart
+        .create({
+          data: {
+            userId: userPrisma.id,
+          },
+        })
+        .catch((reason) => {
+          throw new HttpException(reason.message, 400);
+        });
 
-    await this.httpService
-      .axiosRef({
-        method: 'post',
-        url: `http://localhost:9200/zenith_users/_create/${userPrisma.id}`,
-        headers: {
-          contentType: 'application/json',
-        },
-        data: {
-          name: userPrisma.name,
-          gender: userPrisma.gender,
-          email: userPrisma.email,
-          telephone: userPrisma.telephone,
-          pin: userPrisma.pin,
-          photo_path: userPrisma.photoPath,
-        },
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+      await this.httpService
+        .axiosRef({
+          method: 'POST',
+          url: `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
+          headers: {
+            contentType: 'application/json',
+          },
+          data: { ...userPrisma },
+        })
+        .catch(function () {
+          throw new AxiosError('Error occurred when trying to write!', '500');
+        });
+    });
     return 'Success! new user has been created';
   }
 

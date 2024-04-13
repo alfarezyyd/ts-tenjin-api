@@ -8,6 +8,8 @@ import { MulterService } from './multer.service';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import ElasticSearchService from './elastic-search.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
+import { AxiosService } from './axios.service';
 
 @Module({
   imports: [
@@ -32,6 +34,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useClass: ElasticSearchService,
     }),
+    HttpModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useClass: AxiosService,
+    }),
   ],
   providers: [PrismaService, ValidationService],
   exports: [
@@ -39,6 +46,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ValidationService,
     MulterModule,
     ElasticsearchModule,
+    HttpModule,
   ],
 })
 export class CommonModule {}

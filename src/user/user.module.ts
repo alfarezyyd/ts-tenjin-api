@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { CommonModule } from '../common/common.module';
-import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [CommonModule, HttpModule],
+  imports: [CommonModule, ConfigModule],
   controllers: [UserController],
   providers: [UserService],
 })
