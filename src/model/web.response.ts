@@ -1,10 +1,19 @@
 export class WebResponse<T> {
   result?: {
-    data?: T;
-    message?: string;
+    data?: T | null;
+    message?: string | null;
   };
   errors?: any;
-  paging?: Paging;
+  paging?: Paging | null;
+
+  constructor() {
+    this.result = {
+      data: null,
+      message: null,
+    };
+    this.errors = null;
+    this.paging = null;
+  }
 }
 
 export class Paging {

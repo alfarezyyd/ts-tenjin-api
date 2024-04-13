@@ -23,7 +23,7 @@ export class UserService {
       UserValidation.CREATE,
       createUserDto,
     );
-    this.prismaService.$transaction(async (prismaTransaction) => {
+    await this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
         .create({
           data: {
