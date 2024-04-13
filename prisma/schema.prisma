@@ -75,11 +75,12 @@ model Expedition {
 }
 
 model Category {
-  id             Int        @id @default(autoincrement()) @db.UnsignedInt
-  name           String     @db.VarChar(255)
-  parentCategory Category   @relation("parentChildCategory", fields: [categoryId], references: [id])
-  Category       Category[] @relation("parentChildCategory")
-  categoryId     Int        @map("category_id") @db.UnsignedInt
+  id              Int               @id @default(autoincrement()) @db.UnsignedInt
+  name            String            @db.VarChar(255)
+  parentCategory  Category          @relation("parentChildCategory", fields: [categoryId], references: [id])
+  Category        Category[]        @relation("parentChildCategory")
+  categoryId      Int               @map("category_id") @db.UnsignedInt
+  ProductCategory ProductCategory[]
 
   @@map("categories")
 }
@@ -113,8 +114,19 @@ model Product {
   ProductResource ProductResource[]
   ProductsCarts   ProductsCarts[]
   ProductOrder    ProductOrder[]
+  ProductCategory ProductCategory[]
 
   @@map("products")
+}
+
+model ProductCategory {
+  Category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int      @map("category_id") @db.UnsignedInt
+  Product    Product  @relation(fields: [productId], references: [id])
+  productId  BigInt   @map("product_id") @db.UnsignedBigInt
+
+  @@unique([categoryId, productId])
+  @@map("products_categories")
 }
 
 model ProductResource {

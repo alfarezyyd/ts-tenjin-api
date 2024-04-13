@@ -62,56 +62,61 @@ export class UserService {
   }
 
   async findOne(userId: bigint): Promise<User> {
-    return this.prismaService.user
-      .findFirstOrThrow({
-        where: {
-          id: userId,
-        },
-      })
-      .catch(() => {
-        throw new HttpException(`User with userId ${userId} not found`, 404);
-      });
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      return prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            id: userId,
+          },
+        })
+        .catch(() => {
+          throw new HttpException(`User with userId ${userId} not found`, 404);
+        });
+    });
   }
 
   async update(userId: bigint, updateUserDto: UpdateUserDto): Promise<string> {
-    let userPrisma: User = await this.prismaService.user
-      .findFirstOrThrow({
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      let userPrisma: User = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            id: userId,
+          },
+        })
+        .catch(() => {
+          throw new HttpException(`User with userId ${userId}`, 404);
+        });
+      userPrisma = {
+        ...userPrisma,
+        ...updateUserDto,
+        gender: userGender[updateUserDto.gender],
+      };
+      await prismaTransaction.user.update({
+        data: userPrisma,
         where: {
           id: userId,
         },
-      })
-      .catch(() => {
-        throw new HttpException(`User with userId ${userId}`, 404);
       });
-    userPrisma = {
-      ...userPrisma,
-      ...updateUserDto,
-      gender: userGender[updateUserDto.gender],
-    };
-
-    await this.prismaService.user.update({
-      data: userPrisma,
-      where: {
-        id: userId,
-      },
     });
     return 'Success! user has been updated';
   }
 
   async remove(userId: bigint): Promise<string> {
-    this.prismaService.user
-      .findFirstOrThrow({
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            id: userId,
+          },
+        })
+        .catch(() => {
+          throw new HttpException(`User with userId ${userId} not found`, 404);
+        });
+      await prismaTransaction.user.delete({
         where: {
           id: userId,
         },
-      })
-      .catch(() => {
-        throw new HttpException(`User with userId ${userId} not found`, 404);
       });
-    await this.prismaService.user.delete({
-      where: {
-        id: userId,
-      },
     });
     return `Success! user has been deleted`;
   }
