@@ -100,15 +100,19 @@ export class UserService {
         },
       });
 
-      this.httpService.post(
-        `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
-        { ...userPrisma },
-        {
-          headers: {
-            contentType: 'application/json',
+      await firstValueFrom(
+        this.httpService.post(
+          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
+          { ...userPrisma },
+          {
+            headers: {
+              contentType: 'application/json',
+            },
           },
-        },
-      );
+        ),
+      ).catch(() => {
+        throw new HttpException(`Failed to update`, 500);
+      });
     });
     return 'Success! user has been updated';
   }
