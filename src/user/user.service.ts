@@ -8,6 +8,7 @@ import { User, userGender } from '@prisma/client';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -45,18 +46,19 @@ export class UserService {
           throw new HttpException(reason.message, 400);
         });
 
-      await this.httpService
-        .axiosRef({
-          method: 'POST',
-          url: `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
-          headers: {
-            contentType: 'application/json',
+      await firstValueFrom(
+        this.httpService.post(
+          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
+          { ...userPrisma },
+          {
+            headers: {
+              contentType: 'application/json',
+            },
           },
-          data: { ...userPrisma },
-        })
-        .catch(function () {
-          throw new AxiosError('Error occurred when trying to write!', '500');
-        });
+        ),
+      ).catch(function () {
+        throw new AxiosError('Error occurred when trying to write!', '500');
+      });
     });
     return 'Success! new user has been created';
   }
@@ -76,7 +78,7 @@ export class UserService {
   }
 
   async update(userId: bigint, updateUserDto: UpdateUserDto): Promise<string> {
-    this.prismaService.$transaction(async (prismaTransaction) => {
+    await this.prismaService.$transaction(async (prismaTransaction) => {
       let userPrisma: User = await prismaTransaction.user
         .findFirstOrThrow({
           where: {
@@ -97,25 +99,37 @@ export class UserService {
           id: userId,
         },
       });
+
+      this.httpService.post(
+        `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
+        { ...userPrisma },
+        {
+          headers: {
+            contentType: 'application/json',
+          },
+        },
+      );
     });
     return 'Success! user has been updated';
   }
 
   async remove(userId: bigint): Promise<string> {
     this.prismaService.$transaction(async (prismaTransaction) => {
-      await prismaTransaction.user
-        .findFirstOrThrow({
-          where: {
-            id: userId,
-          },
-        })
-        .catch(() => {
-          throw new HttpException(`User with userId ${userId} not found`, 404);
-        });
-      await prismaTransaction.user.delete({
+      const userPrisma = await prismaTransaction.user.delete({
         where: {
           id: userId,
         },
+      });
+      if (userPrisma == null) {
+        throw new HttpException(`User with userId ${userId} not found`, 404);
+      }
+
+      await firstValueFrom(
+        this.httpService.post(
+          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userId}`,
+        ),
+      ).catch((reason) => {
+        throw new HttpException(reason.message, 400);
       });
     });
     return `Success! user has been deleted`;
