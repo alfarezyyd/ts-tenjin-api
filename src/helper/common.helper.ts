@@ -1,7 +1,25 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import {
+  FileTypeValidator,
+  FileValidator,
+  MaxFileSizeValidator,
+} from '@nestjs/common';
 
 export default class CommonHelper {
+  static async imageValidation({
+    maxSize,
+    fileType,
+  }: {
+    maxSize: number;
+    fileType: string;
+  }): Promise<FileValidator[]> {
+    return [
+      new MaxFileSizeValidator({ maxSize: maxSize }),
+      new FileTypeValidator({ fileType: fileType }),
+    ];
+  }
+
   static async slugifyProductName(productName: string): Promise<string> {
     return productName
       .trim()
