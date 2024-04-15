@@ -9,3 +9,4 @@ SELECT * FROM products;
 SELECT * FROM product_resources;
 SELECT * FROM products_carts;
 SELECT * FROM expedition_provinces;
+SELECT * FROM expedition_cities;

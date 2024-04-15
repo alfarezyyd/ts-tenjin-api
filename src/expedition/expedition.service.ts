@@ -4,7 +4,12 @@ import { UpdateExpeditionDto } from './dto/update-expedition.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { ExpeditionValidation } from './expedition.validation';
-import { Expedition, ExpeditionProvince } from '@prisma/client';
+import {
+  Expedition,
+  ExpeditionCity,
+  ExpeditionCityType,
+  ExpeditionProvince,
+} from '@prisma/client';
 import ResponseExpeditionDto from './dto/response-expedition.dto';
 import ConvertHelper from '../helper/convert.helper';
 import { HttpService } from '@nestjs/axios';
@@ -120,10 +125,16 @@ export class ExpeditionService {
         if (response.status == 200) {
           const allExpeditionProvincePrisma: ExpeditionProvince[] = [];
           response.data.rajaongkir.results.forEach(
-            (result: { province_id: string; province: string }) => {
+            ({
+              province_id: provinceId,
+              province: provinceName,
+            }: {
+              province_id: string;
+              province: string;
+            }) => {
               const expeditionProvincePrisma: ExpeditionProvince = {
-                id: parseInt(result.province_id),
-                name: result.province,
+                id: parseInt(provinceId),
+                name: provinceName,
               };
               allExpeditionProvincePrisma.push(expeditionProvincePrisma);
             },
@@ -149,6 +160,68 @@ export class ExpeditionService {
       .catch((error) => {
         console.log(error);
         throw new AxiosError('Error when trying to sync province!', '500');
+      });
+  }
+
+  async syncThirdPartyCity() {
+    await firstValueFrom(
+      this.httpService.get(
+        `${this.configService.get<string>('RAJAONGKIR_ENDPOINT')}/city`,
+        {
+          headers: {
+            key: this.configService.get<string>('RAJAONGKIR_API_KEY'),
+          },
+        },
+      ),
+    )
+      .then(async (response) => {
+        if (response.status == 200) {
+          const allExpeditionCityPrisma: ExpeditionCity[] = [];
+          response.data.rajaongkir.results.forEach(
+            ({
+              city_id: cityId,
+              province_id: provinceId,
+              type,
+              city_name: cityName,
+              postal_code: postalCode,
+            }: {
+              city_id: string;
+              province_id: string;
+              province: string;
+              type: string;
+              city_name: string;
+              postal_code: string;
+            }) => {
+              const expeditionCityPrisma: ExpeditionCity = {
+                id: parseInt(cityId),
+                expeditionProvinceId: parseInt(provinceId),
+                type: ExpeditionCityType[
+                  type.toUpperCase() as keyof typeof ExpeditionCityType
+                ],
+                name: cityName,
+                postalCode: postalCode,
+              };
+              allExpeditionCityPrisma.push(expeditionCityPrisma);
+            },
+          );
+          await this.prismaService
+            .$transaction(async (prismaInstance) => {
+              await prismaInstance.expeditionCity.deleteMany({});
+              await prismaInstance.expeditionCity.createMany({
+                data: allExpeditionCityPrisma,
+                skipDuplicates: true,
+              });
+            })
+            .catch(() => {
+              throw new AxiosError('Error when trying to sync city!', '500');
+            });
+        } else {
+          throw new AxiosError('Error when trying to sync city!', '500');
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new AxiosError('Error when trying to sync city!', '500');
       });
   }
 }

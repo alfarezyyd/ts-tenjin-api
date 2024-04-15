@@ -45,6 +45,11 @@ export class ExpeditionController {
     await this.expeditionService.syncThirdPartyProvince();
   }
 
+  @Get('sync-city')
+  async syncCity() {
+    await this.expeditionService.syncThirdPartyCity();
+  }
+
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,

@@ -48,7 +48,11 @@ export class AddressService {
     const allResponseAddressDto: ResponseAddressDto[] = [];
     for (const addressByUser of allAddressByUser) {
       allResponseAddressDto.push(
-        await ConvertHelper.addressPrismaIntoAddressResponse(addressByUser),
+        await ConvertHelper.addressPrismaIntoAddressResponse(
+          addressByUser,
+          null,
+          null,
+        ),
       );
     }
     return allResponseAddressDto;
