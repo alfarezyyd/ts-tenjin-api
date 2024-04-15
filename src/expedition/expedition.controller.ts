@@ -40,6 +40,11 @@ export class ExpeditionController {
     };
   }
 
+  @Get('sync-province')
+  async syncProvince() {
+    await this.expeditionService.syncThirdPartyProvince();
+  }
+
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,

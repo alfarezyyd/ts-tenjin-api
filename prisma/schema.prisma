@@ -34,16 +34,52 @@ model User {
   @@map("users")
 }
 
+model ExpeditionProvince {
+  id             Int              @id @db.UnsignedInt
+  name           String           @db.VarChar(255)
+  ExpeditionCity ExpeditionCity[]
+  Address        Address[]
+
+  @@map("expedition_provinces")
+}
+
+enum ExpeditionCityType {
+  KOTA
+  KABUPATEN
+}
+
+model ExpeditionCity {
+  id                   Int                @id @db.UnsignedInt
+  ExpeditionProvince   ExpeditionProvince @relation(fields: [expeditionProvinceId], references: [id])
+  expeditionProvinceId Int                @map("expedition_province_id") @db.UnsignedInt
+  type                 ExpeditionCityType
+  name                 String             @db.VarChar(255)
+  postalCode           String             @db.VarChar(10)
+  Address              Address[]
+
+  @@map("expedition_cities")
+}
+
 model Address {
-  id           BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
-  label        String  @db.VarChar(30)
-  detail       String  @db.VarChar(200)
-  notes        String  @db.VarChar(45)
-  receiverName String  @map("receiver_name") @db.VarChar(50)
-  telephone    String  @db.VarChar(13)
-  User         User    @relation(fields: [userId], references: [id])
-  userId       BigInt  @map("user_id") @db.UnsignedBigInt
-  Order        Order[]
+  id                   BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  label                String             @db.VarChar(30)
+  street               String             @db.VarChar(255)
+  neighbourhoodNumber  String             @map("neighbourhood_number") @db.VarChar(10)
+  hamletNumber         String             @map("hamlet_number") @db.VarChar(10)
+  village              String             @db.VarChar(255)
+  urbanVillage         String             @map("urban_village") @db.VarChar(255)
+  subDistrict          String             @map("sub_district") @db.VarChar(255)
+  ExpeditionCity       ExpeditionCity     @relation(fields: [expeditionCityId], references: [id])
+  expeditionCityId     Int                @map("expedition_city_id") @db.UnsignedInt
+  ExpeditionProvince   ExpeditionProvince @relation(fields: [expeditionProvinceId], references: [id])
+  expeditionProvinceId Int                @map("expedition_province_id") @db.UnsignedInt
+  postalCode           String             @map("postal_code") @db.VarChar(10)
+  notes                String             @db.VarChar(45)
+  receiverName         String             @map("receiver_name") @db.VarChar(50)
+  telephone            String             @db.VarChar(13)
+  User                 User               @relation(fields: [userId], references: [id])
+  userId               BigInt             @map("user_id") @db.UnsignedBigInt
+  Order                Order[]
 
   @@map("addresses")
 }

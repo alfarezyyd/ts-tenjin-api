@@ -70,11 +70,21 @@ export default class ConvertHelper {
 
   static async addressPrismaIntoAddressResponse(
     addressPrisma: Address,
+    expeditionCity: string,
+    expeditionProvince: string,
   ): Promise<ResponseAddressDto> {
     return {
       id: addressPrisma.id.toString(),
       label: addressPrisma.label,
-      detail: addressPrisma.detail,
+      street: addressPrisma.street,
+      neighbourhoodNumber: addressPrisma.neighbourhoodNumber,
+      hamletNumber: addressPrisma.hamletNumber,
+      village: addressPrisma.village,
+      urbanVillage: addressPrisma.urbanVillage,
+      subDistrict: addressPrisma.subDistrict,
+      expeditionCity: expeditionCity,
+      expeditionProvince: expeditionProvince,
+      postalCode: addressPrisma.postalCode,
       notes: addressPrisma.notes,
       receiverName: addressPrisma.receiverName,
       telephone: addressPrisma.telephone,
@@ -153,8 +163,11 @@ export default class ConvertHelper {
         ),
       paymentMethod: orderPrisma.paymentMethod,
       productsOrdersDto: allProductsOrderDto,
-      address:
-        await ConvertHelper.addressPrismaIntoAddressResponse(addressPrisma),
+      address: await ConvertHelper.addressPrismaIntoAddressResponse(
+        addressPrisma,
+        null,
+        null,
+      ),
     };
   }
 }

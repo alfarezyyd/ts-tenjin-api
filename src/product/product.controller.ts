@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   ParseIntPipe,
@@ -17,7 +19,6 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { WebResponse } from '../model/web.response';
 import ResponseProductDto from './dto/response-product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import CommonHelper from '../helper/common.helper';
 
 @Controller('api/stores/products')
 export class ProductController {
@@ -30,10 +31,10 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles(
       new ParseFilePipe({
-        validators: await CommonHelper.imageValidation({
-          maxSize: 10_000,
-          fileType: '.(png|jpeg|jpg)',
-        }),
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10_000 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+        ],
       }),
     )
     productImage: Array<Express.Multer.File>,
