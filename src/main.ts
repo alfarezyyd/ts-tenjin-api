@@ -14,8 +14,8 @@ async function bootstrap() {
 
   // Open API Swagger for Documentation
   const config = new DocumentBuilder()
-    .setTitle('ZENITH - ONLINE STORE RESTful API DOCUMENTATION')
-    .setDescription('ZENITH - ONLINE STORE REST API DOCUMENTATION for Client')
+    .setTitle('TENJIN - RESTful API DOCUMENTATION')
+    .setDescription('TENJIN - REST API DOCUMENTATION for Client')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
