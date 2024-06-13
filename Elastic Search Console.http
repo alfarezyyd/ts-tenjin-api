@@ -1,8 +1,8 @@
 ### Create Index User
-PUT http://localhost:9200/zenith_users
+PUT http://localhost:9200/tenjin_users
 
 ### Create Mapping for User
-PUT http://localhost:9200/zenith_users/_mapping
+PUT http://localhost:9200/tenjin_users/_mapping
 Content-Type: application/json
 
 {
@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### Create Data In Index User
-POST http://localhost:9200/zenith_users/_create/test1
+POST http://localhost:9200/tenjin_users/_create/test1
 Content-Type: application/json
 
 {
@@ -50,10 +50,10 @@ Content-Type: application/json
 }
 
 ### Test
-GET http://localhost:9200/zenith_users/_doc/3
+GET http://localhost:9200/tenjin_users/_doc/3
 
 ### Check Data In Index User
-POST http://localhost:9200/zenith_users/_search
+POST http://localhost:9200/tenjin_users/_search
 Content-Type: application/json
 
 {
@@ -66,10 +66,10 @@ Content-Type: application/json
 
 
 ### Create Index Store
-PUT http://localhost:9200/zenith_stores
+PUT http://localhost:9200/tenjin_stores
 
 ### Create Mapping for Store
-PUT http://localhost:9200/zenith_stores/_mapping
+PUT http://localhost:9200/tenjin_stores/_mapping
 Content-Type: application/json
 
 {
@@ -116,10 +116,10 @@ Content-Type: application/json
 }
 
 ### Create Index Product
-PUT http://localhost:9200/zenith_products
+PUT http://localhost:9200/tenjin_products
 
 ### Create Mapping for Product
-PUT http://localhost:9200/zenith_products/_mapping
+PUT http://localhost:9200/tenjin_products/_mapping
 Content-Type: application/json
 
 {
@@ -175,10 +175,10 @@ Content-Type: application/json
 }
 
 ### Create Index Category
-PUT http://localhost:9200/zenith_categories
+PUT http://localhost:9200/tenjin_categories
 
 ### Create Mapping for Category
-PUT http://localhost:9200/zenith_categories/_mapping
+PUT http://localhost:9200/tenjin_categories/_mapping
 Content-Type: application/json
 
 {

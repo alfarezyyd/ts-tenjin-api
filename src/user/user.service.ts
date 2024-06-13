@@ -48,7 +48,7 @@ export class UserService {
 
       await firstValueFrom(
         this.httpService.post(
-          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
+          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userPrisma.id}`,
           { ...userPrisma },
           {
             headers: {
@@ -102,7 +102,7 @@ export class UserService {
 
       await firstValueFrom(
         this.httpService.post(
-          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userPrisma.id}`,
+          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userPrisma.id}`,
           { ...userPrisma },
           {
             headers: {
@@ -130,7 +130,7 @@ export class UserService {
 
       await firstValueFrom(
         this.httpService.post(
-          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/zenith_users/_create/${userId}`,
+          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userId}`,
         ),
       ).catch((reason) => {
         throw new HttpException(reason.message, 400);
