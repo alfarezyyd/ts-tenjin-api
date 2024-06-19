@@ -35,17 +35,6 @@ export class UserService {
         .catch((reason) => {
           throw new HttpException(reason.message, 400);
         });
-
-      await this.prismaService.cart
-        .create({
-          data: {
-            userId: userPrisma.id,
-          },
-        })
-        .catch((reason) => {
-          throw new HttpException(reason.message, 400);
-        });
-
       await firstValueFrom(
         this.httpService.post(
           `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userPrisma.id}`,
