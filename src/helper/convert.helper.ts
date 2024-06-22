@@ -1,4 +1,4 @@
-import { ResponseUserDto } from '../users/dto/response-user.dto';
+import { ResponseUserDto } from '../user/dto/response-user.dto';
 import { User } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 

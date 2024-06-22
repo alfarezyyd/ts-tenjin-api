@@ -28,7 +28,7 @@ model User {
   photoPath String?    @map("photo_path") @db.VarChar(255)
   Mentor    Mentor?
 
-  @@map("users")
+  @@map("user")
 }
 
 model Mentor {

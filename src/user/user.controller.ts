@@ -9,7 +9,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WebResponse } from '../model/web.response';
@@ -17,9 +17,9 @@ import { ResponseUserDto } from './dto/response-user.dto';
 import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
 
-@Controller('api/users')
-export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+@Controller('api/user')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @HttpCode(201)
