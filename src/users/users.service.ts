@@ -2,7 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import ValidationService from '../common/validation.service';
-import { UserValidation } from './user.validation';
+import { UsersValidation } from './users.validation';
 import PrismaService from '../common/prisma.service';
 import { User, userGender } from '@prisma/client';
 import { HttpService } from '@nestjs/axios';
@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
@@ -21,7 +21,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<string> {
     const createUserRequest = this.validationService.validate(
-      UserValidation.CREATE,
+      UsersValidation.CREATE,
       createUserDto,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -49,7 +49,7 @@ export class UserService {
         throw new AxiosError('Error occurred when trying to write!', '500');
       });
     });
-    return 'Success! new user has been created';
+    return 'Success! new users has been created';
   }
 
   async findOne(userId: bigint): Promise<User> {
@@ -103,7 +103,7 @@ export class UserService {
         throw new HttpException(`Failed to update`, 500);
       });
     });
-    return 'Success! user has been updated';
+    return 'Success! users has been updated';
   }
 
   async remove(userId: bigint): Promise<string> {
