@@ -5,6 +5,7 @@ import { EducationModule } from './education/education.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { SkillModule } from './skill/skill.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
     EducationModule,
     AuthenticationModule,
     UserModule,
+    SkillModule,
   ],
   controllers: [],
   providers: [],
