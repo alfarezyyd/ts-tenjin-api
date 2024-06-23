@@ -15,5 +15,6 @@ export class UserValidation {
     }),
     email: z.string().min(1).max(255),
     telephone: z.string().min(1).max(13),
+    password: z.string().min(1).max(100),
   });
 }

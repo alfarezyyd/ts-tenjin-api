@@ -9,6 +9,8 @@ import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -30,38 +32,50 @@ export class UserService {
           data: {
             ...createUserRequest,
             gender: userGender[createUserDto.gender],
+            password: await bcrypt.hash(createUserDto.password, 10),
+            uniqueId: uuidv4(),
           },
         })
         .catch((reason) => {
           throw new HttpException(reason.message, 400);
         });
-      await firstValueFrom(
-        this.httpService.post(
-          `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userPrisma.id}`,
-          { ...userPrisma },
-          {
-            headers: {
-              contentType: 'application/json',
-            },
-          },
-        ),
-      ).catch(function () {
-        throw new AxiosError('Error occurred when trying to write!', '500');
-      });
+      // await firstValueFrom(
+      //   this.httpService.post(
+      //     `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userPrisma.id}`,
+      //     { ...userPrisma },
+      //     {
+      //       headers: {
+      //         contentType: 'application/json',
+      //       },
+      //     },
+      //   ),
+      // ).catch(function () {
+      //   throw new AxiosError('Error occurred when trying to write!', '500');
+      // });
     });
     return 'Success! new user has been created';
   }
 
-  async findOne(userId: bigint): Promise<User> {
+  async findOne(userIdentifier: string): Promise<User> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       return prismaTransaction.user
         .findFirstOrThrow({
           where: {
-            id: userId,
+            OR: [
+              {
+                email: userIdentifier,
+              },
+              {
+                uniqueId: userIdentifier,
+              },
+            ],
           },
         })
         .catch(() => {
-          throw new HttpException(`User with userId ${userId} not found`, 404);
+          throw new HttpException(
+            `User with userId or email ${userIdentifier} not found`,
+            404,
+          );
         });
     });
   }

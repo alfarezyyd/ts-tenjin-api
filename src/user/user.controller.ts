@@ -17,7 +17,7 @@ import { ResponseUserDto } from './dto/response-user.dto';
 import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
 
-@Controller('api/user')
+@Controller('api/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -35,7 +35,7 @@ export class UserController {
 
   @Get(':userId')
   async findOne(
-    @Param('userId', ParseIntPipe) userId: bigint,
+    @Param('userId') userId: string,
   ): Promise<WebResponse<ResponseUserDto>> {
     const userDetail: User = await this.userService.findOne(userId);
     return {
