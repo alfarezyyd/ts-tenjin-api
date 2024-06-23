@@ -1,10 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
-import { MentorValidation } from './mentor.validation';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class MentorService {
