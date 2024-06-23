@@ -11,6 +11,7 @@ import {
 import { SkillService } from './skill.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
+import { bigint } from 'zod';
 
 @Controller('skill')
 export class SkillController {
@@ -34,9 +35,12 @@ export class SkillController {
     return this.skillService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillService.update(+id, updateSkillDto);
+  @Patch(':mentorId')
+  update(
+    @Param('mentorId') mentorId: bigint,
+    @Body() updateSkillDto: UpdateSkillDto,
+  ) {
+    return this.skillService.update(mentorId, updateSkillDto);
   }
 
   @Delete(':skillId')

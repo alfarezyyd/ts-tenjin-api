@@ -38,7 +38,7 @@ export class SkillService {
     return `This action returns a #${id} skill`;
   }
 
-  async update(mentorId: number, updateSkillDto: UpdateSkillDto) {
+  async update(mentorId: bigint, updateSkillDto: UpdateSkillDto) {
     const validatedCreateSkillDto = this.validationService.validate(
       SkillValidation.UPDATE,
       updateSkillDto,
