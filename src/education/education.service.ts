@@ -54,7 +54,7 @@ export class EducationService {
   async update(mentorId: bigint, updateEducationDto: UpdateEducationDto) {
     const validatedCreateEducationDto: Education =
       this.validationService.validate(
-        EducationValidation.SAVE,
+        EducationValidation.UPDATE,
         updateEducationDto,
       );
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -75,19 +75,19 @@ export class EducationService {
           ...validatedCreateEducationDto,
         },
         where: {
-          id: mentorId,
+          id: updateEducationDto.educationId,
         },
       });
     });
 
-    return 'Success! new education has been created';
+    return 'Success! new education has been updated';
   }
 
-  async remove(mentorId: bigint, educationid: bigint) {
+  async remove(mentorId: bigint, educationId: bigint) {
     await this.prismaService.$transaction(async (prismaTransaction) => {
       prismaTransaction.education.deleteMany({
         where: {
-          AND: [{ id: educationid }, { mentorId: mentorId }],
+          AND: [{ id: educationId }, { mentorId: mentorId }],
         },
       });
     });

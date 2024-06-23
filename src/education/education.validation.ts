@@ -11,4 +11,11 @@ export default class EducationValidation {
     society: z.string(),
     description: z.string().max(255).min(10),
   });
+
+  static readonly UPDATE: ZodType = z.union([
+    EducationValidation.SAVE,
+    z.object({
+      id: z.bigint(),
+    }),
+  ]);
 }
