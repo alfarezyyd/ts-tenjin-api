@@ -6,6 +6,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { SkillModule } from './skill/skill.module';
+import { ExperienceModule } from './experience/experience.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SkillModule } from './skill/skill.module';
     AuthenticationModule,
     UserModule,
     SkillModule,
+    ExperienceModule,
   ],
   controllers: [],
   providers: [],
