@@ -8,6 +8,9 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -21,10 +24,18 @@ export class CategoryController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   create(
-    @UploadedFile() logoFile: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    logoFile: Express.Multer.File,
     @Body() createCategoryDto: CreateCategoryDto,
   ) {
-    return this.categoryService.create(createCategoryDto);
+    return this.categoryService.create(logoFile, createCategoryDto);
   }
 
   @Get()
