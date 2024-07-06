@@ -25,7 +25,7 @@ export class CategoryService {
       createCategoryDto,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const generatedLogoFileName = uuid() + logoFile.originalname;
+      const generatedLogoFileName = `${uuid()}-${logoFile.originalname}`;
       const folderPath = `${this.configService.get<string>('MULTER_DEST')}/logo-icon`;
       fs.writeFile(
         folderPath + generatedLogoFileName,
@@ -43,7 +43,7 @@ export class CategoryService {
         },
       });
     });
-    return 'This action adds a new category';
+    return 'Success! new category has been created';
   }
 
   findAll() {
