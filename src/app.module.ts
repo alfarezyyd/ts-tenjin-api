@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { SkillModule } from './skill/skill.module';
 import { ExperienceModule } from './experience/experience.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ExperienceModule } from './experience/experience.module';
     UserModule,
     SkillModule,
     ExperienceModule,
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
