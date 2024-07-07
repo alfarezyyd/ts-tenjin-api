@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
-import PrismaService from './prisma.service';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-import ValidationService from './validation.service';
-import { MulterModule } from '@nestjs/platform-express';
-import { MulterService } from './multer.service';
-import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import ElasticSearchService from './elastic-search.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { HttpModule } from '@nestjs/axios';
-import { AxiosService } from './axios.service';
+import { MulterModule } from '@nestjs/platform-express';
+
+import PrismaService from './prisma.service';
+import ValidationService from './validation.service';
+import ElasticSearchService from './elastic-search.service';
 import { RedisService } from './redis.service';
+import { MulterService } from './multer.service';
+import { AxiosService } from './axios.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     WinstonModule.forRoot({
       level: 'debug',
       format: winston.format.combine(winston.format.json()),
@@ -47,7 +49,10 @@ import { RedisService } from './redis.service';
     RedisService,
     {
       provide: 'RedisClient',
-      useClass: RedisService,
+      useFactory: (redisService: RedisService) => {
+        return redisService.getClient();
+      },
+      inject: [RedisService],
     },
   ],
   exports: [
