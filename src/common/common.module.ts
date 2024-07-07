@@ -10,6 +10,7 @@ import ElasticSearchService from './elastic-search.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { AxiosService } from './axios.service';
+import { RedisService } from './redis.service';
 
 @Module({
   imports: [
@@ -40,7 +41,15 @@ import { AxiosService } from './axios.service';
       useClass: AxiosService,
     }),
   ],
-  providers: [PrismaService, ValidationService],
+  providers: [
+    PrismaService,
+    ValidationService,
+    RedisService,
+    {
+      provide: 'RedisClient',
+      useClass: RedisService,
+    },
+  ],
   exports: [
     PrismaService,
     ValidationService,
