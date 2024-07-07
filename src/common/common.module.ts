@@ -43,24 +43,14 @@ import { AxiosService } from './axios.service';
       useClass: AxiosService,
     }),
   ],
-  providers: [
-    PrismaService,
-    ValidationService,
-    RedisService,
-    {
-      provide: 'RedisClient',
-      useFactory: (redisService: RedisService) => {
-        return redisService.getClient();
-      },
-      inject: [RedisService],
-    },
-  ],
+  providers: [PrismaService, ValidationService, RedisService],
   exports: [
     PrismaService,
     ValidationService,
     MulterModule,
     ElasticsearchModule,
     HttpModule,
+    RedisService,
   ],
 })
 export class CommonModule {}

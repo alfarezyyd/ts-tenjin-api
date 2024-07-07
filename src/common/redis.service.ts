@@ -28,6 +28,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   getClient(): RedisClientType {
+    console.log(this.client);
     return this.client;
   }
 }

@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SkillModule } from './skill/skill.module';
 import { ExperienceModule } from './experience/experience.module';
 import { CategoryModule } from './category/category.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CategoryModule } from './category/category.module';
     SkillModule,
     ExperienceModule,
     CategoryModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],
