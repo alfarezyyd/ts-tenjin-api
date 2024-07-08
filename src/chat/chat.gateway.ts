@@ -53,7 +53,6 @@ export class ChatGateway
     @MessageBody('username') username: string,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    console.log(this.redisService.getClient());
     await this.redisService
       .getClient()
       .hSet('onlineUsers', client.id, username);
@@ -61,7 +60,10 @@ export class ChatGateway
       user: 'system',
       text: `${username} has joined the chat`,
     });
-    client.emit('message', { user: 'system', text: `Welcome, ${username}` });
+    const onlineUsers = await this.redisService
+      .getClient()
+      .hGetAll('onlineUsers');
+    client.emit('users', onlineUsers);
   }
 
   @SubscribeMessage('message')
