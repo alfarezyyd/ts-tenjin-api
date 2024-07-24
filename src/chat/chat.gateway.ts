@@ -34,17 +34,12 @@ export class ChatGateway
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  afterInit(server: Server) {
-    console.log('Chat Gateway Initialized');
-  }
+  afterInit(server: Server) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async handleConnection(client: Socket, ...args: any[]) {
-    console.log('Client connected:', client.id);
-  }
+  async handleConnection(client: Socket, ...args: any[]) {}
 
   async handleDisconnect(client: Socket) {
-    console.log('Client disconnected:', client.id);
     await this.redisService.getClient().hDel('onlineUsers', client.id);
   }
 

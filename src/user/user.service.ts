@@ -23,11 +23,11 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<string> {
     const createUserRequest = this.validationService.validate(
-      UserValidation.CREATE,
+      UserValidation.userValidationWrapper(this.prismaService),
       createUserDto,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const userPrisma = await prismaTransaction.user
+      await prismaTransaction.user
         .create({
           data: {
             ...createUserRequest,
@@ -39,6 +39,7 @@ export class UserService {
         .catch((reason) => {
           throw new HttpException(reason.message, 400);
         });
+
       // await firstValueFrom(
       //   this.httpService.post(
       //     `${this.configService.get<string>('ELASTICSEARCH_NODE')}/tenjin_users/_create/${userPrisma.id}`,

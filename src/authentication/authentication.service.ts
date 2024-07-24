@@ -15,7 +15,6 @@ export class AuthenticationService {
 
   async signIn(signInDto: SignInDto): Promise<ResponseAuthenticationDto> {
     const user = await this.userService.findOne(signInDto.email);
-    console.log(user);
     if (!(await bcrypt.compare(signInDto.password, user?.password))) {
       throw new UnauthorizedException('Username or password not valid');
     }

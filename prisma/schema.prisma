@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum userGender {
+enum UserGender {
   MAN
   WOMAN
 }
@@ -22,7 +22,7 @@ model User {
   id        BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
   uniqueId  String     @unique @db.VarChar(512)
   name      String     @db.VarChar(255)
-  gender    userGender @default(MAN)
+  gender    UserGender @default(MAN)
   email     String     @unique @db.VarChar(255)
   password  String     @db.VarChar(512)
   telephone String     @unique @db.VarChar(13)
@@ -74,47 +74,7 @@ model AssistanceResource {
   @@map("assistance_resources")
 }
 
-// enum orderStatus {
-//   PROCESSED
-//   CONFIRMED
-//   SENT
-//   FINISHED
-//   CANCELLED
-// }
-//
-// enum orderPaymentMethod {
-//   CASH_ON_DELIVERY
-//   TRANSFER
-// }
-
-//
-// model Order {
-//   id            BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
-//   totalPrice    Int                @map("total_price") @db.UnsignedMediumInt
-//   status        orderStatus        @default(PROCESSED)
-//   paymentMethod orderPaymentMethod
-//   createAt      DateTime           @default(now()) @map("create_at")
-//   addressId     BigInt             @map("address_id") @db.UnsignedBigInt
-//   expeditionId  Int                @map("expedition_id") @db.UnsignedSmallInt
-//   user          User               @relation(fields: [userId], references: [id])
-//   userId        BigInt             @map("user_id") @db.UnsignedBigInt
-//   ProductOrder  ProductOrder[]
-// }
-//
-// model ProductOrder {
-//   product       Product @relation(fields: [productId], references: [id])
-//   productId     BigInt  @map("product_id") @db.UnsignedBigInt
-//   order         Order   @relation(fields: [orderId], references: [id])
-//   orderId       BigInt  @map("order_id") @db.UnsignedBigInt
-//   quantity      Int
-//   subTotalPrice Int     @map("sub_total_price")
-//   note          String? @db.VarChar(255)
-//
-//   @@unique([productId, orderId])
-//   @@map("product_orders")
-// }
-
-enum EmploymentTypeEnum {
+enum EmploymentType {
   FULL_TIME
   PART_TIME
   SELF_EMPLOYED
@@ -129,7 +89,7 @@ model Experience {
   id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
   positionName       String               @map("position_name") @db.VarChar(255)
   companyName        String               @map("company_name") @db.VarChar(255)
-  employmentType     EmploymentTypeEnum   @map("employment_type")
+  employmentType     EmploymentType       @map("employment_type")
   location           String               @db.VarChar(255)
   startDate          DateTime             @map("start_date") @db.Date
   endDate            DateTime             @map("end_date") @db.Date
@@ -183,4 +143,43 @@ model Assistance {
   mentor             Mentor               @relation(fields: [mentorId], references: [id])
   AssistanceCategory AssistanceCategory[]
   AssistanceResource AssistanceResource[]
+}
+
+enum OrderStatus {
+  PROCESSED
+  CONFIRMED
+  FINISHED
+  CANCELLED
+}
+
+enum OrderPaymentStatus {
+  NOT_YET_PAID
+  PAID
+}
+
+model Order {
+  id                 String             @id @default(uuid()) @db.VarChar(255)
+  assistanceId       BigInt             @map("assistance_id") @db.UnsignedBigInt
+  Assistance         Assistance         @relation(fields: [assistanceId], references: [id])
+  mentorId           BigInt             @map("mentor_id") @db.UnsignedBigInt
+  Mentor             Mentor             @relation(fields: [mentorId], references: [id])
+  userId             BigInt             @map("user_id") @db.UnsignedBigInt
+  User               User               @relation(fields: [userId], references: [id])
+  sessionTimestamp   DateTime           @map("session_timestamp")
+  minutesDurations   Int                @map("minutes_duration") @db.UnsignedInt
+  totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)
+  orderStatus        OrderStatus        @map("order_status") @default(PROCESSED)
+  orderPaymentStatus OrderPaymentStatus @map("order_payment_status") @default(NOT_YET_PAID)
+  note               String             @db.Text
+  createdAt          DateTime           @map("created_at") @default(now())
+}
+
+model OrderReview {
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  orderId   String   @map("order_id") @db.VarChar(255)
+  Order     Order    @relation(fields: [orderId], references: [id])
+  rating    Decimal  @db.Decimal(3, 2)
+  review    String   @db.Text
+  createdAt DateTime @map("created_at") @default(now())
+  updatedAt DateTime @map("updated_at")
 }

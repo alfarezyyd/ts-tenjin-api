@@ -1,8 +1,9 @@
-import { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import multer, { MulterError } from 'multer';
 import { WebResponse } from '../model/web.response';
 import { Response } from 'express';
 
+@Catch(MulterError)
 export default class MulterExceptionFilter
   implements ExceptionFilter<MulterError>
 {
@@ -12,6 +13,6 @@ export default class MulterExceptionFilter
     const webResponse: WebResponse<MulterError> =
       new WebResponse<MulterError>();
     webResponse.errors = exception.message;
-    response.status(400).json(webResponse);
+    response.status(500).json(webResponse);
   }
 }

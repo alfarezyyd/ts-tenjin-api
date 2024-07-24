@@ -16,11 +16,13 @@ import { WebResponse } from '../model/web.response';
 import { ResponseUserDto } from './dto/response-user.dto';
 import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
+import { Public } from '../authentication/set-metadata.decorator';
 
 @Controller('api/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @Post()
   @HttpCode(201)
   async create(

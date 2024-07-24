@@ -38,7 +38,6 @@ export class MentorController {
   findOne(@Param('mentorId', ParseIntPipe) mentorId: bigint) {
     return this.mentorService.findOne(mentorId);
   }
-  1;
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMentorDto: UpdateMentorDto) {
