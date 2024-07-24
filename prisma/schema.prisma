@@ -29,6 +29,7 @@ model User {
   pin       String?    @db.Char(6)
   photoPath String?    @map("photo_path") @db.VarChar(255)
   Mentor    Mentor?
+  Order     Order[]
 
   @@map("user")
 }
@@ -41,6 +42,7 @@ model Mentor {
   Education  Education[]
   Skill      Skill[]
   Assistance Assistance[]
+  Order      Order[]
 
   @@map("mentors")
 }
@@ -141,6 +143,7 @@ model Assistance {
   id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
   mentorId           BigInt               @map("mentor_id") @db.UnsignedBigInt
   mentor             Mentor               @relation(fields: [mentorId], references: [id])
+  Order              Order[]
   AssistanceCategory AssistanceCategory[]
   AssistanceResource AssistanceResource[]
 }
@@ -172,6 +175,7 @@ model Order {
   orderPaymentStatus OrderPaymentStatus @map("order_payment_status") @default(NOT_YET_PAID)
   note               String             @db.Text
   createdAt          DateTime           @map("created_at") @default(now())
+  OrderReview        OrderReview[]
 }
 
 model OrderReview {
