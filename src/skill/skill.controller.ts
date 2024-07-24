@@ -11,7 +11,6 @@ import {
 import { SkillService } from './skill.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
-import { bigint } from 'zod';
 
 @Controller('skill')
 export class SkillController {
