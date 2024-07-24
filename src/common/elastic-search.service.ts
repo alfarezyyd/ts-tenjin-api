@@ -14,7 +14,6 @@ export default class ElasticSearchService
   createElasticsearchOptions():
     | Promise<ElasticsearchModuleOptions>
     | ElasticsearchModuleOptions {
-    console.log(this.configService);
     return {
       node: this.configService.get<string>('ELASTICSEARCH_NODE'),
       auth: {

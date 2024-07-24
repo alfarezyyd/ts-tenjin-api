@@ -7,21 +7,30 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ExperienceService } from './experience.service';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('experience')
 export class ExperienceController {
   constructor(private readonly experienceService: ExperienceService) {}
 
   @Post(':mentorId')
+  @UseInterceptors(FilesInterceptor('experienceResources'))
   create(
+    @UploadedFiles() experienceResources: Array<Express.Multer.File>,
     @Param('mentorId', ParseIntPipe) mentorId: bigint,
     @Body() createExperienceDto: CreateExperienceDto,
   ) {
-    return this.experienceService.create(mentorId, createExperienceDto);
+    return this.experienceService.create(
+      experienceResources,
+      mentorId,
+      createExperienceDto,
+    );
   }
 
   @Get()

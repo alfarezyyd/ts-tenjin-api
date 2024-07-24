@@ -9,6 +9,7 @@ import { SkillModule } from './skill/skill.module';
 import { ExperienceModule } from './experience/experience.module';
 import { CategoryModule } from './category/category.module';
 import { ChatModule } from './chat/chat.module';
+import { AssistanceModule } from './assistance/assistance.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ChatModule } from './chat/chat.module';
     ExperienceModule,
     CategoryModule,
     ChatModule,
+    AssistanceModule,
   ],
   controllers: [],
   providers: [],

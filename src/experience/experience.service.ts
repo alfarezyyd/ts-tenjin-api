@@ -4,6 +4,8 @@ import { UpdateExperienceDto } from './dto/update-experience.dto';
 import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import ExperienceValidation from './experience.validation';
+import { v4 as uuid } from 'uuid';
+import * as fs from 'node:fs';
 
 @Injectable()
 export class ExperienceService {
@@ -12,7 +14,11 @@ export class ExperienceService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async create(mentorId: bigint, createExperienceDto: CreateExperienceDto) {
+  async create(
+    experienceResources: Array<Express.Multer.File>,
+    mentorId: bigint,
+    createExperienceDto: CreateExperienceDto,
+  ) {
     const validatedCreateExperienceDto = await this.validationService.validate(
       ExperienceValidation.CREATE,
       createExperienceDto,
@@ -31,7 +37,7 @@ export class ExperienceService {
           );
         });
 
-      await prismaTransaction.experience.create({
+      const experiencePrisma = await prismaTransaction.experience.create({
         data: {
           ...validatedCreateExperienceDto,
           mentorId: mentorId,
