@@ -26,7 +26,6 @@ export class UserService {
       UserValidation.userValidationWrapper(this.prismaService),
       createUserDto,
     );
-    console.log(createUserRequest);
     await this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.user
         .create({

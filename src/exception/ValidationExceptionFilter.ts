@@ -11,7 +11,6 @@ export default class ValidationExceptionFilter
     const http = host.switchToHttp();
     const response = http.getResponse<Response>();
     const webResponse: WebResponse<ZodIssue[]> = new WebResponse<ZodIssue[]>();
-    console.log('Exception Issues:', JSON.stringify(exception.issues, null, 2));
 
     webResponse.errors = exception.issues; // Set errors to exception issues
     response.status(400).json(webResponse);
