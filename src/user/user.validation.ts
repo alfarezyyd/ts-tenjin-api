@@ -19,16 +19,13 @@ export class UserValidation {
         .string()
         .min(1)
         .max(255)
-        .refine((arg) => {
-          prismaService.user
-            .count({
-              where: {
-                email: arg,
-              },
-            })
-            .then((value) => {
-              return value < 1;
-            });
+        .refine(async (arg) => {
+          const count = await prismaService.user.count({
+            where: {
+              email: arg,
+            },
+          });
+          return count < 1;
         }, 'Email has been registered before'),
       telephone: z.string().min(1).max(13),
       password: z.string().min(1).max(100),
