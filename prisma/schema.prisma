@@ -48,10 +48,10 @@ model Mentor {
 }
 
 model Category {
-  id                 Int                  @id @default(autoincrement()) @db.UnsignedInt
-  name               String               @db.VarChar(255)
-  logo               String               @db.VarChar(255)
-  AssistanceCategory AssistanceCategory[]
+  id         Int          @id @default(autoincrement()) @db.UnsignedInt
+  name       String       @db.VarChar(255)
+  logo       String       @db.VarChar(255)
+  Assistance Assistance[]
 
   @@map("categories")
 }
