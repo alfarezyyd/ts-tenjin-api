@@ -52,6 +52,7 @@ model Category {
   name       String       @db.VarChar(255)
   logo       String       @db.VarChar(255)
   Assistance Assistance[]
+  Tag        Tag[]
 
   @@map("categories")
 }
@@ -139,16 +140,18 @@ model Tag {
   id             Int              @id @default(autoincrement()) @db.UnsignedInt
   name           String           @db.VarChar(255)
   logo           String           @db.VarChar(255)
+  categoryId     Int              @map("user_id") @db.UnsignedInt
+  category       Category         @relation(fields: [categoryId], references: [id])
   AssistanceTags AssistanceTags[]
 
-  @@map("categories")
+  @@map("tags")
 }
 
 model Assistance {
   id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
   mentorId           BigInt               @map("mentor_id") @db.UnsignedBigInt
   mentor             Mentor               @relation(fields: [mentorId], references: [id])
-  categoryId         BigInt               @map("category_ud") @db.UnsignedBigInt
+  categoryId         Int                  @map("category_id") @db.UnsignedInt
   category           Category             @relation(fields: [categoryId], references: [id])
   topic              String               @db.VarChar(255)
   description        String               @db.Text
