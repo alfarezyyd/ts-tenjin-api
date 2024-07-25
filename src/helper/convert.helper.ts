@@ -7,13 +7,8 @@ export default class ConvertHelper {
     userPrisma: User,
   ): Promise<ResponseUserDto> {
     return {
+      ...userPrisma,
       id: userPrisma.id.toString(),
-      name: userPrisma.name,
-      gender: userPrisma.gender,
-      email: userPrisma.email,
-      telephone: userPrisma.telephone,
-      pin: userPrisma.pin,
-      photoPath: userPrisma.photoPath,
     };
   }
 
