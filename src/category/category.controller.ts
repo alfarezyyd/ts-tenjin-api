@@ -67,8 +67,8 @@ export class CategoryController {
     return this.categoryService.update(categoryId, logoFile, updateCategoryDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  @Delete(':categoryId')
+  remove(@Param('categoryId', ParseIntPipe) categoryId: number) {
+    return this.categoryService.remove(categoryId);
   }
 }

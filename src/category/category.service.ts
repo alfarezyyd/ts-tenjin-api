@@ -86,8 +86,32 @@ export class CategoryService {
     return `This action updates a #${categoryId} category`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(categoryId: number) {
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      const categoryPrisma: Category = await prismaTransaction.category
+        .findFirstOrThrow({
+          where: {
+            id: categoryId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `Category with ID ${categoryId} not found`,
+          );
+        });
+      fs.unlink(
+        `${this.configService.get<string>('MULTER_DEST')}/logo-icon/${categoryPrisma.logo}`,
+        () => {
+          throw new HttpException('Error when trying to write icon', 500);
+        },
+      );
+      prismaTransaction.category.delete({
+        where: {
+          id: categoryId,
+        },
+      });
+    });
+    return `Success! category has been deleted`;
   }
 
   private handleSaveFile(logoFile: Express.Multer.File) {
