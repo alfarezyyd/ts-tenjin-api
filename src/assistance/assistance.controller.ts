@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
@@ -7,9 +15,12 @@ import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 export class AssistanceController {
   constructor(private readonly assistanceService: AssistanceService) {}
 
-  @Post()
-  create(@Body() createAssistanceDto: CreateAssistanceDto) {
-    return this.assistanceService.create(createAssistanceDto);
+  @Post(':mentorId')
+  create(
+    @Param('mentorId') mentorId: bigint,
+    @Body() createAssistanceDto: CreateAssistanceDto,
+  ) {
+    return this.assistanceService.create(mentorId, createAssistanceDto);
   }
 
   @Get()
@@ -23,7 +34,10 @@ export class AssistanceController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAssistanceDto: UpdateAssistanceDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAssistanceDto: UpdateAssistanceDto,
+  ) {
     return this.assistanceService.update(+id, updateAssistanceDto);
   }
 

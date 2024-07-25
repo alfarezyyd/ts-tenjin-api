@@ -1,10 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
+import { ConfigService } from '@nestjs/config';
+import ValidationService from '../common/validation.service';
+import PrismaService from '../common/prisma.service';
+import { AssistanceValidation } from './assistance.validation';
+import { Category, Mentor } from '@prisma/client';
 
 @Injectable()
 export class AssistanceService {
-  create(createAssistanceDto: CreateAssistanceDto) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly validationService: ValidationService,
+    private readonly prismaService: PrismaService,
+  ) {}
+  async create(mentorId: bigint, createAssistanceDto: CreateAssistanceDto) {
+    let validatedCreateAssistanceDto = this.validationService.validate(
+      AssistanceValidation.SAVE,
+      createAssistanceDto,
+    );
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            id: mentorId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `Mentor with mentorId ${mentorId} not found`,
+          );
+        });
+      prismaTransaction.category
+        .findFirstOrThrow({
+          where: {
+            id: createAssistanceDto.categoryId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `Category with categoryId ${createAssistanceDto.categoryId} not found`,
+          );
+        });
+    });
     return 'This action adds a new assistance';
   }
 
