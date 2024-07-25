@@ -28,22 +28,6 @@ export default class CommonHelper {
       .replace(/[\s-]+/g, '-');
   }
 
-  static async deleteFolderRecursive(folderPath: string) {
-    if (fs.existsSync(folderPath)) {
-      fs.readdirSync(folderPath).forEach((file) => {
-        const curPath = path.join(folderPath, file);
-        if (fs.lstatSync(curPath).isDirectory()) {
-          // Memeriksa apakah itu direktori
-          this.deleteFolderRecursive(curPath); // Memanggil fungsi rekursif untuk menghapus subfolder
-        } else {
-          // Menghapus file
-          fs.unlinkSync(curPath);
-        }
-      });
-      fs.rmdirSync(folderPath); // Menghapus folder setelah file dan subfolder di dalamnya dihapus
-    }
-  }
-
   static generateFileName(multerFile: Express.Multer.File) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     return `${uniqueSuffix}-${multerFile.originalname}`;
