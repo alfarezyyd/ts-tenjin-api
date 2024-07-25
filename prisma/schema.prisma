@@ -56,26 +56,6 @@ model Category {
   @@map("categories")
 }
 
-model AssistanceCategory {
-  Category     Category   @relation(fields: [categoryId], references: [id])
-  categoryId   Int        @map("category_id") @db.UnsignedInt
-  assistance   Assistance @relation(fields: [assistanceId], references: [id])
-  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
-
-  @@unique([categoryId, assistanceId])
-  @@map("assistance_categories")
-}
-
-model AssistanceResource {
-  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  imagePath   String?    @map("image_path") @db.VarChar(255)
-  videoUrl    String?    @map("video_url") @db.VarChar(255)
-  assitance   Assistance @relation(fields: [assitanceId], references: [id])
-  assitanceId BigInt     @map("assitance_id") @db.UnsignedBigInt
-
-  @@map("assistance_resources")
-}
-
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -139,13 +119,63 @@ model Skill {
   @@map("skills")
 }
 
+model AssistanceResource {
+  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath   String?    @map("image_path") @db.VarChar(255)
+  videoUrl    String?    @map("video_url") @db.VarChar(255)
+  assitance   Assistance @relation(fields: [assitanceId], references: [id])
+  assitanceId BigInt     @map("assitance_id") @db.UnsignedBigInt
+
+  @@map("assistance_resources")
+}
+
+enum AssistanceFormat {
+  INDIVIDUAL
+  GROUP
+  HYBRID
+}
+
+model Tag {
+  id             Int              @id @default(autoincrement()) @db.UnsignedInt
+  name           String           @db.VarChar(255)
+  logo           String           @db.VarChar(255)
+  AssistanceTags AssistanceTags[]
+
+  @@map("categories")
+}
+
 model Assistance {
   id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
   mentorId           BigInt               @map("mentor_id") @db.UnsignedBigInt
   mentor             Mentor               @relation(fields: [mentorId], references: [id])
+  categoryId         BigInt               @map("category_ud") @db.UnsignedBigInt
+  category           Category             @relation(fields: [categoryId], references: [id])
+  topic              String               @db.VarChar(255)
+  description        String               @db.Text
+  durationMinutes    Int                  @map("duration_minutes") @db.UnsignedInt
+  price              Int                  @db.UnsignedInt
+  format             AssistanceFormat     @default(INDIVIDUAL)
+  capacity           Int                  @db.UnsignedInt
+  isActive           Boolean              @map("is_active") @default(true)
+  ratingAverage      Decimal              @map("rating_average") @db.Decimal(3, 2) @default(0)
+  language           String               @db.VarChar(100)
   Order              Order[]
-  AssistanceCategory AssistanceCategory[]
+  AssistanceTag      AssistanceTags[]
   AssistanceResource AssistanceResource[]
+  createdAt          DateTime             @map("created_at") @default(now())
+  updatedAt          DateTime             @map("updated_at") @default(now())
+
+  @@map("assistances")
+}
+
+model AssistanceTags {
+  assistance   Assistance @relation(fields: [assistanceId], references: [id])
+  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  Tag          Tag        @relation(fields: [tagId], references: [id])
+  tagId        Int        @map("tag_id") @db.UnsignedInt
+
+  @@unique([tagId, assistanceId])
+  @@map("assistance_tags")
 }
 
 enum OrderStatus {
@@ -176,6 +206,8 @@ model Order {
   note               String             @db.Text
   createdAt          DateTime           @map("created_at") @default(now())
   OrderReview        OrderReview[]
+
+  @@map("orders")
 }
 
 model OrderReview {
@@ -186,4 +218,6 @@ model OrderReview {
   review    String   @db.Text
   createdAt DateTime @map("created_at") @default(now())
   updatedAt DateTime @map("updated_at")
+
+  @@map("order_review")
 }
