@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import { AssistanceValidation } from './assistance.validation';
-import { Category, Mentor } from '@prisma/client';
 
 @Injectable()
 export class AssistanceService {
@@ -15,7 +14,7 @@ export class AssistanceService {
     private readonly prismaService: PrismaService,
   ) {}
   async create(mentorId: bigint, createAssistanceDto: CreateAssistanceDto) {
-    let validatedCreateAssistanceDto = this.validationService.validate(
+    const validatedCreateAssistanceDto = this.validationService.validate(
       AssistanceValidation.SAVE,
       createAssistanceDto,
     );
