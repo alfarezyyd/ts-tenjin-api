@@ -11,6 +11,7 @@ import { CategoryModule } from './category/category.module';
 import { ChatModule } from './chat/chat.module';
 import { AssistanceModule } from './assistance/assistance.module';
 import { OrderModule } from './order/order.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { OrderModule } from './order/order.module';
     ChatModule,
     AssistanceModule,
     OrderModule,
+    TagModule,
   ],
   controllers: [],
   providers: [],
