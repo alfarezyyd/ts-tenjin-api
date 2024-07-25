@@ -1,35 +1,25 @@
 import * as fs from 'node:fs';
-import * as path from 'node:path';
-import {
-  FileTypeValidator,
-  FileValidator,
-  MaxFileSizeValidator,
-} from '@nestjs/common';
+import { v4 as uuid } from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import { HttpException } from '@nestjs/common';
 
 export default class CommonHelper {
-  static async imageValidation({
-    maxSize,
-    fileType,
-  }: {
-    maxSize: number;
-    fileType: string;
-  }): Promise<FileValidator[]> {
-    return [
-      new MaxFileSizeValidator({ maxSize: maxSize }),
-      new FileTypeValidator({ fileType: fileType }),
-    ];
-  }
-
-  static async slugifyProductName(productName: string): Promise<string> {
-    return productName
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/[\s-]+/g, '-');
-  }
-
-  static generateFileName(multerFile: Express.Multer.File) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    return `${uniqueSuffix}-${multerFile.originalname}`;
+  static async handleSaveFile(
+    configService: ConfigService,
+    singleFile: Express.Multer.File,
+    folderName: string,
+  ) {
+    const generatedSingleFileName = `${uuid()}-${singleFile.originalname}`;
+    const folderPath = `${configService.get<string>('MULTER_DEST')}/${folderName}`;
+    fs.writeFile(
+      folderPath + generatedSingleFileName,
+      singleFile.buffer,
+      (err) => {
+        if (err) {
+          throw new HttpException(err, 500);
+        }
+      },
+    );
+    return generatedSingleFileName;
   }
 }
