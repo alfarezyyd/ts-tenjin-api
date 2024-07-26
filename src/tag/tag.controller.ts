@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UploadedFile,
@@ -12,31 +11,37 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { WebResponse } from '../model/web.response';
 
-@Controller('tag')
+@Controller('tags')
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('icon'))
-  create(
+  async create(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5000 }),
+          new MaxFileSizeValidator({ maxSize: 5000 * 100 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
       }),
     )
     iconFile: Express.Multer.File,
     @Body() createTagDto: CreateTagDto,
-  ) {
-    return this.tagService.create(iconFile, createTagDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.tagService.create(iconFile, createTagDto),
+      },
+    };
   }
 
   @Get()
@@ -49,14 +54,14 @@ export class TagController {
     return this.tagService.findOne(+id);
   }
 
-  @Patch(':tagId')
+  @Put(':tagId')
   @UseInterceptors(FileInterceptor('icon'))
-  update(
+  async update(
     @Param('tagId', ParseIntPipe) tagId: number,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5000 }),
+          new MaxFileSizeValidator({ maxSize: 5000 * 100 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
       }),
@@ -65,11 +70,19 @@ export class TagController {
     @Body()
     updateTagDto: UpdateTagDto,
   ) {
-    return this.tagService.update(tagId, iconFile, updateTagDto);
+    return {
+      result: {
+        message: await this.tagService.update(tagId, iconFile, updateTagDto),
+      },
+    };
   }
 
   @Delete(':tagId')
-  remove(@Param('tagId', ParseIntPipe) tagId: number) {
-    return this.tagService.remove(tagId);
+  async remove(@Param('tagId', ParseIntPipe) tagId: number) {
+    return {
+      result: {
+        message: await this.tagService.remove(tagId),
+      },
+    };
   }
 }

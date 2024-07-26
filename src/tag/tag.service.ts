@@ -26,7 +26,7 @@ export class TagService {
       await prismaTransaction.category
         .findFirstOrThrow({
           where: {
-            id: createTagDto.categoryId,
+            id: Number(createTagDto.categoryId),
           },
         })
         .catch(() => {
@@ -39,14 +39,14 @@ export class TagService {
         iconFile,
         'tag-icon',
       );
-      prismaTransaction.tag.create({
+      await prismaTransaction.tag.create({
         data: {
           ...validatedCreateTagDto,
-          logo: iconFileName,
+          icon: iconFileName,
         },
       });
     });
-    return 'This action adds a new tag';
+    return 'Success! new tag has been created';
   }
 
   findAll() {
@@ -87,14 +87,14 @@ export class TagService {
             `Category with categoryId ${validateUpdateTagDto.categoryId} not found`,
           );
         });
-      const isImageSame = await CommonHelper.compareImages(
-        `${this.configService.get<string>('MULTER_DEST')}/tag-icon/${tagPrisma.logo}`,
-        iconFile.path,
+      const isImageSame = await CommonHelper.compareImagesFromUpload(
+        `${this.configService.get<string>('MULTER_DEST')}/tag-icon/${tagPrisma.icon}`,
+        iconFile,
       );
       let newGeneratedSingleFileName = null;
       if (!isImageSame) {
         fs.unlinkSync(
-          `${this.configService.get<string>('MULTER_DEST')}/tag-icon/${tagPrisma.logo}`,
+          `${this.configService.get<string>('MULTER_DEST')}/tag-icon/${tagPrisma.icon}`,
         );
         newGeneratedSingleFileName = await CommonHelper.handleSaveFile(
           this.configService,
@@ -105,7 +105,7 @@ export class TagService {
       await prismaTransaction.tag.update({
         data: {
           ...validateUpdateTagDto,
-          logo: newGeneratedSingleFileName ?? tagPrisma.logo,
+          icon: newGeneratedSingleFileName ?? tagPrisma.icon,
         },
         where: {
           id: tagId,
@@ -117,17 +117,23 @@ export class TagService {
 
   async remove(tagId: number) {
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const tagPrisma: Tag = await prismaTransaction.tag.delete({
+      const tagPrisma: Tag = await prismaTransaction.tag
+        .findFirstOrThrow({
+          where: {
+            id: tagId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`Tag with tagId ${tagId} not found`);
+        });
+      await prismaTransaction.tag.delete({
         where: {
           id: tagId,
         },
       });
       fs.unlinkSync(
-        `${this.configService.get<string>('MULTER_DEST')}/tag-icon/${tagPrisma.logo}`,
+        `${this.configService.get<string>('MULTER_DEST')}/tag-icon/${tagPrisma.icon}`,
       );
-      if (tagPrisma) {
-        throw new NotFoundException(`Tag with tagId ${tagId} not found`);
-      }
     });
     return `Success! tag with tagId ${tagId} removed`;
   }
