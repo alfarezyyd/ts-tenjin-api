@@ -3,4 +3,5 @@ CREATE DATABASE ts_tenjin_api;
 USE ts_tenjin_api;
 SHOW TABLES;
 SELECT * FROM categories;
-SELECT * FROM tags  ;
+SELECT * FROM tags;
+SELECT * FROM mentors;

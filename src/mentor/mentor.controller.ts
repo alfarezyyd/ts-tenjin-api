@@ -8,10 +8,12 @@ import {
   Delete,
   ParseIntPipe,
   HttpCode,
+  Req,
 } from '@nestjs/common';
 import { MentorService } from './mentor.service';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import { WebResponse } from '../model/web.response';
+import { Request } from 'express';
 
 @Controller('mentors')
 export class MentorController {
@@ -19,12 +21,10 @@ export class MentorController {
 
   @Post()
   @HttpCode(201)
-  async create(
-    @Param('userId', ParseIntPipe) userId: bigint,
-  ): Promise<WebResponse<string>> {
+  async create(@Req() expressRequest: Request): Promise<WebResponse<string>> {
     return {
       result: {
-        data: await this.mentorService.create(userId),
+        data: await this.mentorService.create(expressRequest['user']['id']),
       },
     };
   }

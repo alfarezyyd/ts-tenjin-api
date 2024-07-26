@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class MentorService {
@@ -10,20 +11,20 @@ export class MentorService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async create(userId: bigint) {
-    await this.prismaService.user
-      .findFirstOrThrow({
-        where: {
-          id: userId,
-        },
-      })
-      .catch(() => {
-        throw new HttpException(`User with userId ${userId} not found`, 404);
-      });
+  async create(userId: string) {
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      prismaTransaction.mentor.create({
+      const userPrisma: User = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: userId,
+          },
+        })
+        .catch(() => {
+          throw new HttpException(`User with userId ${userId} not found`, 404);
+        });
+      await prismaTransaction.mentor.create({
         data: {
-          userId: userId,
+          userId: userPrisma.id,
         },
       });
     });
