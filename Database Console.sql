@@ -5,3 +5,4 @@ SHOW TABLES;
 SELECT * FROM categories;
 SELECT * FROM tags;
 SELECT * FROM mentors;
+SELECT * FROM educations;

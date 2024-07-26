@@ -11,14 +11,21 @@ import {
 import { EducationService } from './education.service';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
+import { WebResponse } from '../model/web.response';
 
-@Controller('education')
+@Controller('educations')
 export class EducationController {
   constructor(private readonly educationService: EducationService) {}
 
-  @Post('')
-  create(@Body() createEducationDto: CreateEducationDto) {
-    return this.educationService.create(createEducationDto);
+  @Post()
+  async create(
+    @Body() createEducationDto: CreateEducationDto,
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.educationService.create(createEducationDto),
+      },
+    };
   }
 
   @Get()

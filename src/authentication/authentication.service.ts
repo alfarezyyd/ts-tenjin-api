@@ -24,7 +24,7 @@ export class AuthenticationService {
     const payloadJwt = {
       id: user.uniqueId,
       email: user.email,
-      mentorId: user.Mentor.id ?? null,
+      mentorId: user.Mentor.id.toString() ?? null,
     };
     return {
       accessToken: await this.jwtService.signAsync(payloadJwt),

@@ -22,22 +22,22 @@ export class EducationService {
         createEducationDto,
       );
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      prismaTransaction.mentor
+      await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
-            id: this.expressRequest['mentorId'],
+            id: this.expressRequest['user']['mentorId'],
           },
         })
         .catch(() => {
           throw new HttpException(
-            `Mentor with mentorId ${this.expressRequest['mentorId']} not found`,
+            `Mentor with mentorId ${this.expressRequest['user']['mentorId']} not found`,
             404,
           );
         });
-      prismaTransaction.education.create({
+      await prismaTransaction.education.create({
         data: {
           ...validatedCreateEducationDto,
-          mentorId: this.expressRequest['mentorId'],
+          mentorId: this.expressRequest['user']['mentorId'],
         },
       });
     });
