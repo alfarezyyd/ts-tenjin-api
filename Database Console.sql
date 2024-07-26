@@ -2,3 +2,4 @@ DROP DATABASE IF EXISTS ts_tenjin_api;
 CREATE DATABASE ts_tenjin_api;
 USE ts_tenjin_api;
 SHOW TABLES;
+SELECT * FROM categories;
