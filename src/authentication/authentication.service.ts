@@ -19,6 +19,7 @@ export class AuthenticationService {
       throw new UnauthorizedException('Username or password not valid');
     }
     const payloadJwt = {
+      id: user.uniqueId,
       email: user.email,
     };
     return {
