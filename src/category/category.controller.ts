@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   UseInterceptors,
@@ -17,26 +17,31 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { WebResponse } from '../model/web.response';
 
-@Controller('category')
+@Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('logo'))
-  create(
+  async create(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5000 }),
+          new MaxFileSizeValidator({ maxSize: 5000 * 10 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
       }),
     )
     logoFile: Express.Multer.File,
     @Body() createCategoryDto: CreateCategoryDto,
-  ) {
-    return this.categoryService.create(logoFile, createCategoryDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.categoryService.create(logoFile, createCategoryDto),
+      },
+    };
   }
 
   @Get()
@@ -49,13 +54,13 @@ export class CategoryController {
     return this.categoryService.findOne(+id);
   }
 
-  @Patch(':categoryId')
+  @Put(':categoryId')
   @UseInterceptors(FileInterceptor('logo'))
-  update(
+  async update(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5000 }),
+          new MaxFileSizeValidator({ maxSize: 5000 * 10 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
       }),
@@ -63,12 +68,26 @@ export class CategoryController {
     logoFile: Express.Multer.File,
     @Param('categoryId', ParseIntPipe) categoryId: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
-  ) {
-    return this.categoryService.update(categoryId, logoFile, updateCategoryDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.categoryService.update(
+          categoryId,
+          logoFile,
+          updateCategoryDto,
+        ),
+      },
+    };
   }
 
   @Delete(':categoryId')
-  remove(@Param('categoryId', ParseIntPipe) categoryId: number) {
-    return this.categoryService.remove(categoryId);
+  async remove(
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.categoryService.remove(categoryId),
+      },
+    };
   }
 }

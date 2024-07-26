@@ -4,10 +4,10 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { CategoryValidation } from './category.validation';
-import { v4 as uuid } from 'uuid';
 import * as fs from 'node:fs';
 import { ConfigService } from '@nestjs/config';
 import { Category } from '@prisma/client';
+import CommonHelper from '../helper/common.helper';
 
 @Injectable()
 export class CategoryService {
@@ -26,8 +26,12 @@ export class CategoryService {
       createCategoryDto,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const generatedLogoFileName = this.handleSaveFile(logoFile);
-      prismaTransaction.category.create({
+      const generatedLogoFileName = await CommonHelper.handleSaveFile(
+        this.configService,
+        logoFile,
+        'category-icon',
+      );
+      await prismaTransaction.category.create({
         data: {
           logo: generatedLogoFileName,
           ...createCategoryDto,
@@ -54,36 +58,56 @@ export class CategoryService {
       CategoryValidation.SAVE,
       updateCategoryDto,
     );
-    await this.prismaService.$transaction(async (prismaTransaction) => {
-      const categoryPrisma: Category = await prismaTransaction.category
-        .findUniqueOrThrow({
-          where: {
-            id: categoryId,
-          },
-        })
-        .catch(() => {
-          throw new NotFoundException(
-            `Category with ID ${categoryId} not found`,
+
+    try {
+      await this.prismaService.$transaction(async (prismaTransaction) => {
+        const categoryPrisma = await prismaTransaction.category
+          .findUniqueOrThrow({
+            where: { id: categoryId },
+          })
+          .catch(() => {
+            throw new NotFoundException(
+              `Category with ID ${categoryId} not found`,
+            );
+          });
+
+        const isImageSame = CommonHelper.compareImagesFromUpload(
+          `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
+          logoFile,
+        );
+
+        let generatedLogoFileName = null;
+        if (!isImageSame) {
+          fs.unlink(
+            `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
+            (err) => {
+              if (err) {
+                console.error('Error deleting old icon:', err);
+                throw new HttpException('Error when trying to write icon', 500);
+              }
+            },
           );
+          generatedLogoFileName = CommonHelper.handleSaveFile(
+            this.configService,
+            logoFile,
+            'category-icon',
+          );
+        }
+
+        await prismaTransaction.category.update({
+          where: { id: categoryPrisma.id },
+          data: {
+            ...validatedUpdateCategoryDto,
+            logo: generatedLogoFileName ?? categoryPrisma.logo,
+          },
         });
-      fs.unlink(
-        `${this.configService.get<string>('MULTER_DEST')}/logo-icon/${categoryPrisma.logo}`,
-        () => {
-          throw new HttpException('Error when trying to write icon', 500);
-        },
-      );
-      const generatedLogoFileName = this.handleSaveFile(logoFile);
-      await prismaTransaction.category.update({
-        where: {
-          id: categoryPrisma.id,
-        },
-        data: {
-          logo: generatedLogoFileName,
-          ...validatedUpdateCategoryDto,
-        },
       });
-    });
-    return `This action updates a #${categoryId} category`;
+
+      return `Success! category has been updated`;
+    } catch (err) {
+      console.error('Transaction Error:', err);
+      return `Failed! try again`;
+    }
   }
 
   async remove(categoryId: number) {
@@ -100,7 +124,7 @@ export class CategoryService {
           );
         });
       fs.unlink(
-        `${this.configService.get<string>('MULTER_DEST')}/logo-icon/${categoryPrisma.logo}`,
+        `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
         () => {
           throw new HttpException('Error when trying to write icon', 500);
         },
@@ -112,16 +136,5 @@ export class CategoryService {
       });
     });
     return `Success! category has been deleted`;
-  }
-
-  private handleSaveFile(logoFile: Express.Multer.File) {
-    const generatedLogoFileName = `${uuid()}-${logoFile.originalname}`;
-    const folderPath = `${this.configService.get<string>('MULTER_DEST')}/logo-icon`;
-    fs.writeFile(folderPath + generatedLogoFileName, logoFile.buffer, (err) => {
-      if (err) {
-        throw new HttpException(err, 500);
-      }
-    });
-    return generatedLogoFileName;
   }
 }
