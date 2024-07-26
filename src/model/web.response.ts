@@ -1,12 +1,29 @@
+import { Expose } from 'class-transformer';
+
+export class Paging {
+  size: number;
+  totalPage: number;
+  currentPage: number;
+
+  constructor() {
+    this.size = null;
+    this.totalPage = null;
+    this.currentPage = null;
+  }
+}
+
 export class WebResponse<T> {
+  @Expose()
   result?: {
     data?: T | null;
     message?: string | null;
   };
+  @Expose()
   errors?: {
     code?: string;
-    message?: T;
+    message?: T | null;
   };
+  @Expose()
   paging?: Paging | null;
 
   constructor() {
@@ -14,13 +31,10 @@ export class WebResponse<T> {
       data: null,
       message: null,
     };
-    this.errors = null;
-    this.paging = null;
+    this.errors = {
+      code: null,
+      message: null,
+    };
+    this.paging = new Paging();
   }
-}
-
-export class Paging {
-  size: number;
-  totalPage: number;
-  currentPage: number;
 }
