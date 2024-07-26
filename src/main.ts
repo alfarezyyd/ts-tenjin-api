@@ -4,6 +4,7 @@ import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
 import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
+import { RequestMethod } from '@nestjs/common';
 declare const module: any;
 
 async function bootstrap() {
@@ -14,7 +15,9 @@ async function bootstrap() {
   app.useGlobalFilters(new MulterExceptionFilter());
 
   // Global Prefix
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: ['authentication'],
+  });
 
   // Open API Swagger for Documentation
   const config = new DocumentBuilder()
