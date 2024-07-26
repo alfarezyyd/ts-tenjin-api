@@ -11,6 +11,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
@@ -48,13 +49,27 @@ export class TagController {
     return this.tagService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto) {
-    return this.tagService.update(+id, updateTagDto);
+  @Patch(':tagId')
+  @UseInterceptors(FileInterceptor('icon'))
+  update(
+    @Param('tagId', ParseIntPipe) tagId: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    iconFile: Express.Multer.File,
+    @Body()
+    updateTagDto: UpdateTagDto,
+  ) {
+    return this.tagService.update(tagId, iconFile, updateTagDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tagService.remove(+id);
+  @Delete(':tagId')
+  remove(@Param('tagId', ParseIntPipe) tagId: number) {
+    return this.tagService.remove(tagId);
   }
 }
