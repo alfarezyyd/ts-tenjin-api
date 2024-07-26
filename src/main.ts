@@ -20,7 +20,12 @@ async function bootstrap() {
   });
 
   // Global Interceptor
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      strategy: 'exposeAll',
+      exposeUnsetFields: true, // This ensures unset fields are also exposed
+    }),
+  );
 
   // Open API Swagger for Documentation
   const config = new DocumentBuilder()
