@@ -15,18 +15,7 @@ export class UserValidation {
           GenderEnum,
         );
       }),
-      email: z
-        .string()
-        .min(1)
-        .max(255)
-        .refine(async (arg) => {
-          const count = await prismaService.user.count({
-            where: {
-              email: arg,
-            },
-          });
-          return count < 1;
-        }, 'Email has been registered before'),
+      email: z.string().min(1).max(255),
       telephone: z.string().min(1).max(13),
       password: z.string().min(1).max(100),
     });
