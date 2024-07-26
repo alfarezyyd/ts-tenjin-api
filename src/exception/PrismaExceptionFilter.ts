@@ -17,12 +17,12 @@ export default class PrismaExceptionFilter
       case 'P2002':
         webResponse.errors.code = 'P2002';
         webResponse.errors.message = `Duplicate field value: ${exception.meta.target as string}`;
-        response.status(401).json(webResponse);
+        response.status(400).json(webResponse);
         break;
       case 'P2003':
         webResponse.errors.code = 'P2003';
         webResponse.errors.message = `Foreign key constraint failed: ${exception.meta.target as string}`;
-        response.status(401).json(webResponse);
+        response.status(400).json(webResponse);
         break;
       default:
         // handling all other errors
