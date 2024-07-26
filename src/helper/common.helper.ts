@@ -12,6 +12,7 @@ export default class CommonHelper {
   ) {
     const generatedSingleFileName = `${uuid()}-${singleFile.originalname}`;
     const folderPath = `${configService.get<string>('MULTER_DEST')}/${folderName}/`;
+    await fsPromises.mkdir(folderPath, { recursive: true });
     fs.writeFile(
       folderPath + generatedSingleFileName,
       singleFile.buffer,
@@ -24,12 +25,14 @@ export default class CommonHelper {
     return generatedSingleFileName;
   }
 
-  static async compareImages(firstImagePath: string, secondImagePath: string) {
+  static async compareImagesFromUpload(
+    firstImagePath: string,
+    secondImageFile: Express.Multer.File,
+  ) {
     const firstImage = await fsPromises.readFile(firstImagePath);
-    const secondImage = await fsPromises.readFile(secondImagePath);
 
     const firstImageBase64 = firstImage.toString('base64');
-    const secondImageBase64 = secondImage.toString('base64');
+    const secondImageBase64 = secondImageFile.buffer.toString('base64');
 
     return firstImageBase64 === secondImageBase64;
   }
