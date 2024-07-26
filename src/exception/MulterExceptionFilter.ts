@@ -12,7 +12,7 @@ export default class MulterExceptionFilter
     const response = http.getResponse<Response>();
     const webResponse: WebResponse<MulterError> =
       new WebResponse<MulterError>();
-    webResponse.errors = exception.message;
+    webResponse.errors.message = exception.message;
     response.status(500).json(webResponse);
   }
 }

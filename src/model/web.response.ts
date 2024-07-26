@@ -3,7 +3,10 @@ export class WebResponse<T> {
     data?: T | null;
     message?: string | null;
   };
-  errors?: any;
+  errors?: {
+    code?: string;
+    message?: string;
+  };
   paging?: Paging | null;
 
   constructor() {

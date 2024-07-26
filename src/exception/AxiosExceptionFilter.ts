@@ -8,7 +8,7 @@ export class AxiosExceptionFilter implements ExceptionFilter<AxiosError> {
     const http = host.switchToHttp();
     const response = http.getResponse<Response>();
     const webResponse: WebResponse<AxiosError> = new WebResponse<AxiosError>();
-    webResponse.errors = exception.message;
+    webResponse.errors.message = exception.message;
     response.status(500).json(webResponse);
   }
 }
