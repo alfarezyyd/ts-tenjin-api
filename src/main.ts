@@ -13,6 +13,9 @@ async function bootstrap() {
   app.useGlobalFilters(new ValidationExceptionFilter());
   app.useGlobalFilters(new MulterExceptionFilter());
 
+  // Global Prefix
+  app.setGlobalPrefix('api');
+
   // Open API Swagger for Documentation
   const config = new DocumentBuilder()
     .setTitle('TENJIN - RESTful API DOCUMENTATION')
