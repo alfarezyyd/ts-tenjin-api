@@ -5,6 +5,7 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ResponseAuthenticationDto } from './dto/response-authentication';
 import * as bcrypt from 'bcrypt';
+import { Mentor, User } from '@prisma/client';
 
 @Injectable()
 export class AuthenticationService {
@@ -14,13 +15,16 @@ export class AuthenticationService {
   ) {}
 
   async signIn(signInDto: SignInDto): Promise<ResponseAuthenticationDto> {
-    const user = await this.userService.findOne(signInDto.email);
+    const user: User & { Mentor?: Mentor | null } =
+      await this.userService.findOne(signInDto.email);
     if (!(await bcrypt.compare(signInDto.password, user?.password))) {
       throw new UnauthorizedException('Username or password not valid');
     }
+    console.log(user);
     const payloadJwt = {
       id: user.uniqueId,
       email: user.email,
+      mentorId: user.Mentor.id ?? null,
     };
     return {
       accessToken: await this.jwtService.signAsync(payloadJwt),

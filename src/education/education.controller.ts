@@ -16,12 +16,9 @@ import { UpdateEducationDto } from './dto/update-education.dto';
 export class EducationController {
   constructor(private readonly educationService: EducationService) {}
 
-  @Post(':mentorId')
-  create(
-    @Param('mentorId', ParseIntPipe) mentorId: bigint,
-    @Body() createEducationDto: CreateEducationDto,
-  ) {
-    return this.educationService.create(mentorId, createEducationDto);
+  @Post('')
+  create(@Body() createEducationDto: CreateEducationDto) {
+    return this.educationService.create(createEducationDto);
   }
 
   @Get()

@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import ValidationService from '../common/validation.service';
 import { UserValidation } from './user.validation';
 import PrismaService from '../common/prisma.service';
-import { User, UserGender } from '@prisma/client';
+import { Mentor, User, UserGender } from '@prisma/client';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -56,27 +56,25 @@ export class UserService {
     return 'Success! new user has been created';
   }
 
-  async findOne(userIdentifier: string): Promise<User> {
+  async findOne(
+    userIdentifier: string,
+  ): Promise<User & { Mentor?: Mentor | null }> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      return prismaTransaction.user
-        .findFirstOrThrow({
-          where: {
-            OR: [
-              {
-                email: userIdentifier,
-              },
-              {
-                uniqueId: userIdentifier,
-              },
-            ],
-          },
-        })
-        .catch(() => {
-          throw new HttpException(
-            `User with userId or email ${userIdentifier} not found`,
-            404,
-          );
-        });
+      return prismaTransaction.user.findFirstOrThrow({
+        where: {
+          OR: [
+            {
+              email: userIdentifier,
+            },
+            {
+              uniqueId: userIdentifier,
+            },
+          ],
+        },
+        include: {
+          Mentor: true,
+        },
+      });
     });
   }
 

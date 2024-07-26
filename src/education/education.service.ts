@@ -1,19 +1,21 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable, Scope } from '@nestjs/common';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { Education } from '@prisma/client';
 import EducationValidation from './education.validation';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class EducationService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly validationService: ValidationService,
+    @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
 
-  async create(mentorId: bigint, createEducationDto: CreateEducationDto) {
+  async create(createEducationDto: CreateEducationDto) {
     const validatedCreateEducationDto: Education =
       this.validationService.validate(
         EducationValidation.SAVE,
@@ -23,19 +25,19 @@ export class EducationService {
       prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
-            id: mentorId,
+            id: this.expressRequest['mentorId'],
           },
         })
         .catch(() => {
           throw new HttpException(
-            `Mentor with mentorId ${mentorId} not found`,
+            `Mentor with mentorId ${this.expressRequest['mentorId']} not found`,
             404,
           );
         });
       prismaTransaction.education.create({
         data: {
           ...validatedCreateEducationDto,
-          mentorId: mentorId,
+          mentorId: this.expressRequest['mentorId'],
         },
       });
     });
