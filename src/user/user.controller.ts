@@ -18,7 +18,7 @@ import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
 import { Public } from '../authentication/set-metadata.decorator';
 
-@Controller('api/users')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
