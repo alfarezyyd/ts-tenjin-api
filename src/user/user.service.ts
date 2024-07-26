@@ -4,9 +4,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import ValidationService from '../common/validation.service';
 import { UserValidation } from './user.validation';
 import PrismaService from '../common/prisma.service';
-import { User, userGender } from '@prisma/client';
+import { User, UserGender } from '@prisma/client';
 import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import * as bcrypt from 'bcrypt';
@@ -31,7 +30,7 @@ export class UserService {
         .create({
           data: {
             ...createUserRequest,
-            gender: userGender[createUserDto.gender],
+            gender: UserGender[createUserDto.gender],
             password: await bcrypt.hash(createUserDto.password, 10),
             uniqueId: uuidv4(),
           },
@@ -95,7 +94,7 @@ export class UserService {
       userPrisma = {
         ...userPrisma,
         ...updateUserDto,
-        gender: userGender[updateUserDto.gender],
+        gender: UserGender[updateUserDto.gender],
       };
       await prismaTransaction.user.update({
         data: userPrisma,

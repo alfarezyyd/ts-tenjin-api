@@ -10,8 +10,7 @@ export default class MulterExceptionFilter
   catch(exception: multer.MulterError, host: ArgumentsHost): any {
     const http = host.switchToHttp();
     const response = http.getResponse<Response>();
-    const webResponse: WebResponse<MulterError> =
-      new WebResponse<MulterError>();
+    const webResponse: WebResponse<string> = new WebResponse<string>();
     webResponse.errors.message = exception.message;
     response.status(500).json(webResponse);
   }
