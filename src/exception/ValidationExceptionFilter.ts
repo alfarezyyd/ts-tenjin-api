@@ -12,7 +12,7 @@ export default class ValidationExceptionFilter
     const response = http.getResponse<Response>();
     const webResponse: WebResponse<ZodIssue[]> = new WebResponse<ZodIssue[]>();
 
-    webResponse.errors = exception.issues; // Set errors to exception issues
+    webResponse.errors.message = exception.issues; // Set errors to exception issues
     response.status(400).json(webResponse);
   }
 }

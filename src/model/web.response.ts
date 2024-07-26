@@ -5,7 +5,7 @@ export class WebResponse<T> {
   };
   errors?: {
     code?: string;
-    message?: string;
+    message?: T;
   };
   paging?: Paging | null;
 
