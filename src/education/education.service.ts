@@ -53,7 +53,7 @@ export class EducationService {
     return `This action returns a #${id} education`;
   }
 
-  async update(mentorId: bigint, updateEducationDto: UpdateEducationDto) {
+  async update(updateEducationDto: UpdateEducationDto) {
     const validatedCreateEducationDto: Education =
       this.validationService.validate(
         EducationValidation.UPDATE,
@@ -63,12 +63,12 @@ export class EducationService {
       prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
-            id: mentorId,
+            id: this.expressRequest['user']['mentorId'],
           },
         })
         .catch(() => {
           throw new HttpException(
-            `Mentor with mentorId ${mentorId} not found`,
+            `Mentor with mentorId ${this.expressRequest['user']['mentorId']} not found`,
             404,
           );
         });
@@ -85,11 +85,14 @@ export class EducationService {
     return 'Success! new education has been updated';
   }
 
-  async remove(mentorId: bigint, educationId: bigint) {
+  async remove(educationId: bigint) {
     await this.prismaService.$transaction(async (prismaTransaction) => {
       prismaTransaction.education.deleteMany({
         where: {
-          AND: [{ id: educationId }, { mentorId: mentorId }],
+          AND: [
+            { id: educationId },
+            { mentorId: this.expressRequest['user']['mentorId'] },
+          ],
         },
       });
     });

@@ -3,10 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { EducationService } from './education.service';
 import { CreateEducationDto } from './dto/create-education.dto';
@@ -38,19 +38,13 @@ export class EducationController {
     return this.educationService.findOne(+id);
   }
 
-  @Patch(':mentorId')
-  update(
-    @Param('mentorId', ParseIntPipe) mentorId: bigint,
-    @Body() updateEducationDto: UpdateEducationDto,
-  ) {
-    return this.educationService.update(mentorId, updateEducationDto);
+  @Put()
+  update(@Body() updateEducationDto: UpdateEducationDto) {
+    return this.educationService.update(updateEducationDto);
   }
 
-  @Delete(':mentorId/:educationId')
-  remove(
-    @Param('mentorId') mentorId,
-    @Param('educationId') educationId: bigint,
-  ) {
-    return this.educationService.remove(mentorId, educationId);
+  @Delete(':educationId')
+  remove(@Param('educationId') educationId: bigint) {
+    return this.educationService.remove(educationId);
   }
 }
