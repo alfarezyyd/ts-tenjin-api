@@ -57,26 +57,25 @@ export class OrderService {
           uniqueId: this.expressRequest['user']['id'],
         },
       });
-      let createOrderPayload: Order = {
+      const createOrderPayload: Order = {
         ...validatedCreateOrderDto,
         totalPrice:
           validatedCreateOrderDto.minutesDurations * assistancePrisma.price,
         userId: userPrisma.id,
         createdAt: new Date(),
       };
-      const newOrder: Order = await prismaTransaction.order.create({
+      const newCreatedOrder: Order = await prismaTransaction.order.create({
         data: {
           ...createOrderPayload,
         },
       });
-      const userFullName = userPrisma.name.split(' ');
+      const [firstName, ...partedLastName] = userPrisma.name.split(' ');
+      const lastName = partedLastName.join(' ');
 
-      const firstName = userFullName[0];
-      const lastName = userFullName.slice(1).join(' ');
-      let midtransCreateOrderPayload = {
+      const midtransCreateOrderPayload = {
         transaction_details: {
-          order_id: newOrder.id,
-          gross_amount: newOrder.totalPrice,
+          order_id: newCreatedOrder.id,
+          gross_amount: newCreatedOrder.totalPrice,
         },
         credit_card: {
           secure: true,
@@ -88,17 +87,17 @@ export class OrderService {
           phone: userPrisma.telephone,
         },
       };
-      this.midtransService
+      await this.midtransService
         .getSnapTransaction()
         .createTransaction(midtransCreateOrderPayload)
         .then(async (transactionResponse: { token: any; id: any }) => {
-          let transactionToken = transactionResponse.token;
+          const transactionToken = transactionResponse.token;
           await prismaTransaction.order.update({
-            where: {
-              id: transactionResponse.id,
-            },
             data: {
               transactionToken: transactionToken,
+            },
+            where: {
+              id: newCreatedOrder.id,
             },
           });
         })

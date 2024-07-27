@@ -8,3 +8,4 @@ SELECT * FROM mentors;
 SELECT * FROM educations;
 SELECT * FROM skills;
 SELECT * FROM assistants;
+SELECT * FROM orders;
