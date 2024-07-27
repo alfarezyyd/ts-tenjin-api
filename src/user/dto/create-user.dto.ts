@@ -1,8 +1,8 @@
-import { GenderEnum } from '../enum/gender.enum';
+import { UserGender } from '@prisma/client';
 
 export class CreateUserDto {
   name: string;
-  gender: GenderEnum;
+  gender: UserGender;
   email: string;
   password: string;
   telephone: string;

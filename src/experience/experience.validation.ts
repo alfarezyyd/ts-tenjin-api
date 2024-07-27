@@ -1,6 +1,6 @@
 import { z, ZodType } from 'zod';
 import ConvertHelper from '../helper/convert.helper';
-import { EmploymentTypeEnum } from './enum/employment-type.enum';
+import { EmploymentType } from '@prisma/client';
 
 export default class ExperienceValidation {
   static readonly CREATE: ZodType = z.object({
@@ -11,7 +11,7 @@ export default class ExperienceValidation {
         arg,
         ctx,
         'Employment type not valid',
-        EmploymentTypeEnum,
+        EmploymentType,
       );
     }),
     location: z.string().min(1).max(200),

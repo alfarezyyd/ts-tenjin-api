@@ -1,6 +1,6 @@
 import { z, ZodType } from 'zod';
 import ConvertHelper from '../helper/convert.helper';
-import { AssistanceFormat } from './enum/assistance-format.enum';
+import { AssistanceFormat } from '@prisma/client';
 
 export class AssistanceValidation {
   static readonly SAVE: ZodType = z.object({

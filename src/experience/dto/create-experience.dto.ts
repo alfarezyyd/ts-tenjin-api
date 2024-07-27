@@ -1,9 +1,9 @@
-import { EmploymentTypeEnum } from '../enum/employment-type.enum';
+import { EmploymentType } from '@prisma/client';
 
 export class CreateExperienceDto {
   positionName: string;
   companyName: string;
-  employmentType: EmploymentTypeEnum;
+  employmentType: EmploymentType;
   location: string;
   startDate: string;
   endDate: string;
