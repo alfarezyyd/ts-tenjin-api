@@ -1,10 +1,9 @@
 import { z, ZodType } from 'zod';
-import { GenderEnum } from './enum/gender.enum';
 import ConvertHelper from '../helper/convert.helper';
-import PrismaService from '../common/prisma.service';
+import { UserGender } from '@prisma/client';
 
 export class UserValidation {
-  static userValidationWrapper(prismaService: PrismaService): ZodType {
+  static userValidationWrapper(): ZodType {
     return z.object({
       name: z.string().min(1).max(255),
       gender: z.string().transform((arg, ctx) => {
@@ -12,7 +11,7 @@ export class UserValidation {
           arg,
           ctx,
           'Product condition not valid',
-          GenderEnum,
+          UserGender,
         );
       }),
       email: z.string().min(1).max(255),
