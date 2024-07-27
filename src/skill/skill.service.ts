@@ -1,4 +1,10 @@
-import { HttpException, Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import ValidationService from '../common/validation.service';
@@ -19,18 +25,14 @@ export class SkillService {
       SkillValidation.SAVE,
       createSkillDto,
     );
-    try {
-      await this.prismaService.$transaction(async (prismaTransaction) => {
-        prismaTransaction.skill.create({
-          data: {
-            ...validatedCreateSkillDto,
-            mentorId: this.expressRequest['user']['mentorId'],
-          },
-        });
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.skill.create({
+        data: {
+          ...validatedCreateSkillDto,
+          mentorId: this.expressRequest['user']['mentorId'],
+        },
       });
-    } catch (err) {
-      throw new HttpException('Error occurred when trying to write!', 500);
-    }
+    });
     return 'Success! new skill has been created';
   }
 
@@ -42,43 +44,47 @@ export class SkillService {
     return `This action returns a #${id} skill`;
   }
 
-  async update(mentorId: bigint, updateSkillDto: UpdateSkillDto) {
+  async update(skillId: bigint, updateSkillDto: UpdateSkillDto) {
     const validatedCreateSkillDto = this.validationService.validate(
       SkillValidation.UPDATE,
       updateSkillDto,
     );
-    try {
-      await this.prismaService.$transaction(async (prismaTransaction) => {
-        prismaTransaction.mentor
-          .findFirstOrThrow({
-            where: {
-              id: mentorId,
-            },
-          })
-          .catch(() => {
-            throw new HttpException(
-              'Mentor with mentorId ${mentorId} not found',
-              404,
-            );
-          });
-        prismaTransaction.skill.update({
-          data: { ...validatedCreateSkillDto, mentorId: mentorId },
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.mentor
+        .findFirstOrThrow({
           where: {
-            id: updateSkillDto.skillId,
+            id: this.expressRequest['user']['mentorId'],
           },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `Mentor with mentorId ${this.expressRequest['user']['mentorId']} not found`,
+          );
         });
+      await prismaTransaction.skill.updateMany({
+        data: {
+          ...validatedCreateSkillDto,
+          mentorId: this.expressRequest['user']['mentorId'],
+        },
+        where: {
+          AND: [
+            { id: skillId },
+            { mentorId: this.expressRequest['user']['mentorId'] },
+          ],
+        },
       });
-    } catch (err) {
-      throw new HttpException('Error occurred when trying to write!', 500);
-    }
+    });
     return 'Success! new skill has been updated';
   }
 
   async remove(skillId: bigint) {
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const skillModel = await prismaTransaction.skill.delete({
+      const skillModel = await prismaTransaction.skill.deleteMany({
         where: {
-          id: skillId,
+          AND: [
+            { id: skillId },
+            { mentorId: this.expressRequest['user']['mentorId'] },
+          ],
         },
       });
       if (skillModel == null) {

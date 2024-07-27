@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   ParseIntPipe,
@@ -12,13 +12,17 @@ import { SkillService } from './skill.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 
-@Controller('skill')
+@Controller('skills')
 export class SkillController {
   constructor(private readonly skillService: SkillService) {}
 
   @Post()
-  create(@Body() createSkillDto: CreateSkillDto) {
-    return this.skillService.create(createSkillDto);
+  async create(@Body() createSkillDto: CreateSkillDto) {
+    return {
+      result: {
+        message: await this.skillService.create(createSkillDto),
+      },
+    };
   }
 
   @Get()
@@ -31,12 +35,12 @@ export class SkillController {
     return this.skillService.findOne(+id);
   }
 
-  @Patch(':mentorId')
+  @Put('skillId')
   update(
-    @Param('mentorId') mentorId: bigint,
+    @Param('skillId') skillId: bigint,
     @Body() updateSkillDto: UpdateSkillDto,
   ) {
-    return this.skillService.update(mentorId, updateSkillDto);
+    return this.skillService.update(skillId, updateSkillDto);
   }
 
   @Delete(':skillId')
