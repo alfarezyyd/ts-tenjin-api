@@ -119,7 +119,7 @@ export class UserService {
   }
 
   async remove(userId: bigint): Promise<string> {
-    this.prismaService.$transaction(async (prismaTransaction) => {
+    await this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user.delete({
         where: {
           id: userId,

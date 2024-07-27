@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   Delete,
-  ParseIntPipe,
   Put,
 } from '@nestjs/common';
 import { EducationService } from './education.service';
