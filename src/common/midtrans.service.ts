@@ -14,7 +14,7 @@ export class MidtransService {
   }
 
   // Metode untuk mendapatkan Snap transaction
-  getSnapTransaction() {
+  getSnapTransaction(): midtransClient.Snap {
     return this.midtransSnap;
   }
 }
