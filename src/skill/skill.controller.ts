@@ -16,12 +16,9 @@ import { UpdateSkillDto } from './dto/update-skill.dto';
 export class SkillController {
   constructor(private readonly skillService: SkillService) {}
 
-  @Post(':mentorId')
-  create(
-    @Param('mentorId', ParseIntPipe) mentorId: bigint,
-    @Body() createSkillDto: CreateSkillDto,
-  ) {
-    return this.skillService.create(mentorId, createSkillDto);
+  @Post()
+  create(@Body() createSkillDto: CreateSkillDto) {
+    return this.skillService.create(createSkillDto);
   }
 
   @Get()

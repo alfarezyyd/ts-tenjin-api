@@ -1,19 +1,20 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable, Scope } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import SkillValidation from './skill.validation';
-import { Skill } from '@prisma/client';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class SkillService {
   constructor(
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
+    @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
 
-  async create(mentorId: bigint, createSkillDto: CreateSkillDto) {
+  async create(createSkillDto: CreateSkillDto) {
     const validatedCreateSkillDto = this.validationService.validate(
       SkillValidation.SAVE,
       createSkillDto,
@@ -21,7 +22,10 @@ export class SkillService {
     try {
       await this.prismaService.$transaction(async (prismaTransaction) => {
         prismaTransaction.skill.create({
-          data: { ...validatedCreateSkillDto, mentorId: mentorId },
+          data: {
+            ...validatedCreateSkillDto,
+            mentorId: this.expressRequest['user']['mentorId'],
+          },
         });
       });
     } catch (err) {
