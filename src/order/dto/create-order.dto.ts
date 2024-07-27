@@ -4,5 +4,4 @@ export class CreateOrderDto {
   sessionTimestamp: string;
   minutesDurations: number;
   note: string;
-  createdAt: string;
 }
