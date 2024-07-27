@@ -6,3 +6,4 @@ SELECT * FROM categories;
 SELECT * FROM tags;
 SELECT * FROM mentors;
 SELECT * FROM educations;
+SELECT * FROM skills;
