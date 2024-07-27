@@ -12,6 +12,7 @@ import ElasticSearchService from './elastic-search.service';
 import { RedisService } from './redis.service';
 import { MulterService } from './multer.service';
 import { AxiosService } from './axios.service';
+import { MidtransService } from './midtrans.service';
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { AxiosService } from './axios.service';
       useClass: AxiosService,
     }),
   ],
-  providers: [PrismaService, ValidationService, RedisService],
+  providers: [PrismaService, ValidationService, RedisService, MidtransService],
   exports: [
     PrismaService,
     ValidationService,
@@ -51,6 +52,7 @@ import { AxiosService } from './axios.service';
     ElasticsearchModule,
     HttpModule,
     RedisService,
+    MidtransService,
   ],
 })
 export class CommonModule {}
