@@ -17,7 +17,6 @@ enum UserGender {
   MAN
   WOMAN
 }
-
 model User {
   id        BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
   uniqueId  String     @unique @db.VarChar(512)
@@ -172,10 +171,10 @@ model Assistance {
 }
 
 model AssistanceTags {
-  assistance   Assistance @relation(fields: [assistanceId], references: [id])
   assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
-  Tag          Tag        @relation(fields: [tagId], references: [id])
+  assistance   Assistance @relation(fields: [assistanceId], references: [id])
   tagId        Int        @map("tag_id") @db.UnsignedInt
+  tag          Tag        @relation(fields: [tagId], references: [id])
 
   @@unique([tagId, assistanceId])
   @@map("assistance_tags")
@@ -196,11 +195,11 @@ enum OrderPaymentStatus {
 model Order {
   id                 String             @id @default(uuid()) @db.VarChar(255)
   assistanceId       BigInt             @map("assistance_id") @db.UnsignedBigInt
-  Assistance         Assistance         @relation(fields: [assistanceId], references: [id])
+  assistance         Assistance         @relation(fields: [assistanceId], references: [id])
   mentorId           BigInt             @map("mentor_id") @db.UnsignedBigInt
-  Mentor             Mentor             @relation(fields: [mentorId], references: [id])
+  mentor             Mentor             @relation(fields: [mentorId], references: [id])
   userId             BigInt             @map("user_id") @db.UnsignedBigInt
-  User               User               @relation(fields: [userId], references: [id])
+  user               User               @relation(fields: [userId], references: [id])
   sessionTimestamp   DateTime           @map("session_timestamp")
   minutesDurations   Int                @map("minutes_duration") @db.UnsignedInt
   totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)

@@ -4,7 +4,7 @@ import { AssistanceFormat } from './enum/assistance-format.enum';
 
 export class AssistanceValidation {
   static readonly SAVE: ZodType = z.object({
-    categoryId: z.bigint().gte(BigInt(1)),
+    categoryId: z.number().gte(1),
     topic: z.string().min(5).max(200),
     description: z.optional(z.string()),
     durationMinutes: z.number().min(1).max(60),
@@ -19,6 +19,6 @@ export class AssistanceValidation {
     }),
     capacity: z.number().min(1).max(100),
     language: z.string(),
-    tagId: z.set(z.number()),
+    tagId: z.array(z.number()).transform((arr) => new Set(arr)),
   });
 }

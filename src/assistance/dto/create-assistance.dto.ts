@@ -1,4 +1,4 @@
-import { AssistanceFormat } from '../enum/assistance-format.enum';
+import { AssistanceFormat } from '@prisma/client';
 
 export class CreateAssistanceDto {
   categoryId: number;

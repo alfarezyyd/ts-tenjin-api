@@ -25,7 +25,7 @@ export default class ConvertHelper {
       });
       return z.NEVER;
     } else {
-      return arg.toUpperCase();
+      return arg.toUpperCase().toString();
     }
   }
 }

@@ -8,7 +8,6 @@ import { AssistanceValidation } from './assistance.validation';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { Assistance, Tag } from '@prisma/client';
-import { all } from 'axios';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AssistanceService {
@@ -49,18 +48,30 @@ export class AssistanceService {
       const allTagPrisma: Tag[] = await prismaTransaction.tag.findMany({
         where: {
           id: {
-            in: validatedCreateAssistanceDto.tagId,
+            in: [...validatedCreateAssistanceDto.tagId],
           },
         },
       });
-      if (allTagPrisma.length != validatedCreateAssistanceDto.tagId.length) {
+      if (allTagPrisma.length != validatedCreateAssistanceDto.tagId.size) {
         throw new NotFoundException(`Some tagId not found`);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { tagId, categoryId, ...prismaPayload } = createAssistanceDto;
+      console.log(prismaPayload);
       const newAssistancePrisma: Assistance =
         await prismaTransaction.assistance.create({
           data: {
-            ...validatedCreateAssistanceDto,
-            mentorId: this.expressRequest['user']['mentorId'],
+            ...prismaPayload,
+            mentor: {
+              connect: {
+                id: this.expressRequest['user']['mentorId'],
+              },
+            },
+            category: {
+              connect: {
+                id: validatedCreateAssistanceDto.categoryId,
+              },
+            },
           },
         });
       const assistanceTagsInsertPayload = Array.from(
