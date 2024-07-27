@@ -21,8 +21,8 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<string> {
-    const createUserRequest: User = await this.validationService.validateAsync(
-      UserValidation.userValidationWrapper(this.prismaService),
+    const createUserRequest: User = await this.validationService.validate(
+      UserValidation.SAVE,
       createUserDto,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
