@@ -203,6 +203,7 @@ model Order {
   sessionTimestamp   DateTime           @map("session_timestamp")
   minutesDurations   Int                @map("minutes_duration") @db.UnsignedInt
   totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)
+  transactionToken   String             @map("transaction_token") @db.VarChar(255)
   orderStatus        OrderStatus        @map("order_status") @default(PROCESSED)
   orderPaymentStatus OrderPaymentStatus @map("order_payment_status") @default(NOT_YET_PAID)
   note               String             @db.Text
