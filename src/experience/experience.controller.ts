@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,16 +18,14 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 export class ExperienceController {
   constructor(private readonly experienceService: ExperienceService) {}
 
-  @Post(':mentorId')
+  @Post()
   @UseInterceptors(FilesInterceptor('experienceResources'))
   create(
     @UploadedFiles() experienceResources: Array<Express.Multer.File>,
-    @Param('mentorId', ParseIntPipe) mentorId: bigint,
     @Body() createExperienceDto: CreateExperienceDto,
   ) {
     return this.experienceService.create(
       experienceResources,
-      mentorId,
       createExperienceDto,
     );
   }

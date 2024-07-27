@@ -1,22 +1,24 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Scope } from '@nestjs/common';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import ExperienceValidation from './experience.validation';
-import { v4 as uuid } from 'uuid';
-import * as fs from 'node:fs';
+import CommonHelper from '../helper/common.helper';
+import { ConfigService } from '@nestjs/config';
+import { Experience } from '@prisma/client';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ExperienceService {
   constructor(
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
+    private readonly expressRequest: Request,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(
     experienceResources: Array<Express.Multer.File>,
-    mentorId: bigint,
     createExperienceDto: CreateExperienceDto,
   ) {
     const validatedCreateExperienceDto = await this.validationService.validate(
@@ -27,21 +29,36 @@ export class ExperienceService {
       await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
-            id: mentorId,
+            id: this.expressRequest['user']['mentorId'],
           },
         })
         .catch(() => {
           throw new HttpException(
-            `Mentor with mentorId ${mentorId} not found`,
+            `Mentor with mentorId ${this.expressRequest['user']['mentorId']} not found`,
             404,
           );
         });
+      const experiencePrisma: Experience =
+        await prismaTransaction.experience.create({
+          data: {
+            ...validatedCreateExperienceDto,
+            mentorId: this.expressRequest['user']['mentorId'],
+          },
+        });
+      const allExperienceResourcePayload = [];
+      for (const experienceResource of experienceResources) {
+        allExperienceResourcePayload.push({
+          experienceId: experiencePrisma.id,
+          imagePath: await CommonHelper.handleSaveFile(
+            this.configService,
+            experienceResource,
+            `experience-resources/${this.expressRequest['user']['mentorId']}`,
+          ),
+        });
+      }
 
-      const experiencePrisma = await prismaTransaction.experience.create({
-        data: {
-          ...validatedCreateExperienceDto,
-          mentorId: mentorId,
-        },
+      await prismaTransaction.experienceResource.createMany({
+        data: allExperienceResourcePayload,
       });
     });
     return 'Success! new experience has been created';
