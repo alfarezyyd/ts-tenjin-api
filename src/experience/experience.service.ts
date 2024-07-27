@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Scope } from '@nestjs/common';
+import { HttpException, Inject, Injectable, Scope } from '@nestjs/common';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import ValidationService from '../common/validation.service';
@@ -7,13 +7,14 @@ import ExperienceValidation from './experience.validation';
 import CommonHelper from '../helper/common.helper';
 import { ConfigService } from '@nestjs/config';
 import { Experience } from '@prisma/client';
+import { REQUEST } from '@nestjs/core';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ExperienceService {
   constructor(
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
-    private readonly expressRequest: Request,
+    @Inject(REQUEST) private readonly expressRequest: Request,
     private readonly configService: ConfigService,
   ) {}
 
