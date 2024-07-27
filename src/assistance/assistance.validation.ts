@@ -19,5 +19,6 @@ export class AssistanceValidation {
     }),
     capacity: z.number().min(1).max(100),
     language: z.string(),
+    tagId: z.set(z.number()),
   });
 }

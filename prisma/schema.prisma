@@ -168,7 +168,7 @@ model Assistance {
   createdAt          DateTime             @map("created_at") @default(now())
   updatedAt          DateTime             @map("updated_at") @default(now())
 
-  @@map("assistances")
+  @@map("assistants")
 }
 
 model AssistanceTags {

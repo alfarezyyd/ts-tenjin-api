@@ -10,17 +10,21 @@ import {
 import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
+import { WebResponse } from '../model/web.response';
 
-@Controller('assistance')
+@Controller('assistants')
 export class AssistanceController {
   constructor(private readonly assistanceService: AssistanceService) {}
 
-  @Post(':mentorId')
-  create(
-    @Param('mentorId') mentorId: bigint,
+  @Post('')
+  async create(
     @Body() createAssistanceDto: CreateAssistanceDto,
-  ) {
-    return this.assistanceService.create(mentorId, createAssistanceDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.assistanceService.create(createAssistanceDto),
+      },
+    };
   }
 
   @Get()

@@ -9,4 +9,5 @@ export class CreateAssistanceDto {
   format: AssistanceFormat;
   capacity: number;
   language: string;
+  tagId: number[];
 }

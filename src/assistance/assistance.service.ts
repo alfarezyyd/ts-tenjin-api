@@ -1,19 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { ConfigService } from '@nestjs/config';
 import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import { AssistanceValidation } from './assistance.validation';
+import { Request } from 'express';
+import { REQUEST } from '@nestjs/core';
+import { Assistance, Tag } from '@prisma/client';
+import { all } from 'axios';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AssistanceService {
   constructor(
     private readonly configService: ConfigService,
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
+    @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
-  async create(mentorId: bigint, createAssistanceDto: CreateAssistanceDto) {
+  async create(createAssistanceDto: CreateAssistanceDto) {
     const validatedCreateAssistanceDto = this.validationService.validate(
       AssistanceValidation.SAVE,
       createAssistanceDto,
@@ -22,15 +27,15 @@ export class AssistanceService {
       await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
-            id: mentorId,
+            id: this.expressRequest['user']['mentorId'],
           },
         })
         .catch(() => {
           throw new NotFoundException(
-            `Mentor with mentorId ${mentorId} not found`,
+            `Mentor with mentorId ${this.expressRequest['user']['mentorId']} not found`,
           );
         });
-      prismaTransaction.category
+      await prismaTransaction.category
         .findFirstOrThrow({
           where: {
             id: createAssistanceDto.categoryId,
@@ -41,8 +46,34 @@ export class AssistanceService {
             `Category with categoryId ${createAssistanceDto.categoryId} not found`,
           );
         });
+      const allTagPrisma: Tag[] = await prismaTransaction.tag.findMany({
+        where: {
+          id: {
+            in: validatedCreateAssistanceDto.tagId,
+          },
+        },
+      });
+      if (allTagPrisma.length != validatedCreateAssistanceDto.tagId.length) {
+        throw new NotFoundException(`Some tagId not found`);
+      }
+      const newAssistancePrisma: Assistance =
+        await prismaTransaction.assistance.create({
+          data: {
+            ...validatedCreateAssistanceDto,
+            mentorId: this.expressRequest['user']['mentorId'],
+          },
+        });
+      const assistanceTagsInsertPayload = Array.from(
+        validatedCreateAssistanceDto.tagId,
+      ).map((value) => ({
+        assistanceId: newAssistancePrisma.id,
+        tagId: value as number,
+      }));
+      await prismaTransaction.assistanceTags.createMany({
+        data: assistanceTagsInsertPayload,
+      });
     });
-    return 'This action adds a new assistance';
+    return 'Success! new assistance has been created';
   }
 
   findAll() {
