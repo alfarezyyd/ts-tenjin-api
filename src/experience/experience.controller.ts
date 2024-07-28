@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   UploadedFiles,
@@ -13,21 +13,26 @@ import { ExperienceService } from './experience.service';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { WebResponse } from '../model/web.response';
 
-@Controller('experience')
+@Controller('experiences')
 export class ExperienceController {
   constructor(private readonly experienceService: ExperienceService) {}
 
   @Post()
   @UseInterceptors(FilesInterceptor('experienceResources'))
-  create(
+  async create(
     @UploadedFiles() experienceResources: Array<Express.Multer.File>,
     @Body() createExperienceDto: CreateExperienceDto,
-  ) {
-    return this.experienceService.create(
-      experienceResources,
-      createExperienceDto,
-    );
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.experienceService.create(
+          experienceResources,
+          createExperienceDto,
+        ),
+      },
+    };
   }
 
   @Get()
@@ -40,19 +45,30 @@ export class ExperienceController {
     return this.experienceService.findOne(+id);
   }
 
-  @Patch(':mentorId')
-  update(
-    @Param('mentorId') mentorId: bigint,
+  @Put()
+  @UseInterceptors(FilesInterceptor('experienceResources'))
+  async update(
+    @UploadedFiles() experienceResources: Array<Express.Multer.File>,
     @Body() updateExperienceDto: UpdateExperienceDto,
-  ) {
-    return this.experienceService.update(mentorId, updateExperienceDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.experienceService.update(
+          experienceResources,
+          updateExperienceDto,
+        ),
+      },
+    };
   }
 
-  @Delete(':mentorId/:experienceId')
-  remove(
-    @Param('mentorId') mentorId: bigint,
+  @Delete(':experienceId')
+  async remove(
     @Param('experienceId') experienceId: bigint,
-  ) {
-    return this.experienceService.remove(mentorId, experienceId);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.experienceService.remove(experienceId),
+      },
+    };
   }
 }
