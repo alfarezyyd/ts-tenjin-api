@@ -13,6 +13,7 @@ import { MidtransService } from '../common/midtrans.service';
 import { OrderValidation } from './order.validation';
 import { Assistance, Order, User } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
+import { MidtransCreateOrderDtoBuilder } from './dto/midtrans-create-order.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -72,21 +73,19 @@ export class OrderService {
       const [firstName, ...partedLastName] = userPrisma.name.split(' ');
       const lastName = partedLastName.join(' ');
 
-      const midtransCreateOrderPayload = {
-        transaction_details: {
-          order_id: newCreatedOrder.id,
-          gross_amount: newCreatedOrder.totalPrice,
-        },
-        credit_card: {
-          secure: true,
-        },
-        customer_details: {
-          first_name: firstName,
-          last_name: lastName,
-          email: userPrisma.email,
-          phone: userPrisma.telephone,
-        },
-      };
+      const midtransCreateOrderPayload = new MidtransCreateOrderDtoBuilder()
+        .setTransactionDetails(
+          newCreatedOrder.id,
+          createOrderPayload.totalPrice,
+        )
+        .setCreditCard(true)
+        .setCustomerDetails(
+          firstName,
+          lastName,
+          userPrisma.email,
+          userPrisma.telephone,
+        )
+        .build();
       await this.midtransService
         .getSnapTransaction()
         .createTransaction(midtransCreateOrderPayload)
