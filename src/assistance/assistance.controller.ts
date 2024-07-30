@@ -37,12 +37,19 @@ export class AssistanceController {
     return this.assistanceService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Patch(':assistanceId')
+  async update(
+    @Param('assistanceId') assistanceId: bigint,
     @Body() updateAssistanceDto: UpdateAssistanceDto,
-  ) {
-    return this.assistanceService.update(+id, updateAssistanceDto);
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        message: await this.assistanceService.update(
+          assistanceId,
+          updateAssistanceDto,
+        ),
+      },
+    };
   }
 
   @Delete(':id')
