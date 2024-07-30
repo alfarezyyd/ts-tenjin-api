@@ -8,6 +8,7 @@ import { AssistanceValidation } from './assistance.validation';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { Assistance, Tag } from '@prisma/client';
+import * as fs from 'node:fs';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AssistanceService {
@@ -167,7 +168,47 @@ export class AssistanceService {
     return 'Success! assistance has been updated';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} assistance`;
+  async remove(id: bigint) {
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      const assistancePrisma: Assistance = await prismaTransaction.assistance
+        .findFirstOrThrow({
+          where: {
+            id: id,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `Assistance with assistanceId ${id} not found`,
+          );
+        });
+      const assistanceResources =
+        await prismaTransaction.assistanceResource.findMany({
+          where: {
+            assistanceId: assistancePrisma.id,
+          },
+        });
+      for (const assistanceResource of assistanceResources) {
+        fs.unlink(
+          `${this.configService.get<string>('MULTER_DEST')}/assistance-resources/${this.expressRequest['user']['mentorId']}/${assistancePrisma.id}/${assistanceResource.imagePath}`,
+          () => {},
+        );
+      }
+      await prismaTransaction.assistanceResource.deleteMany({
+        where: {
+          assistanceId: assistancePrisma.id,
+        },
+      });
+      await prismaTransaction.assistanceTags.deleteMany({
+        where: {
+          assistanceId: assistancePrisma.id,
+        },
+      });
+      await prismaTransaction.assistance.delete({
+        where: {
+          id: assistancePrisma.id,
+        },
+      });
+    });
+    return `Success! assistance with assistanceId ${id} has been deleted`;
   }
 }

@@ -120,11 +120,11 @@ model Skill {
 }
 
 model AssistanceResource {
-  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  imagePath   String?    @map("image_path") @db.VarChar(255)
-  videoUrl    String?    @map("video_url") @db.VarChar(255)
-  assitance   Assistance @relation(fields: [assitanceId], references: [id])
-  assitanceId BigInt     @map("assitance_id") @db.UnsignedBigInt
+  id           BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath    String?    @map("image_path") @db.VarChar(255)
+  videoUrl     String?    @map("video_url") @db.VarChar(255)
+  assistance   Assistance @relation(fields: [assistanceId], references: [id])
+  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
 
   @@map("assistance_resources")
 }

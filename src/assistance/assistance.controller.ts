@@ -52,8 +52,12 @@ export class AssistanceController {
     };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.assistanceService.remove(+id);
+  @Delete(':assistanceId')
+  async remove(@Param('assistanceId') assistanceId: bigint) {
+    return {
+      result: {
+        message: await this.assistanceService.remove(assistanceId),
+      },
+    };
   }
 }
