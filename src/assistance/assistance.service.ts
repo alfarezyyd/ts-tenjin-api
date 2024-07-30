@@ -58,7 +58,6 @@ export class AssistanceService {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { tagId, categoryId, ...prismaPayload } = createAssistanceDto;
-      console.log(prismaPayload);
       const newAssistancePrisma: Assistance =
         await prismaTransaction.assistance.create({
           data: {

@@ -20,7 +20,6 @@ export class AuthenticationService {
     if (!(await bcrypt.compare(signInDto.password, user?.password))) {
       throw new UnauthorizedException('Username or password not valid');
     }
-    console.log(user);
     const payloadJwt = {
       id: user.uniqueId,
       email: user.email,
