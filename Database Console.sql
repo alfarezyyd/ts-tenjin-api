@@ -9,3 +9,5 @@ SELECT * FROM educations;
 SELECT * FROM skills;
 SELECT * FROM assistants;
 SELECT * FROM orders;
+SELECT * FROM experiences;
+SELECT * FROM experience_resources;

@@ -8,6 +8,7 @@ import {
   Delete,
   UploadedFiles,
   UseInterceptors,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ExperienceService } from './experience.service';
 import { CreateExperienceDto } from './dto/create-experience.dto';
@@ -45,15 +46,17 @@ export class ExperienceController {
     return this.experienceService.findOne(+id);
   }
 
-  @Put()
+  @Put(':experienceId')
   @UseInterceptors(FilesInterceptor('experienceResources'))
   async update(
+    @Param('experienceId', ParseIntPipe) experienceId: bigint,
     @UploadedFiles() experienceResources: Array<Express.Multer.File>,
     @Body() updateExperienceDto: UpdateExperienceDto,
   ): Promise<WebResponse<string>> {
     return {
       result: {
         message: await this.experienceService.update(
+          experienceId,
           experienceResources,
           updateExperienceDto,
         ),

@@ -28,7 +28,7 @@ export class ExperienceService {
   async create(
     experienceResources: Array<Express.Multer.File>,
     createExperienceDto: CreateExperienceDto,
-  ) {
+  ): Promise<string> {
     const validatedCreateExperienceDto = await this.validationService.validate(
       ExperienceValidation.CREATE,
       createExperienceDto,
@@ -81,6 +81,7 @@ export class ExperienceService {
   }
 
   async update(
+    experienceId: bigint,
     experienceResources: Array<Express.Multer.File>,
     updateExperienceDto: UpdateExperienceDto,
   ) {
@@ -101,46 +102,24 @@ export class ExperienceService {
             404,
           );
         });
-      for (const deletedFileName of validatedUpdateExperienceDto.deletedFilesName) {
-        fs.stat(
-          `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${updateExperienceDto.experienceId}/${deletedFileName}`,
-          function (err) {
-            if (err) {
-              throw new NotFoundException(
-                `File with fileName ${deletedFileName} not found`,
-              );
-            }
-          },
-        );
-      }
-
-      for (const deletedFileName of validatedUpdateExperienceDto.deletedFilesName) {
-        fs.unlink(
-          `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${updateExperienceDto.experienceId}/${deletedFileName}`,
-          (err) => {
-            if (err) {
-              throw new HttpException(`Error when trying to change file`, 500);
-            }
-          },
-        );
-      }
-
+      const { deletedFilesName, ...shatteredValidatedUpdateExperienceDto } =
+        validatedUpdateExperienceDto;
       await prismaTransaction.experienceResource.deleteMany({
         where: {
-          experienceId: updateExperienceDto.experienceId,
+          experienceId: experienceId,
           imagePath: {
-            in: validatedUpdateExperienceDto.deletedFilesName,
+            in: deletedFilesName,
           },
         },
       });
 
       await prismaTransaction.experience.updateMany({
         data: {
-          ...validatedUpdateExperienceDto,
+          ...shatteredValidatedUpdateExperienceDto,
         },
         where: {
           AND: [
-            { id: updateExperienceDto.experienceId },
+            { id: experienceId },
             { mentorId: this.expressRequest['user']['mentorId'] },
           ],
         },
@@ -149,11 +128,11 @@ export class ExperienceService {
       const allExperienceResourcePayload = [];
       for (const experienceResource of experienceResources) {
         allExperienceResourcePayload.push({
-          experienceId: updateExperienceDto.experienceId,
+          experienceId: experienceId,
           imagePath: await CommonHelper.handleSaveFile(
             this.configService,
             experienceResource,
-            `experience-resources/${this.expressRequest['user']['mentorId']}/${updateExperienceDto.experienceId}`,
+            `experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}`,
           ),
         });
       }
@@ -161,8 +140,38 @@ export class ExperienceService {
       await prismaTransaction.experienceResource.createMany({
         data: allExperienceResourcePayload,
       });
+      console.log(deletedFilesName);
+      if (deletedFilesName === null) {
+        for (const deletedFileName of deletedFilesName) {
+          fs.stat(
+            `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}/${deletedFileName}`,
+            function (err) {
+              if (err) {
+                throw new NotFoundException(
+                  `File with fileName ${deletedFileName} not found`,
+                );
+              }
+            },
+          );
+        }
+
+        for (const deletedFileName of deletedFilesName) {
+          fs.unlink(
+            `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}/${deletedFileName}`,
+            (err) => {
+              if (err) {
+                console.log(err);
+                throw new HttpException(
+                  `Error when trying to change file`,
+                  500,
+                );
+              }
+            },
+          );
+        }
+      }
     });
-    return 'Success! new experience has been created';
+    return 'Success! new experience has been updated';
   }
 
   async remove(experienceId: bigint) {
