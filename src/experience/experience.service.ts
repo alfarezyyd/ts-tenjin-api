@@ -15,6 +15,7 @@ import { ConfigService } from '@nestjs/config';
 import { Experience } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import * as fs from 'node:fs';
+import * as fsPromise from 'node:fs/promises';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ExperienceService {
@@ -181,17 +182,14 @@ export class ExperienceService {
           experienceId: experienceId,
         },
       });
-      fs.rmdir(
-        `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}`,
-        function (err) {
-          if (err) {
-            throw new HttpException(
-              `Error when trying to remove experience`,
-              500,
-            );
-          }
-        },
-      );
+      try {
+        await fsPromise.rm(
+          `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}`,
+          { recursive: true },
+        );
+      } catch (err) {
+        throw new HttpException(`Error when trying to remove experience`, 500);
+      }
       await prismaTransaction.experience.deleteMany({
         where: {
           AND: [
