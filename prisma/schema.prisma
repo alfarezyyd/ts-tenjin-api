@@ -224,3 +224,13 @@ model OrderReview {
 
   @@map("order_review")
 }
+
+model OrderResource {
+  id        BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath String? @map("image_path") @db.VarChar(255)
+  videoUrl  String? @map("video_url") @db.VarChar(255)
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   BigInt  @map("order_id") @db.UnsignedBigInt
+
+  @@map("experience_resources")
+}
