@@ -1,9 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { ConfigService } from '@nestjs/config';
+import PrismaService from '../common/prisma.service';
+import ValidationService from '../common/validation.service';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ReviewService {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
+    private readonly validationService: ValidationService,
+    @Inject(REQUEST) private readonly expressRequest: Request,
+  ) {}
   create(createReviewDto: CreateReviewDto) {
     return 'This action adds a new review';
   }

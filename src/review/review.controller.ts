@@ -1,13 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('review')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post()
+  @UseInterceptors(FilesInterceptor('resource'))
   create(@Body() createReviewDto: CreateReviewDto) {
     return this.reviewService.create(createReviewDto);
   }
