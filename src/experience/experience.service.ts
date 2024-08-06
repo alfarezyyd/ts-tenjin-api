@@ -141,7 +141,6 @@ export class ExperienceService {
       await prismaTransaction.experienceResource.createMany({
         data: allExperienceResourcePayload,
       });
-      console.log(deletedFilesName);
       if (deletedFilesName === null) {
         for (const deletedFileName of deletedFilesName) {
           fs.stat(
@@ -161,7 +160,6 @@ export class ExperienceService {
             `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}/${deletedFileName}`,
             (err) => {
               if (err) {
-                console.log(err);
                 throw new HttpException(
                   `Error when trying to change file`,
                   500,

@@ -1,9 +1,7 @@
-import { EmploymentType } from '@prisma/client';
-
 export class CreateExperienceDto {
   positionName: string;
   companyName: string;
-  employmentType: EmploymentType;
+  employmentType: string;
   location: string;
   startDate: string;
   endDate: string;
