@@ -41,6 +41,15 @@ export class ExperienceController {
     return this.experienceService.findAll();
   }
 
+  @Get('enums/employment-types')
+  async fetchEmploymentTypeEnum() {
+    return {
+      result: {
+        data: await this.experienceService.employmentTypeEnum(),
+      },
+    };
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.experienceService.findOne(+id);

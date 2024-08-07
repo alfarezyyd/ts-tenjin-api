@@ -12,7 +12,7 @@ import PrismaService from '../common/prisma.service';
 import ExperienceValidation from './experience.validation';
 import CommonHelper from '../helper/common.helper';
 import { ConfigService } from '@nestjs/config';
-import { Experience } from '@prisma/client';
+import { EmploymentType, Experience } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import * as fs from 'node:fs';
 import * as fsPromise from 'node:fs/promises';
@@ -75,6 +75,10 @@ export class ExperienceService {
 
   findAll() {
     return `This action returns all experience`;
+  }
+
+  async employmentTypeEnum() {
+    return Object.values(EmploymentType);
   }
 
   findOne(id: number) {
