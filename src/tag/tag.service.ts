@@ -49,8 +49,8 @@ export class TagService {
     return 'Success! new tag has been created';
   }
 
-  findAll() {
-    return `This action returns all tag`;
+  async findAll(): Promise<Tag[]> {
+    return this.prismaService.tag.findMany();
   }
 
   findOne(id: number) {

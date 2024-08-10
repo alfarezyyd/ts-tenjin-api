@@ -18,6 +18,7 @@ import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WebResponse } from '../model/web.response';
+import { Public } from '../authentication/set-metadata.decorator';
 
 @Controller('tags')
 export class TagController {
@@ -44,9 +45,14 @@ export class TagController {
     };
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.tagService.findAll();
+  async findAll() {
+    return {
+      result: {
+        data: await this.tagService.findAll(),
+      },
+    };
   }
 
   @Get(':id')
