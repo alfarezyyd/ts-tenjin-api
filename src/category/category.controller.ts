@@ -19,12 +19,12 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WebResponse } from '../model/web.response';
 import { Public } from 'src/authentication/set-metadata.decorator';
+import { Category } from '@prisma/client';
 
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Public()
   @Post()
   @UseInterceptors(FileInterceptor('logo'))
   async create(
@@ -46,9 +46,14 @@ export class CategoryController {
     };
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  async findAll(): Promise<WebResponse<Category[]>> {
+    return {
+      result: {
+        data: await this.categoryService.findAll(),
+      },
+    };
   }
 
   @Get(':id')

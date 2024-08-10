@@ -41,8 +41,8 @@ export class CategoryService {
     return 'Success! new category has been created';
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async findAll() {
+    return this.prismaService.category.findMany();
   }
 
   findOne(id: number) {
