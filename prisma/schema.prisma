@@ -160,10 +160,10 @@ model Assistance {
   capacity           Int                  @db.UnsignedInt
   isActive           Boolean              @map("is_active") @default(true)
   ratingAverage      Decimal              @map("rating_average") @db.Decimal(3, 2) @default(0)
-  language           String               @db.VarChar(100)
   Order              Order[]
   AssistanceTag      AssistanceTags[]
   AssistanceResource AssistanceResource[]
+  AssistanceLanguage AssistanceLanguage[]
   createdAt          DateTime             @map("created_at") @default(now())
   updatedAt          DateTime             @map("updated_at") @default(now())
 
@@ -222,15 +222,23 @@ model OrderReview {
   createdAt DateTime @map("created_at") @default(now())
   updatedAt DateTime @map("updated_at")
 
-  @@map("order_review")
+  @@map("order_reviews")
 }
 
-model OrderResource {
-  id        BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
-  imagePath String? @map("image_path") @db.VarChar(255)
-  videoUrl  String? @map("video_url") @db.VarChar(255)
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   BigInt  @map("order_id") @db.UnsignedBigInt
+model Language {
+  id                 Int                  @id @default(autoincrement()) @db.UnsignedInt
+  name               String               @db.VarChar(255) @unique
+  AssistanceLanguage AssistanceLanguage[]
 
-  @@map("experience_resources")
+  @@map("languages")
+}
+
+model AssistanceLanguage {
+  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance   Assistance @relation(fields: [assistanceId], references: [id])
+  languageId   Int        @map("language_id") @db.UnsignedInt
+  language     Language   @relation(fields: [languageId], references: [id])
+
+  @@unique([languageId, assistanceId])
+  @@map("assistance_languages")
 }
