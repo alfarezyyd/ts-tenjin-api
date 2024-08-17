@@ -11,18 +11,34 @@ import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { WebResponse } from '../model/web.response';
+import { Category, Language, Tag } from '@prisma/client';
 
 @Controller('assistants')
 export class AssistanceController {
   constructor(private readonly assistanceService: AssistanceService) {}
 
+  @Get('')
+  async create(): Promise<
+    WebResponse<{
+      languages: Language[];
+      categories: Category[];
+      tags: Tag[];
+    }>
+  > {
+    return {
+      result: {
+        data: await this.assistanceService.create(),
+      },
+    };
+  }
+
   @Post('')
-  async create(
+  async store(
     @Body() createAssistanceDto: CreateAssistanceDto,
   ): Promise<WebResponse<string>> {
     return {
       result: {
-        message: await this.assistanceService.create(createAssistanceDto),
+        message: await this.assistanceService.store(createAssistanceDto),
       },
     };
   }

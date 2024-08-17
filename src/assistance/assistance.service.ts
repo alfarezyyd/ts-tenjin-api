@@ -7,7 +7,7 @@ import PrismaService from '../common/prisma.service';
 import { AssistanceValidation } from './assistance.validation';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { Assistance, Tag } from '@prisma/client';
+import { Assistance, Category, Language, Tag } from '@prisma/client';
 import * as fs from 'node:fs';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -18,7 +18,25 @@ export class AssistanceService {
     private readonly prismaService: PrismaService,
     @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
-  async create(createAssistanceDto: CreateAssistanceDto) {
+  async create(): Promise<{
+    languages: Language[];
+    categories: Category[];
+    tags: Tag[];
+  }> {
+    const groupedData = {
+      languages: [],
+      tags: [],
+      categories: [],
+    };
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      groupedData['languages'] = await prismaTransaction.language.findMany();
+      groupedData['categories'] = await prismaTransaction.category.findMany();
+      groupedData['tags'] = await prismaTransaction.tag.findMany();
+    });
+    return groupedData;
+  }
+
+  async store(createAssistanceDto: CreateAssistanceDto) {
     const validatedCreateAssistanceDto = this.validationService.validate(
       AssistanceValidation.SAVE,
       createAssistanceDto,
