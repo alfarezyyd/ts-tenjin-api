@@ -32,7 +32,7 @@ export class AssistanceController {
     };
   }
 
-  @Post('')
+  @Post()
   async store(
     @Body() createAssistanceDto: CreateAssistanceDto,
   ): Promise<WebResponse<string>> {

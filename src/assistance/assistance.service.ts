@@ -75,11 +75,13 @@ export class AssistanceService {
         throw new NotFoundException(`Some tagId not found`);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { tagId, categoryId, ...prismaPayload } = createAssistanceDto;
+      const { tagId, categoryId, language, ...prismaPayload } =
+        validatedCreateAssistanceDto;
       const newAssistancePrisma: Assistance =
         await prismaTransaction.assistance.create({
           data: {
             ...prismaPayload,
+            format: 'INDIVIDUAL',
             mentor: {
               connect: {
                 id: this.expressRequest['user']['mentorId'],
@@ -160,6 +162,7 @@ export class AssistanceService {
           },
           data: {
             ...prismaPayload,
+            format: 'INDIVIDUAL',
             mentor: {
               connect: {
                 id: this.expressRequest['user']['mentorId'],
