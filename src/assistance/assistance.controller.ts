@@ -12,12 +12,13 @@ import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { WebResponse } from '../model/web.response';
 import { Category, Language, Tag } from '@prisma/client';
+import { Public } from 'src/authentication/set-metadata.decorator';
 
 @Controller('assistants')
 export class AssistanceController {
   constructor(private readonly assistanceService: AssistanceService) {}
 
-  @Get('')
+  @Get('create')
   async create(): Promise<
     WebResponse<{
       languages: Language[];
@@ -43,9 +44,14 @@ export class AssistanceController {
     };
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.assistanceService.findAll();
+  async findAll() {
+    return {
+      result: {
+        data: await this.assistanceService.findAll(),
+      },
+    };
   }
 
   @Get(':id')

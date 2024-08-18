@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
 import { Assistance, Category, Language, Tag } from '@prisma/client';
 import * as fs from 'node:fs';
+import { ResponseAssistanceDto } from './dto/response-assistance.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AssistanceService {
@@ -107,8 +108,34 @@ export class AssistanceService {
     return 'Success! new assistance has been created';
   }
 
-  findAll() {
-    return `This action returns all assistance`;
+  async findAll(): Promise<ResponseAssistanceDto[]> {
+    const allAssistantsWithRelationship =
+      await this.prismaService.assistance.findMany({
+        include: {
+          mentor: true,
+          category: true,
+          AssistanceLanguage: true,
+        },
+      });
+    const allResponseAssistants: ResponseAssistanceDto[] = [];
+    for (const assistantWithRelationship of allAssistantsWithRelationship) {
+      const { topic, durationMinutes, price, format, isActive } =
+        assistantWithRelationship;
+      const responseAssistant: ResponseAssistanceDto = {
+        id: assistantWithRelationship.id.toString(),
+        mentorId: assistantWithRelationship.mentorId.toString(),
+        categoryId: assistantWithRelationship['categoryId'].toString(),
+        categoryName: assistantWithRelationship['category']['name'],
+        topic,
+        durationMinutes: durationMinutes.toString(),
+        price: price.toString(),
+        format,
+        isActive,
+      };
+      allResponseAssistants.push(responseAssistant);
+    }
+    console.log(allResponseAssistants);
+    return allResponseAssistants;
   }
 
   findOne(id: number) {
