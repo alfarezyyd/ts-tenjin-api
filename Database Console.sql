@@ -12,3 +12,4 @@ SELECT * FROM orders;
 SELECT * FROM experiences;
 SELECT * FROM experience_resources;
 SELECT * FROM tags;
+SELECT * FROM languages;
