@@ -14,6 +14,7 @@ import { OrderModule } from './order/order.module';
 import { TagModule } from './tag/tag.module';
 import { ReviewModule } from './review/review.module';
 import { LanguageModule } from './language/language.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { LanguageModule } from './language/language.module';
     TagModule,
     ReviewModule,
     LanguageModule,
+    CartModule,
   ],
   controllers: [],
   providers: [],
