@@ -25,12 +25,12 @@ export class OrderService {
     @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto): Promise<string> {
     const validatedCreateOrderDto = this.validationService.validate(
       OrderValidation.SAVE,
       createOrderDto,
     );
-    await this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       const assistancePrisma: Assistance = await prismaTransaction.assistance
         .findFirstOrThrow({
           where: {
@@ -86,25 +86,25 @@ export class OrderService {
           userPrisma.telephone,
         )
         .build();
-      await this.midtransService
+      const transactionResponse = await this.midtransService
         .getSnapTransaction()
-        .createTransaction(midtransCreateOrderPayload)
-        .then(async (transactionResponse: { token: any; id: any }) => {
-          const transactionToken = transactionResponse.token;
-          await prismaTransaction.order.update({
-            data: {
-              transactionToken: transactionToken,
-            },
-            where: {
-              id: newCreatedOrder.id,
-            },
-          });
+        .createTransaction(midtransCreateOrderPayload);
+
+      const transactionToken = transactionResponse.token;
+      await prismaTransaction.order
+        .update({
+          data: {
+            transactionToken: transactionToken,
+          },
+          where: {
+            id: newCreatedOrder.id,
+          },
         })
         .catch(() => {
           throw new HttpException(`Error when trying to init payment`, 500);
         });
+      return transactionToken;
     });
-    return 'This action adds a new order';
   }
 
   findAll() {
