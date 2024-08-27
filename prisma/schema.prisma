@@ -29,6 +29,7 @@ model User {
   photoPath String?    @map("photo_path") @db.VarChar(255)
   Mentor    Mentor?
   Order     Order[]
+  Cart      Cart?
 
   @@map("user")
 }
@@ -166,6 +167,7 @@ model Assistance {
   AssistanceLanguage AssistanceLanguage[]
   createdAt          DateTime             @map("created_at") @default(now())
   updatedAt          DateTime             @map("updated_at") @default(now())
+  AssistanceCart     AssistanceCart[]
 
   @@map("assistants")
 }
@@ -241,4 +243,23 @@ model AssistanceLanguage {
 
   @@unique([languageId, assistanceId])
   @@map("assistance_languages")
+}
+
+model Cart {
+  id             BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  userId         BigInt           @map("user_id") @db.UnsignedBigInt @unique
+  User           User             @relation(fields: [userId], references: [id])
+  AssistanceCart AssistanceCart[]
+
+  @@map("carts")
+}
+
+model AssistanceCart {
+  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance   Assistance @relation(fields: [assistanceId], references: [id])
+  cartId       BigInt     @map("cart_id") @db.UnsignedBigInt
+  cart         Cart       @relation(fields: [cartId], references: [id])
+
+  @@unique([assistanceId, cartId])
+  @@map("assistance_carts")
 }
