@@ -10,6 +10,7 @@ import { REQUEST } from '@nestjs/core';
 import { Assistance, Category, Language, Tag } from '@prisma/client';
 import * as fs from 'node:fs';
 import { ResponseAssistanceDto } from './dto/response-assistance.dto';
+import CommonHelper from '../helper/common.helper';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AssistanceService {
@@ -37,7 +38,10 @@ export class AssistanceService {
     return groupedData;
   }
 
-  async store(createAssistanceDto: CreateAssistanceDto) {
+  async store(
+    createAssistanceDto: CreateAssistanceDto,
+    assistanceResources: Array<Express.Multer.File>,
+  ) {
     const validatedCreateAssistanceDto = this.validationService.validate(
       AssistanceValidation.SAVE,
       createAssistanceDto,
@@ -95,6 +99,21 @@ export class AssistanceService {
             },
           },
         });
+      const assistanceResourceInsertPayload = [];
+      for (const assistanceResource of assistanceResources) {
+        const newResourceFileName = await CommonHelper.handleSaveFile(
+          this.configService,
+          assistanceResource,
+          `assistants/${this.expressRequest['user']['mentorId']}/${newAssistancePrisma.id}`,
+        );
+        assistanceResourceInsertPayload.push({
+          assistanceId: newAssistancePrisma.id,
+          imagePath: newResourceFileName,
+        });
+      }
+      await prismaTransaction.assistanceResource.createMany({
+        data: assistanceResourceInsertPayload,
+      });
       const assistanceTagsInsertPayload = Array.from(
         validatedCreateAssistanceDto.tagId,
       ).map((value) => ({

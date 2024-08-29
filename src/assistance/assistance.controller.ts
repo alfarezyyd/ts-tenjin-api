@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
@@ -13,6 +15,7 @@ import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { WebResponse } from '../model/web.response';
 import { Category, Language, Tag } from '@prisma/client';
 import { Public } from 'src/authentication/set-metadata.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('assistants')
 export class AssistanceController {
@@ -34,12 +37,17 @@ export class AssistanceController {
   }
 
   @Post()
+  @UseInterceptors(FileInterceptor('images'))
   async store(
     @Body() createAssistanceDto: CreateAssistanceDto,
+    @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
     return {
       result: {
-        message: await this.assistanceService.store(createAssistanceDto),
+        message: await this.assistanceService.store(
+          createAssistanceDto,
+          assistanceResources,
+        ),
       },
     };
   }
