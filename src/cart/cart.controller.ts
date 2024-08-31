@@ -6,23 +6,35 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { WebResponse } from '../model/web.response';
+import ResponseCart from './dto/response-cart.dto';
 
 @Controller('carts')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.create(createCartDto);
+  @Post(':assistanceId')
+  async create(
+    @Param('assistanceId', ParseIntPipe) assistanceId: number,
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.cartService.create(assistanceId),
+      },
+    };
   }
 
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  async findAll(): Promise<WebResponse<ResponseCart[]>> {
+    return {
+      result: {
+        data: await this.cartService.findAll(),
+      },
+    };
   }
 
   @Get(':id')

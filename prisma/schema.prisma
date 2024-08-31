@@ -255,10 +255,11 @@ model Cart {
 }
 
 model AssistanceCart {
-  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
-  assistance   Assistance @relation(fields: [assistanceId], references: [id])
-  cartId       BigInt     @map("cart_id") @db.UnsignedBigInt
-  cart         Cart       @relation(fields: [cartId], references: [id])
+  assistanceId  BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance    Assistance @relation(fields: [assistanceId], references: [id])
+  cartId        BigInt     @map("cart_id") @db.UnsignedBigInt
+  cart          Cart       @relation(fields: [cartId], references: [id])
+  sessionAmount Int        @map("session_amount") @db.UnsignedInt
 
   @@unique([assistanceId, cartId])
   @@map("assistance_carts")
