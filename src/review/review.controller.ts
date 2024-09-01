@@ -14,6 +14,7 @@ import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import DeleteReviewDto from './dto/delete-review.dto';
 
 @Controller('review')
 export class ReviewController {
@@ -48,8 +49,11 @@ export class ReviewController {
     return this.reviewService.update(reviewId, imageResources, updateReviewDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewService.remove(+id);
+  @Delete(':reviewId')
+  remove(
+    @Param('reviewId', ParseIntPipe) reviewId: bigint,
+    @Body() deleteReviewDto: DeleteReviewDto,
+  ) {
+    return this.reviewService.remove(reviewId, deleteReviewDto);
   }
 }

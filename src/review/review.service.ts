@@ -14,6 +14,7 @@ import { REQUEST } from '@nestjs/core';
 import ReviewValidation from './review.validation';
 import CommonHelper from '../helper/common.helper';
 import * as fs from 'node:fs';
+import DeleteReviewDto from './dto/delete-review.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReviewService {
@@ -48,7 +49,7 @@ export class ReviewService {
         .findFirstOrThrow({
           where: {
             id: validatedCreateReviewDto.orderId,
-            assistanceId: validatedCreateReviewDto.assistantId,
+            assistantId: validatedCreateReviewDto.assistantId,
             userId: userPrismaId.id,
           },
         })
@@ -122,7 +123,7 @@ export class ReviewService {
             Order: {
               where: {
                 id: validatedUpdateReviewDto.orderId,
-                assistanceId: validatedUpdateReviewDto.assistantId,
+                assistantId: validatedUpdateReviewDto.assistantId,
               },
             },
           },
@@ -137,7 +138,7 @@ export class ReviewService {
           where: {
             id: reviewId,
             Order: {
-              assistanceId: validatedUpdateReviewDto.assistantId,
+              assistantId: validatedUpdateReviewDto.assistantId,
               userId: this.expressRequest['user']['uniqueId'],
             },
           },
@@ -191,7 +192,53 @@ export class ReviewService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} review`;
+  async remove(reviewId: bigint, deleteReviewDto: DeleteReviewDto) {
+    const validatedDeleteReviewDto = this.validationService.validate(
+      ReviewValidation.DELETE,
+      deleteReviewDto,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const orderPrisma = await prismaTransaction.order
+        .findFirst({
+          where: {
+            id: validatedDeleteReviewDto.orderId,
+            assistantId: validatedDeleteReviewDto.assistantId,
+            user: {
+              uniqueId: this.expressRequest['user']['uniqueId'],
+            },
+          },
+          select: {
+            id: true,
+            assistantId: true,
+            userId: true,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            'Order with the specified details not found',
+          );
+        });
+
+      await prismaTransaction.review.findFirstOrThrow({
+        where: {
+          id: reviewId,
+          Order: {
+            id: orderPrisma.id,
+            assistantId: orderPrisma.assistantId,
+          },
+        },
+      });
+
+      await prismaTransaction.review.deleteMany({
+        where: {
+          id: reviewId,
+          Order: {
+            id: orderPrisma.id,
+            assistantId: orderPrisma.assistantId,
+          },
+        },
+      });
+      return `Success! review has been deleted`;
+    });
   }
 }

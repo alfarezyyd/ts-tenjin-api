@@ -8,4 +8,9 @@ export default class ReviewValidation {
     review: z.coerce.string(),
     removedResourcePaths: z.array(z.string()),
   });
+
+  static readonly DELETE = z.object({
+    orderId: z.coerce.string(),
+    assistantId: z.coerce.bigint().gte(BigInt(1)),
+  });
 }

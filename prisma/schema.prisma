@@ -121,11 +121,11 @@ model Skill {
 }
 
 model AssistanceResource {
-  id           BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  imagePath    String?    @map("image_path") @db.VarChar(255)
-  videoUrl     String?    @map("video_url") @db.VarChar(255)
-  assistance   Assistance @relation(fields: [assistanceId], references: [id])
-  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath   String?    @map("image_path") @db.VarChar(255)
+  videoUrl    String?    @map("video_url") @db.VarChar(255)
+  assistance  Assistance @relation(fields: [assistantId], references: [id])
+  assistantId BigInt     @map("assistance_id") @db.UnsignedBigInt
 
   @@map("assistance_resources")
 }
@@ -174,12 +174,12 @@ model Assistance {
 }
 
 model AssistanceTags {
-  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
-  assistance   Assistance @relation(fields: [assistanceId], references: [id])
-  tagId        Int        @map("tag_id") @db.UnsignedInt
-  tag          Tag        @relation(fields: [tagId], references: [id])
+  assistantId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance  Assistance @relation(fields: [assistantId], references: [id])
+  tagId       Int        @map("tag_id") @db.UnsignedInt
+  tag         Tag        @relation(fields: [tagId], references: [id])
 
-  @@unique([tagId, assistanceId])
+  @@unique([tagId, assistantId])
   @@map("assistance_tags")
 }
 
@@ -197,8 +197,8 @@ enum OrderPaymentStatus {
 
 model Order {
   id                 String             @id @default(uuid()) @db.VarChar(255)
-  assistanceId       BigInt             @map("assistance_id") @db.UnsignedBigInt
-  assistance         Assistance         @relation(fields: [assistanceId], references: [id])
+  assistantId        BigInt             @map("assistance_id") @db.UnsignedBigInt
+  assistance         Assistance         @relation(fields: [assistantId], references: [id])
   mentorId           BigInt             @map("mentor_id") @db.UnsignedBigInt
   mentor             Mentor             @relation(fields: [mentorId], references: [id])
   userId             BigInt             @map("user_id") @db.UnsignedBigInt
@@ -251,12 +251,12 @@ model Language {
 }
 
 model AssistanceLanguage {
-  assistanceId BigInt     @map("assistance_id") @db.UnsignedBigInt
-  assistance   Assistance @relation(fields: [assistanceId], references: [id])
-  languageId   Int        @map("language_id") @db.UnsignedInt
-  language     Language   @relation(fields: [languageId], references: [id])
+  assistantId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance  Assistance @relation(fields: [assistantId], references: [id])
+  languageId  Int        @map("language_id") @db.UnsignedInt
+  language    Language   @relation(fields: [languageId], references: [id])
 
-  @@unique([languageId, assistanceId])
+  @@unique([languageId, assistantId])
   @@map("assistance_languages")
 }
 
@@ -270,12 +270,12 @@ model Cart {
 }
 
 model AssistanceCart {
-  assistanceId  BigInt     @map("assistance_id") @db.UnsignedBigInt
-  assistance    Assistance @relation(fields: [assistanceId], references: [id])
+  assistantId   BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance    Assistance @relation(fields: [assistantId], references: [id])
   cartId        BigInt     @map("cart_id") @db.UnsignedBigInt
   cart          Cart       @relation(fields: [cartId], references: [id])
   sessionAmount Int        @map("session_amount") @db.UnsignedInt
 
-  @@unique([assistanceId, cartId])
+  @@unique([assistantId, cartId])
   @@map("assistance_carts")
 }
