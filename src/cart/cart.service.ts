@@ -1,16 +1,8 @@
-import {
-  HttpException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  Scope,
-} from '@nestjs/common';
-import { CreateCartDto } from './dto/create-cart.dto';
+import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { REQUEST } from '@nestjs/core';
-import ResponseCartDto from './dto/response-cart.dto';
 import ResponseCart from './dto/response-cart.dto';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -29,27 +21,25 @@ export class CartService {
           where: {
             uniqueId: userUniqueId,
           },
+          include: {
+            Cart: {
+              select: {
+                id: true,
+              },
+            },
+          },
         })
         .catch(() => {
           throw new NotFoundException(
             `User with unique id ${userUniqueId} not found`,
           );
         });
-      const cartPrisma = await prismaTransaction.cart
-        .findFirstOrThrow({
-          where: {
-            userId: userPrisma.id,
-          },
-        })
-        .catch(() => {
-          throw new NotFoundException(
-            `Cart with user id ${userPrisma.id} not found`,
-          );
-        });
+
       await prismaTransaction.assistanceCart.create({
         data: {
           assistanceId: assistanceId,
-          cartId: cartPrisma.id,
+          cartId: userPrisma.id,
+          sessionAmount: 1,
         },
       });
     });
@@ -116,11 +106,97 @@ export class CartService {
     return `This action returns a #${id} cart`;
   }
 
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
+  async update(updateCartDto: UpdateCartDto) {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userUniqueId = this.expressRequest['user']['uniqueId'];
+      const userPrisma = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: userUniqueId,
+          },
+          select: {
+            Cart: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `User with unique id ${userUniqueId} not found`,
+          );
+        });
+      const assistanceCart =
+        await prismaTransaction.assistanceCart.findFirstOrThrow({
+          where: {
+            assistanceId: updateCartDto.assistanceId,
+            cartId: userPrisma.Cart.id,
+          },
+          select: {
+            sessionAmount: true,
+          },
+        });
+      updateCartDto.cartMethod
+        ? assistanceCart.sessionAmount++
+        : assistanceCart.sessionAmount--;
+      if (assistanceCart.sessionAmount <= 0) {
+        await prismaTransaction.assistanceCart.deleteMany({
+          where: {
+            assistanceId: updateCartDto.assistanceId,
+            cartId: userPrisma.Cart.id,
+          },
+        });
+        return `Success! assistance  has been removed from cart`;
+      }
+      await prismaTransaction.assistanceCart.updateMany({
+        where: {
+          assistanceId: updateCartDto.assistanceId,
+          cartId: userPrisma.Cart.id,
+        },
+        data: {
+          sessionAmount: assistanceCart.sessionAmount,
+        },
+      });
+      return `Success! assistance in cart has been updated successfully`;
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+  remove(assistanceId: bigint) {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: this.expressRequest['user']['uniqueId'],
+          },
+          select: {
+            Cart: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`Failed! user not found`);
+        });
+      await prismaTransaction.assistanceCart
+        .findFirstOrThrow({
+          where: {
+            assistanceId: assistanceId,
+            cartId: userPrisma.Cart.id,
+          },
+        })
+        .cart(() => {
+          throw new NotFoundException(`Failed! assistance not found cart`);
+        });
+      await prismaTransaction.assistanceCart.deleteMany({
+        where: {
+          cartId: userPrisma.Cart.id,
+          assistanceId: assistanceId,
+        },
+      });
+      return `Success! assistance has been removed from cart`;
+    });
   }
 }

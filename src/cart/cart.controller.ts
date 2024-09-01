@@ -37,8 +37,17 @@ export class CartController {
     };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
+  @Patch('')
+  update(@Body() updateCartDto: UpdateCartDto) {
+    return this.cartService.update(updateCartDto);
+  }
+
+  @Delete(':assistanceId')
+  async remove(@Param('assistanceId') assistanceId: bigint) {
+    return {
+      result: {
+        message: await this.cartService.remove(assistanceId),
+      },
+    };
   }
 }
