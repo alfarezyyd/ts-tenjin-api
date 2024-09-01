@@ -1,3 +1,3 @@
 export class CreateCartDto {
-  assistanceId: number;
+  assistantId: number;
 }

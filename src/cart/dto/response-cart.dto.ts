@@ -1,5 +1,5 @@
 export default class ResponseCart {
-  assistanceId: string;
+  assistantId: string;
   assistanceTopic: string;
   assistancePrice: number;
   sessionAmount: number;

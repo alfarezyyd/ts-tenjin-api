@@ -13,7 +13,7 @@ export class CartService {
     @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
 
-  async create(assistanceId: number) {
+  async create(assistantId: number) {
     await this.prismaService.$transaction(async (prismaTransaction) => {
       const userUniqueId = this.expressRequest['user']['uniqueId'];
       const userPrisma = await prismaTransaction.user
@@ -37,7 +37,7 @@ export class CartService {
 
       await prismaTransaction.assistanceCart.create({
         data: {
-          assistanceId: assistanceId,
+          assistantId: assistantId,
           cartId: userPrisma.id,
           sessionAmount: 1,
         },
@@ -89,7 +89,7 @@ export class CartService {
       const assistantsCartResponse: ResponseCart[] = [];
       for (const assistantsCartElement of assistantsCart) {
         const assistantCartResponse = new ResponseCart();
-        assistantCartResponse.assistanceId =
+        assistantCartResponse.assistantId =
           assistantsCartElement.assistance.id.toString();
         assistantCartResponse.assistanceTopic =
           assistantsCartElement.assistance.topic;
@@ -130,7 +130,7 @@ export class CartService {
       const assistanceCart =
         await prismaTransaction.assistanceCart.findFirstOrThrow({
           where: {
-            assistanceId: updateCartDto.assistanceId,
+            assistantId: updateCartDto.assistantId,
             cartId: userPrisma.Cart.id,
           },
           select: {
@@ -143,7 +143,7 @@ export class CartService {
       if (assistanceCart.sessionAmount <= 0) {
         await prismaTransaction.assistanceCart.deleteMany({
           where: {
-            assistanceId: updateCartDto.assistanceId,
+            assistantId: updateCartDto.assistantId,
             cartId: userPrisma.Cart.id,
           },
         });
@@ -151,7 +151,7 @@ export class CartService {
       }
       await prismaTransaction.assistanceCart.updateMany({
         where: {
-          assistanceId: updateCartDto.assistanceId,
+          assistantId: updateCartDto.assistantId,
           cartId: userPrisma.Cart.id,
         },
         data: {
@@ -162,7 +162,7 @@ export class CartService {
     });
   }
 
-  remove(assistanceId: bigint) {
+  remove(assistantId: bigint) {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
@@ -183,7 +183,7 @@ export class CartService {
       await prismaTransaction.assistanceCart
         .findFirstOrThrow({
           where: {
-            assistanceId: assistanceId,
+            assistantId: assistantId,
             cartId: userPrisma.Cart.id,
           },
         })
@@ -193,7 +193,7 @@ export class CartService {
       await prismaTransaction.assistanceCart.deleteMany({
         where: {
           cartId: userPrisma.Cart.id,
-          assistanceId: assistanceId,
+          assistantId: assistantId,
         },
       });
       return `Success! assistance has been removed from cart`;
