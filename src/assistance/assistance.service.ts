@@ -107,7 +107,7 @@ export class AssistanceService {
           `assistants/${this.expressRequest['user']['mentorId']}/${newAssistancePrisma.id}`,
         );
         assistanceResourceInsertPayload.push({
-          assistanceId: newAssistancePrisma.id,
+          assistantId: newAssistancePrisma.id,
           imagePath: newResourceFileName,
         });
       }
@@ -117,7 +117,7 @@ export class AssistanceService {
       const assistanceTagsInsertPayload = Array.from(
         validatedCreateAssistanceDto.tagId,
       ).map((value) => ({
-        assistanceId: newAssistancePrisma.id,
+        assistantId: newAssistancePrisma.id,
         tagId: value as number,
       }));
       await prismaTransaction.assistanceTags.createMany({
@@ -161,7 +161,7 @@ export class AssistanceService {
     return `This action returns a #${id} assistance`;
   }
 
-  async update(assistanceId: bigint, updateAssistanceDto: UpdateAssistanceDto) {
+  async update(assistantId: bigint, updateAssistanceDto: UpdateAssistanceDto) {
     const validatedCreateAssistanceDto = this.validationService.validate(
       AssistanceValidation.SAVE,
       updateAssistanceDto,
@@ -204,7 +204,7 @@ export class AssistanceService {
       const updateAssistancePrisma: Assistance =
         await prismaTransaction.assistance.update({
           where: {
-            id: assistanceId,
+            id: assistantId,
           },
           data: {
             ...prismaPayload,
@@ -224,7 +224,7 @@ export class AssistanceService {
       const assistanceTagsInsertPayload = Array.from(
         validatedCreateAssistanceDto.tagId,
       ).map((value) => ({
-        assistanceId: updateAssistancePrisma.id,
+        assistantId: updateAssistancePrisma.id,
         tagId: value as number,
       }));
       await prismaTransaction.assistanceTags.createMany({
@@ -244,13 +244,13 @@ export class AssistanceService {
         })
         .catch(() => {
           throw new NotFoundException(
-            `Assistance with assistanceId ${id} not found`,
+            `Assistance with assistantId ${id} not found`,
           );
         });
       const assistanceResources =
         await prismaTransaction.assistanceResource.findMany({
           where: {
-            assistanceId: assistancePrisma.id,
+            assistantId: assistancePrisma.id,
           },
         });
       for (const assistanceResource of assistanceResources) {
@@ -261,12 +261,12 @@ export class AssistanceService {
       }
       await prismaTransaction.assistanceResource.deleteMany({
         where: {
-          assistanceId: assistancePrisma.id,
+          assistantId: assistancePrisma.id,
         },
       });
       await prismaTransaction.assistanceTags.deleteMany({
         where: {
-          assistanceId: assistancePrisma.id,
+          assistantId: assistancePrisma.id,
         },
       });
       await prismaTransaction.assistance.delete({
@@ -275,6 +275,6 @@ export class AssistanceService {
         },
       });
     });
-    return `Success! assistance with assistanceId ${id} has been deleted`;
+    return `Success! assistance with assistantId ${id} has been deleted`;
   }
 }
