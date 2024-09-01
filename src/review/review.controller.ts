@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -19,12 +20,12 @@ export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post()
-  @UseInterceptors(FilesInterceptor('resources'))
+  @UseInterceptors(FilesInterceptor('imageResources'))
   create(
-    @UploadedFiles() resources: Array<Express.Multer.File>,
+    @UploadedFiles() imageResources: Array<Express.Multer.File>,
     @Body() createReviewDto: CreateReviewDto,
   ) {
-    return this.reviewService.create(resources, createReviewDto);
+    return this.reviewService.create(imageResources, createReviewDto);
   }
 
   @Get()
@@ -37,9 +38,14 @@ export class ReviewController {
     return this.reviewService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(+id, updateReviewDto);
+  @Patch(':reviewId')
+  @UseInterceptors(FilesInterceptor('imageResources'))
+  update(
+    @UploadedFiles() imageResources: Array<Express.Multer.File>,
+    @Param('reviewId', ParseIntPipe) reviewId: bigint,
+    @Body() updateReviewDto: UpdateReviewDto,
+  ) {
+    return this.reviewService.update(reviewId, imageResources, updateReviewDto);
   }
 
   @Delete(':id')
