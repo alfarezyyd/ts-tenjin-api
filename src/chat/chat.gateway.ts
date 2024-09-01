@@ -35,9 +35,9 @@ export class ChatGateway
     private readonly redisService: RedisService,
   ) {}
 
-  afterInit(socketServer: Server) {}
+  afterInit(webSocketServer: Server) {}
 
-  async handleConnection(client: Socket) {}
+  async handleConnection(webSocketClient: Socket) {}
 
   async handleDisconnect(client: Socket) {
     const username = this.clients.get(client.id);
@@ -47,19 +47,16 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('join')
+  @SubscribeMessage('joinChat')
   async handleJoin(
-    @MessageBody('username') username: string,
+    @MessageBody('name') name: string,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    this.clients.set(client.id, username);
-    await this.redisService
-      .getClient()
-      .hSet('onlineUsers', username, client.id);
+    await this.redisService.getClient().hSet('onlineUsers', name, client.id);
 
-    client.broadcast.emit('message', {
-      user: 'system',
-      text: `${username} has joined the chat`,
+    client.broadcast.emit('channelMessage', {
+      user: 'server',
+      text: `${name} has joined the chat`,
     });
 
     const onlineUsers = await this.redisService
@@ -71,33 +68,26 @@ export class ChatGateway
   @SubscribeMessage('privateMessage')
   async handlePrivateMessage(
     @MessageBody('message') message: string,
-    @MessageBody('toUser') toUser: string,
-    @ConnectedSocket() client: Socket,
+    @MessageBody('destinationUser') destinationUser: string,
+    @ConnectedSocket() webSocketClient: Socket,
   ): Promise<void> {
-    const fromUser = this.clients.get(client.id);
-    const toClientId = await this.redisService
+    const originUser = await this.redisService
       .getClient()
-      .hGet('onlineUsers', toUser);
+      .hGet('onlineUsers', webSocketClient.handshake.auth.name);
+    const destinationClientId = await this.redisService
+      .getClient()
+      .hGet('onlineUsers', destinationUser);
 
-    if (toClientId) {
-      client
-        .to(toClientId)
-        .emit('privateMessage', { from: fromUser, text: message });
+    if (destinationClientId) {
+      webSocketClient
+        .to(destinationClientId)
+        .emit('privateMessage', { from: originUser, text: message });
     } else {
-      client.emit('message', {
+      webSocketClient.emit('message', {
         user: 'system',
-        text: `User ${toUser} is not online`,
+        text: `User ${destinationUser} is not online`,
       });
     }
-  }
-
-  @SubscribeMessage('message')
-  async handleMessage(
-    @MessageBody('message') message: string,
-    @ConnectedSocket() client: Socket,
-  ): Promise<void> {
-    const username = this.clients.get(client.id);
-    this.webSocketServer.emit('message', { user: username, text: message });
   }
 
   @SubscribeMessage('createChat')
