@@ -15,6 +15,7 @@ import { Server, Socket } from 'socket.io';
 import { RedisService } from '../common/redis.service';
 
 @WebSocketGateway({
+  namespace: 'chats',
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
@@ -34,7 +35,7 @@ export class ChatGateway
     private readonly redisService: RedisService,
   ) {}
 
-  afterInit(server: Server) {}
+  afterInit(socketServer: Server) {}
 
   async handleConnection(client: Socket) {}
 
