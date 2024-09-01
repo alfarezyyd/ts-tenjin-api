@@ -50,11 +50,13 @@ export class ChatGateway
   @SubscribeMessage('joinChat')
   async handleJoin(
     @MessageBody('name') name: string,
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() webSocketClient: Socket,
   ): Promise<void> {
-    await this.redisService.getClient().hSet('onlineUsers', name, client.id);
+    await this.redisService
+      .getClient()
+      .hSet('onlineUsers', name, webSocketClient.id);
 
-    client.broadcast.emit('channelMessage', {
+    webSocketClient.broadcast.emit('channelMessage', {
       user: 'server',
       text: `${name} has joined the chat`,
     });
@@ -62,7 +64,7 @@ export class ChatGateway
     const onlineUsers = await this.redisService
       .getClient()
       .hGetAll('onlineUsers');
-    client.emit('users', onlineUsers);
+    webSocketClient.emit('users', onlineUsers);
   }
 
   @SubscribeMessage('privateMessage')
