@@ -1,5 +1,6 @@
 export class CreateReviewDto {
-  orderId: bigint;
+  orderId: string;
+  assistantId: bigint;
   rating: number;
   review: string;
 }

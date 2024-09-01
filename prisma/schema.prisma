@@ -168,6 +168,7 @@ model Assistance {
   createdAt          DateTime             @map("created_at") @default(now())
   updatedAt          DateTime             @map("updated_at") @default(now())
   AssistanceCart     AssistanceCart[]
+  Review             Review[]
 
   @@map("assistants")
 }
@@ -210,21 +211,35 @@ model Order {
   orderPaymentStatus OrderPaymentStatus @map("order_payment_status") @default(NOT_YET_PAID)
   note               String             @db.Text
   createdAt          DateTime           @map("created_at") @default(now())
-  OrderReview        OrderReview[]
+  Review             Review[]
 
   @@map("orders")
 }
 
-model OrderReview {
-  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
-  orderId   String   @map("order_id") @db.VarChar(255)
-  Order     Order    @relation(fields: [orderId], references: [id])
-  rating    Decimal  @db.Decimal(3, 2)
-  review    String   @db.Text
-  createdAt DateTime @map("created_at") @default(now())
-  updatedAt DateTime @map("updated_at")
+model Review {
+  id             BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  orderId        String           @map("order_id") @db.VarChar(255)
+  Order          Order            @relation(fields: [orderId], references: [id])
+  assistantId    BigInt           @map("assistant_id") @db.UnsignedBigInt
+  Assistance     Assistance       @relation(fields: [assistantId], references: [id])
+  rating         Decimal          @db.Decimal(3, 2)
+  review         String           @db.Text
+  createdAt      DateTime         @map("created_at") @default(now())
+  updatedAt      DateTime         @map("updated_at")
+  ReviewResource ReviewResource[]
 
-  @@map("order_reviews")
+  @@unique([orderId, assistantId])
+  @@map("reviews")
+}
+
+model ReviewResource {
+  id        BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath String? @map("image_path") @db.VarChar(255)
+  videoUrl  String? @map("video_url") @db.VarChar(255)
+  Review    Review  @relation(fields: [reviewId], references: [id])
+  reviewId  BigInt  @map("order_review_id") @db.UnsignedBigInt
+
+  @@map("review_resources")
 }
 
 model Language {
