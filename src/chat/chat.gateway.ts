@@ -11,8 +11,6 @@ import {
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
-import { RedisClientType } from 'redis';
-import { Inject } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '../common/redis.service';
 
@@ -28,19 +26,24 @@ export class ChatGateway
 {
   @WebSocketServer()
   webSocketServer: Server;
+
+  private clients = new Map<string, string>(); // Mapping socket.id ke username
+
   constructor(
     private readonly chatService: ChatService,
     private readonly redisService: RedisService,
   ) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async handleConnection(client: Socket, ...args: any[]) {}
+  async handleConnection(client: Socket) {}
 
   async handleDisconnect(client: Socket) {
-    await this.redisService.getClient().hDel('onlineUsers', client.id);
+    const username = this.clients.get(client.id);
+    if (username) {
+      this.clients.delete(client.id);
+      await this.redisService.getClient().hDel('onlineUsers', username);
+    }
   }
 
   @SubscribeMessage('join')
@@ -48,17 +51,43 @@ export class ChatGateway
     @MessageBody('username') username: string,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
+    this.clients.set(client.id, username);
     await this.redisService
       .getClient()
-      .hSet('onlineUsers', client.id, username);
+      .hSet('onlineUsers', username, client.id);
+
     client.broadcast.emit('message', {
       user: 'system',
       text: `${username} has joined the chat`,
     });
+
     const onlineUsers = await this.redisService
       .getClient()
       .hGetAll('onlineUsers');
     client.emit('users', onlineUsers);
+  }
+
+  @SubscribeMessage('privateMessage')
+  async handlePrivateMessage(
+    @MessageBody('message') message: string,
+    @MessageBody('toUser') toUser: string,
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const fromUser = this.clients.get(client.id);
+    const toClientId = await this.redisService
+      .getClient()
+      .hGet('onlineUsers', toUser);
+
+    if (toClientId) {
+      client
+        .to(toClientId)
+        .emit('privateMessage', { from: fromUser, text: message });
+    } else {
+      client.emit('message', {
+        user: 'system',
+        text: `User ${toUser} is not online`,
+      });
+    }
   }
 
   @SubscribeMessage('message')
@@ -66,9 +95,7 @@ export class ChatGateway
     @MessageBody('message') message: string,
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
-    const username = await this.redisService
-      .getClient()
-      .hGet('onlineUsers', client.id);
+    const username = this.clients.get(client.id);
     this.webSocketServer.emit('message', { user: username, text: message });
   }
 
