@@ -10,6 +10,7 @@ export class ChatSessionMiddleware implements NestMiddleware {
   constructor(private readonly redisService: RedisService) {}
   async use(webSocketClient: Socket, next: (err?: any) => void) {
     const sessionId = webSocketClient.handshake.auth.sessionId;
+    console.log('Middleware ' + sessionId);
     if (sessionId) {
       const chatSessionTrait: ChatSessionTrait = JSON.parse(
         await this.redisService.getClient().hGet('onlineUsers', sessionId),
@@ -18,6 +19,7 @@ export class ChatSessionMiddleware implements NestMiddleware {
       webSocketClient.handshake.auth.userUniqueId =
         chatSessionTrait.userUniqueId;
       webSocketClient.handshake.auth.name = chatSessionTrait.name;
+      console.log('Chat Session Trait ' + chatSessionTrait);
       return next();
     }
     const name = webSocketClient.handshake.auth.name;
@@ -33,6 +35,7 @@ export class ChatSessionMiddleware implements NestMiddleware {
       .setSessionId(webSocketClient.handshake.auth.sessionId)
       .setUserUniqueId(userUniqueId)
       .setName(name);
+    console.log('New Chat Session Trait ' + newChatSessionTraitBuilder);
     await this.redisService
       .getClient()
       .hSet(

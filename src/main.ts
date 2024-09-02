@@ -5,6 +5,7 @@ import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { ClassSerializerInterceptor } from '@nestjs/common';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 declare const module: any;
 
 async function bootstrap() {
@@ -40,6 +41,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   await app.listen(3001);
   if (module.hot) {

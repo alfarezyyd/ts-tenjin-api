@@ -14,12 +14,12 @@ import { UpdateChatDto } from './dto/update-chat.dto';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '../common/redis.service';
 import PrismaService from '../common/prisma.service';
-import {
-  ChatSessionTrait,
-  ChatSessionTraitBuilder,
-} from './trait/chat-session.trait';
+import { ChatSessionTrait } from './trait/chat-session.trait';
 import { Chat, ChatStatus } from '@prisma/client';
+import { NotFoundException, UseGuards } from '@nestjs/common';
+import { ChatSessionMiddleware } from './chat-session.middleware';
 
+@UseGuards(ChatSessionMiddleware) // Gunakan guard ini untuk memeriksa akses
 @WebSocketGateway({
   namespace: 'chats',
   cors: {
@@ -33,8 +33,6 @@ export class ChatGateway
 {
   @WebSocketServer()
   webSocketServer: Server;
-
-  private clients = new Map<string, string>(); // Mapping socket.id ke username
 
   constructor(
     private readonly chatService: ChatService,
@@ -50,14 +48,21 @@ export class ChatGateway
       userUniqueId: webSocketClient.handshake.auth.userUniqueId,
     });
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const userPrisma = await prismaTransaction.user.findFirstOrThrow({
-        where: {
-          uniqueId: webSocketClient.handshake.auth.userUniqueId,
-        },
-        select: {
-          id: true,
-        },
-      });
+      const userPrisma = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: webSocketClient.handshake.auth.userUniqueId,
+          },
+          select: {
+            id: true,
+          },
+        })
+        .catch(() => {
+          webSocketClient.emit('error', {
+            message: 'User not found',
+          });
+          throw new NotFoundException(`User not found`);
+        });
       const allMessageFromUser: Chat[] = await prismaTransaction.chat.findMany({
         where: {
           originUserId: userPrisma.id,
