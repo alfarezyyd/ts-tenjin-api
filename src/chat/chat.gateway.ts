@@ -92,6 +92,7 @@ export class ChatGateway
           messages: messagesPerUser.get(parsedChatPayload.userId) || [],
         });
       }
+      webSocketClient.emit('onlineUsers', allOnlineUsers);
     });
   }
 
