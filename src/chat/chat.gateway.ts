@@ -37,13 +37,28 @@ export class ChatGateway
 
   afterInit(webSocketServer: Server) {}
 
-  async handleConnection(webSocketClient: Socket) {}
+  async handleConnection(webSocketClient: Socket) {
+    webSocketClient.emit('session', {
+      sessionId: webSocketClient.handshake.auth.sessionId,
+      userUniqueId: webSocketClient.handshake.auth.userUniqueId,
+    });
+  }
 
-  async handleDisconnect(client: Socket) {
-    const username = this.clients.get(client.id);
-    if (username) {
-      this.clients.delete(client.id);
-      await this.redisService.getClient().hDel('onlineUsers', username);
+  async handleDisconnect(webSocketClient: Socket) {
+    const matchingSockets = await webSocketClient
+      .in(webSocketClient.handshake.auth.sessionId)
+      .fetchSockets();
+    const isDisconnected = matchingSockets.length === 0;
+    if (isDisconnected) {
+      // notify other users
+      webSocketClient.broadcast.emit(
+        'user disconnected',
+        webSocketClient.handshake.auth.userUniqueId,
+      );
+      // update the connection status of the session
+      await this.redisService
+        .getClient()
+        .hDel('onlineUsers', webSocketClient.handshake.auth.sessionId);
     }
   }
 
