@@ -292,7 +292,7 @@ model Chat {
   originUserId      BigInt     @map("origin_user_ud") @db.UnsignedBigInt
   originUser        User       @relation(fields: [originUserId], references: [id], name: "originUserRelation")
   destinationUserId BigInt     @map("destination_user_id") @db.UnsignedBigInt
-  destinationuser   User       @relation(fields: [destinationUserId], references: [id], name: "destinationUserRelation")
+  destinationUser   User       @relation(fields: [destinationUserId], references: [id], name: "destinationUserRelation")
   payloadMessage    String     @map("payload_message") @db.LongText
   createdAt         DateTime   @map("created_at") @default(now())
   updatedAt         DateTime   @map("updated_at")
