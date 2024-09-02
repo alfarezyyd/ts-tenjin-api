@@ -168,7 +168,7 @@ model Assistance {
   AssistanceResource AssistanceResource[]
   AssistanceLanguage AssistanceLanguage[]
   createdAt          DateTime             @map("created_at") @default(now())
-  updatedAt          DateTime             @map("updated_at") @default(now())
+  updatedAt          DateTime?            @map("updated_at") @default(now())
   AssistanceCart     AssistanceCart[]
   Review             Review[]
 
@@ -227,7 +227,7 @@ model Review {
   rating         Decimal          @db.Decimal(3, 2)
   review         String           @db.Text
   createdAt      DateTime         @map("created_at") @default(now())
-  updatedAt      DateTime         @map("updated_at")
+  updatedAt      DateTime?        @map("updated_at")
   ReviewResource ReviewResource[]
 
   @@unique([orderId, assistantId])
@@ -295,7 +295,7 @@ model Chat {
   destinationUser   User       @relation(fields: [destinationUserId], references: [id], name: "destinationUserRelation")
   payloadMessage    String     @map("payload_message") @db.LongText
   createdAt         DateTime   @map("created_at") @default(now())
-  updatedAt         DateTime   @map("updated_at")
+  updatedAt         DateTime?  @map("updated_at")
   status            ChatStatus @default(SENT)
   isDeleted         Boolean    @map("is_deleted") @default(false)
 
