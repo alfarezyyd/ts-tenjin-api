@@ -1,9 +1,9 @@
 import { Injectable, NestMiddleware, NotFoundException } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { RedisService } from '../common/redis.service';
-import ChatSessionTrait from './trait/chat-session.trait';
+import { ChatSessionTrait } from './trait/chat-session.trait';
 import { v4 as uuidv4 } from 'uuid';
-import ChatSessionTraitBuilder from './trait/chat-session.trait';
+import { ChatSessionTraitBuilder } from './trait/chat-session.trait';
 
 @Injectable()
 export class ChatSessionMiddleware implements NestMiddleware {
@@ -29,7 +29,7 @@ export class ChatSessionMiddleware implements NestMiddleware {
     webSocketClient.handshake.auth.sessionId = uuidv4();
     webSocketClient.handshake.auth.userUniqueId = userUniqueId;
     webSocketClient.handshake.auth.name = name;
-    const newChatSessionTrait = new ChatSessionTraitBuilder()
+    const newChatSessionTraitBuilder = new ChatSessionTraitBuilder()
       .setSessionId(webSocketClient.handshake.auth.sessionId)
       .setUserUniqueId(userUniqueId)
       .setName(name);
@@ -37,8 +37,8 @@ export class ChatSessionMiddleware implements NestMiddleware {
       .getClient()
       .hSet(
         'onlineUsers',
-        newChatSessionTrait.sessionId,
-        JSON.stringify(newChatSessionTrait),
+        newChatSessionTraitBuilder.sessionId,
+        JSON.stringify(newChatSessionTraitBuilder),
       );
     next();
   }

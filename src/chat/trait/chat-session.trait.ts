@@ -1,10 +1,10 @@
-class ChatSessionTrait {
+export class ChatSessionTrait {
   sessionId: string;
   userUniqueId: string;
   name: string;
 }
 
-export default class ChatSessionTraitBuilder {
+export class ChatSessionTraitBuilder {
   sessionId: string;
   userUniqueId: string;
   name: string;
