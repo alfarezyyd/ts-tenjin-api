@@ -85,6 +85,9 @@ export class ChatGateway
         'user-unique-id'
       ] as string,
     });
+    webSocketClient.join(
+      webSocketClient.handshake.headers['user-unique-id'] as string,
+    );
     await this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
@@ -234,7 +237,7 @@ export class ChatGateway
         },
       });
     });
-    if (originUser || destinationUser) {
+    if (originUser && destinationUser) {
       webSocketClient
         .to(destinationUser.uniqueId)
         .to(originUser.uniqueId)
