@@ -45,37 +45,32 @@ export class ChatGateway
   afterInit(webSocketServer: Server) {}
 
   async handleConnection(webSocketClient: Socket) {
-    const sessionId = webSocketClient.handshake.headers[
-      'session-idc'
-    ] as string;
+    const sessionId = webSocketClient.handshake.headers['session-id'] as string;
     console.log('Middleware ' + sessionId);
     if (sessionId) {
       const chatSessionTrait: ChatSessionTrait = JSON.parse(
         await this.redisService.getClient().hGet('onlineUsers', sessionId),
       );
-      webSocketClient.handshake.headers['sessionId'] = sessionId;
-      webSocketClient.handshake.headers['userUniqueId'] =
+      webSocketClient.handshake.headers['session-id'] = sessionId;
+      webSocketClient.handshake.headers['user-unique-id'] =
         chatSessionTrait.userUniqueId;
       webSocketClient.handshake.headers['name'] = chatSessionTrait.name;
-      console.log('Chat Session Trait ' + chatSessionTrait);
     }
     const name = webSocketClient.handshake.headers['name'] as string;
     const userUniqueId = webSocketClient.handshake.headers[
       'user-unique-id'
     ] as string;
-    console.log(name, userUniqueId);
     if (!name || !userUniqueId) {
       throw new NotFoundException(`Specified user not found`);
     }
 
-    webSocketClient.handshake.headers['sessionId'] = uuidv4();
-    webSocketClient.handshake.headers['userUniqueId'] = userUniqueId;
+    webSocketClient.handshake.headers['session-id'] = uuidv4();
+    webSocketClient.handshake.headers['user'] = userUniqueId;
     webSocketClient.handshake.headers['name'] = name;
     const newChatSessionTraitBuilder = new ChatSessionTraitBuilder()
-      .setSessionId(webSocketClient.handshake.headers['sessionId'] as string)
+      .setSessionId(webSocketClient.handshake.headers['session-id'] as string)
       .setUserUniqueId(userUniqueId)
       .setName(name);
-    console.log('New Chat Session Trait ' + newChatSessionTraitBuilder);
     await this.redisService
       .getClient()
       .hSet(
@@ -85,8 +80,10 @@ export class ChatGateway
       );
 
     webSocketClient.emit('session', {
-      sessionId: webSocketClient.handshake.headers['sessionId'] as string,
-      userUniqueId: webSocketClient.handshake.headers['userUniqueId'] as string,
+      sessionId: webSocketClient.handshake.headers['session-id'] as string,
+      userUniqueId: webSocketClient.handshake.headers[
+        'user-unique-id'
+      ] as string,
     });
     await this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
