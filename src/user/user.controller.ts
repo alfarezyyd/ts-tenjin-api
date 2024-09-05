@@ -16,7 +16,7 @@ import { WebResponse } from '../model/web.response';
 import { ResponseUserDto } from './dto/response-user.dto';
 import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
-import { Public } from '../authentication/set-metadata.decorator';
+import { Public } from '../authentication/decorator/set-metadata.decorator';
 
 @Controller('users')
 export class UserController {

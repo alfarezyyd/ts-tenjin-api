@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
+import PrismaService from './common/prisma.service';
 declare const module: any;
 
 async function bootstrap() {
@@ -31,6 +33,11 @@ async function bootstrap() {
       strategy: 'exposeAll',
       exposeUnsetFields: true, // This ensures unset fields are also exposed
     }),
+  );
+
+  // Global Guards
+  app.useGlobalGuards(
+    new NoVerifiedEmailGuard(app.get(Reflector), app.get(PrismaService)),
   );
 
   // Open API Swagger for Documentation

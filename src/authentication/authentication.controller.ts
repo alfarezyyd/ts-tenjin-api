@@ -12,7 +12,7 @@ import {
 import { AuthenticationService } from './authentication.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { UpdateAuthenticationDto } from './dto/update-authentication.dto';
-import { Public } from './set-metadata.decorator';
+import { Public } from './decorator/set-metadata.decorator';
 import SignUpDto from './dto/sign-up.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseAuthenticationDto } from './dto/response-authentication';

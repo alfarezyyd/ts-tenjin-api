@@ -18,7 +18,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { WebResponse } from '../model/web.response';
-import { Public } from 'src/authentication/set-metadata.decorator';
+import { Public } from 'src/authentication/decorator/set-metadata.decorator';
 import { Category } from '@prisma/client';
 
 @Controller('categories')

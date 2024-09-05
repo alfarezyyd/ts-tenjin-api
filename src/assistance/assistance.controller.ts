@@ -14,7 +14,7 @@ import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { WebResponse } from '../model/web.response';
 import { Category, Language, Tag } from '@prisma/client';
-import { Public } from 'src/authentication/set-metadata.decorator';
+import { Public } from 'src/authentication/decorator/set-metadata.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('assistants')
