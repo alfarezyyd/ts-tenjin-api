@@ -13,6 +13,9 @@ import { AuthenticationService } from './authentication.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { UpdateAuthenticationDto } from './dto/update-authentication.dto';
 import { Public } from './set-metadata.decorator';
+import SignUpDto from './dto/sign-up.dto';
+import { WebResponse } from '../model/web.response';
+import { ResponseAuthenticationDto } from './dto/response-authentication';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -21,8 +24,25 @@ export class AuthenticationController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: SignInDto) {
-    return this.authenticationService.signIn(signInDto);
+  async signIn(
+    @Body() signInDto: SignInDto,
+  ): Promise<WebResponse<ResponseAuthenticationDto>> {
+    return {
+      result: {
+        data: await this.authenticationService.signIn(signInDto),
+      },
+    };
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('register')
+  async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.authenticationService.signUp(signUpDto),
+      },
+    };
   }
 
   @Get()
