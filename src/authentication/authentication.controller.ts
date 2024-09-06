@@ -16,6 +16,9 @@ import { Public } from './decorator/set-metadata.decorator';
 import SignUpDto from './dto/sign-up.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseAuthenticationDto } from './dto/response-authentication';
+import { NoVerifiedEmail } from './decorator/set-no-verified-email.decorator';
+import { CurrentUser } from './decorator/current-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -41,6 +44,19 @@ export class AuthenticationController {
     return {
       result: {
         data: await this.authenticationService.signUp(signUpDto),
+      },
+    };
+  }
+
+  @NoVerifiedEmail(true)
+  async generateOneTimePasswordVerification(
+    @CurrentUser() currentUser: User,
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.authenticationService.generateOneTimePasswordVerification(
+          currentUser,
+        ),
       },
     };
   }

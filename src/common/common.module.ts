@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { HttpModule } from '@nestjs/axios';
 import { MulterModule } from '@nestjs/platform-express';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 import PrismaService from './prisma.service';
 import ValidationService from './validation.service';
@@ -29,6 +30,19 @@ import { MidtransService } from './midtrans.service';
           ),
         }),
       ],
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule], // Import ConfigModule
+      inject: [ConfigService], // Inject ConfigService
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          service: configService.get<string>('EMAIL_HOST'),
+          auth: {
+            user: configService.get<string>('EMAIL_USERNAME'),
+            pass: configService.get<string>('EMAIL_PASSWORD'),
+          },
+        },
+      }),
     }),
     MulterModule.registerAsync({
       useClass: MulterService,

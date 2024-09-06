@@ -14,6 +14,9 @@ import SignUpDto from './dto/sign-up.dto';
 import ValidationService from '../common/validation.service';
 import AuthenticationValidation from './authentication.validation';
 import PrismaService from '../common/prisma.service';
+import CommonHelper from '../helper/common.helper';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthenticationService {
@@ -22,6 +25,8 @@ export class AuthenticationService {
     private readonly jwtService: JwtService,
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
   ) {}
 
   async signIn(signInDto: SignInDto): Promise<ResponseAuthenticationDto> {
@@ -77,5 +82,35 @@ export class AuthenticationService {
       });
       return `Success! new user has been created`;
     });
+  }
+
+  async generateOneTimePasswordVerification(
+    currentUser: User,
+  ): Promise<string> {
+    const generatedOneTimePassword = await this.prismaService.$transaction(
+      async (prismaTransaction) => {
+        const generatedOneTimePassword =
+          await CommonHelper.generateOneTimePassword();
+        const hashedGeneratedOneTimePassword = await bcrypt.hash(
+          generatedOneTimePassword,
+          10,
+        );
+        prismaTransaction.oneTimePasswordToken.create({
+          data: {
+            userId: currentUser['id'],
+            hashedToken: hashedGeneratedOneTimePassword,
+            expiresAt: new Date(new Date().getTime() + 10 * 60 * 1000),
+          },
+        });
+        return generatedOneTimePassword;
+      },
+    );
+    await this.mailerService.sendMail({
+      from: this.configService.get<string>('EMAIL_USERNAME'),
+      to: currentUser['email'],
+      subject: 'One Time Password Verification',
+      text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
+    });
+    return `Successfully send one time password`;
   }
 }
