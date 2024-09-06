@@ -17,6 +17,7 @@ import PrismaService from '../common/prisma.service';
 import CommonHelper from '../helper/common.helper';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthenticationService {
@@ -78,7 +79,7 @@ export class AuthenticationService {
         );
       }
       await prismaTransaction.user.create({
-        data: validatedSignUpDto,
+        data: { ...validatedSignUpDto, uniqueId: uuidv4() },
       });
       return `Success! new user has been created`;
     });

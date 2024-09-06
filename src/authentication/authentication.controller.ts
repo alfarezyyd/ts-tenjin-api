@@ -25,6 +25,7 @@ export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Public()
+  @NoVerifiedEmail(true)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signIn(
@@ -38,6 +39,7 @@ export class AuthenticationController {
   }
 
   @Public()
+  @NoVerifiedEmail(true)
   @HttpCode(HttpStatus.OK)
   @Post('register')
   async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponse<string>> {
