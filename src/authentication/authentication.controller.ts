@@ -19,6 +19,7 @@ import { ResponseAuthenticationDto } from './dto/response-authentication';
 import { NoVerifiedEmail } from './decorator/set-no-verified-email.decorator';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { User } from '@prisma/client';
+import LoggedUser from './dto/logged-user.dto';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -52,7 +53,7 @@ export class AuthenticationController {
   @NoVerifiedEmail(true)
   @Get('generate-otp')
   async generateOneTimePasswordVerification(
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: LoggedUser,
   ): Promise<WebResponse<string>> {
     return {
       result: {
@@ -66,7 +67,7 @@ export class AuthenticationController {
   @NoVerifiedEmail(true)
   @Post('verify-otp/:oneTimePassword')
   async verifyOneTimePasswordToken(
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: LoggedUser,
     @Param('oneTimePassword') oneTimePassword: string,
   ): Promise<WebResponse<boolean>> {
     return {

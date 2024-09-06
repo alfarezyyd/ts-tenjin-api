@@ -18,6 +18,7 @@ import CommonHelper from '../helper/common.helper';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import LoggedUser from './dto/logged-user.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -37,7 +38,7 @@ export class AuthenticationService {
       throw new UnauthorizedException('Username or password not valid');
     }
     const payloadJwt = {
-      id: user.uniqueId,
+      uniqueId: user.uniqueId,
       email: user.email,
       mentorId: user.Mentor?.id?.toString() ?? null,
     };
@@ -90,7 +91,7 @@ export class AuthenticationService {
   }
 
   async generateOneTimePasswordVerification(
-    currentUser: User,
+    currentUser: LoggedUser,
   ): Promise<string> {
     const generatedOneTimePassword = await this.prismaService.$transaction(
       async (prismaTransaction) => {
@@ -100,9 +101,18 @@ export class AuthenticationService {
           generatedOneTimePassword,
           10,
         );
+        const userPrisma: User = await prismaTransaction.user
+          .findFirstOrThrow({
+            where: {
+              uniqueId: currentUser['uniqueId'],
+            },
+          })
+          .catch(() => {
+            throw new UnauthorizedException(`User not found`);
+          });
         await prismaTransaction.oneTimePasswordToken.create({
           data: {
-            userId: currentUser['id'],
+            userId: userPrisma['id'],
             hashedToken: hashedGeneratedOneTimePassword,
             expiresAt: new Date(new Date().getTime() + 10 * 60 * 1000),
           },
@@ -120,14 +130,23 @@ export class AuthenticationService {
   }
 
   async verifyOneTimePasswordToken(
-    currentUser: User,
+    currentUser: LoggedUser,
     oneTimePassword: string,
   ): Promise<boolean> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma: User = await prismaTransaction.user
+        .findFirst({
+          where: {
+            uniqueId: currentUser['uniqueId'],
+          },
+        })
+        .catch(() => {
+          throw new UnauthorizedException(`User not found`);
+        });
       const validOneTimePasswordToken: OneTimePasswordToken =
         await prismaTransaction.oneTimePasswordToken.findFirstOrThrow({
           where: {
-            id: currentUser.id,
+            userId: userPrisma.id,
             expiresAt: {
               gte: new Date(),
             },
@@ -142,7 +161,7 @@ export class AuthenticationService {
       ) {
         await prismaTransaction.user.update({
           where: {
-            id: currentUser.id,
+            id: userPrisma.id,
           },
           data: {
             emailVerifiedAt: new Date(),
