@@ -63,6 +63,22 @@ export class AuthenticationController {
     };
   }
 
+  @NoVerifiedEmail(true)
+  @Post('verify-otp/:oneTimePassword')
+  async verifyOneTimePasswordToken(
+    @CurrentUser() currentUser: User,
+    @Param('oneTimePassword') oneTimePassword: string,
+  ): Promise<WebResponse<boolean>> {
+    return {
+      result: {
+        data: await this.authenticationService.verifyOneTimePasswordToken(
+          currentUser,
+          oneTimePassword,
+        ),
+      },
+    };
+  }
+
   @Get()
   findAll() {
     return this.authenticationService.findAll();

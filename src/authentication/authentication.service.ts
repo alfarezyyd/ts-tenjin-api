@@ -9,7 +9,7 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ResponseAuthenticationDto } from './dto/response-authentication';
 import * as bcrypt from 'bcrypt';
-import { Mentor, User } from '@prisma/client';
+import { Mentor, OneTimePasswordToken, User } from '@prisma/client';
 import SignUpDto from './dto/sign-up.dto';
 import ValidationService from '../common/validation.service';
 import AuthenticationValidation from './authentication.validation';
@@ -100,7 +100,7 @@ export class AuthenticationService {
           generatedOneTimePassword,
           10,
         );
-        prismaTransaction.oneTimePasswordToken.create({
+        await prismaTransaction.oneTimePasswordToken.create({
           data: {
             userId: currentUser['id'],
             hashedToken: hashedGeneratedOneTimePassword,
@@ -117,5 +117,41 @@ export class AuthenticationService {
       text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
     });
     return `Successfully send one time password`;
+  }
+
+  async verifyOneTimePasswordToken(
+    currentUser: User,
+    oneTimePassword: string,
+  ): Promise<boolean> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const validOneTimePasswordToken: OneTimePasswordToken =
+        await prismaTransaction.oneTimePasswordToken.findFirstOrThrow({
+          where: {
+            id: currentUser.id,
+            expiresAt: {
+              gte: new Date(),
+            },
+          },
+        });
+      if (
+        validOneTimePasswordToken &&
+        (await bcrypt.compare(
+          oneTimePassword,
+          validOneTimePasswordToken.hashedToken,
+        ))
+      ) {
+        await prismaTransaction.user.update({
+          where: {
+            id: currentUser.id,
+          },
+          data: {
+            emailVerifiedAt: new Date(),
+          },
+        });
+        return true;
+      } else {
+        return false;
+      }
+    });
   }
 }

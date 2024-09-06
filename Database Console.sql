@@ -15,4 +15,4 @@ SELECT * FROM tags;
 SELECT * FROM languages;
 SELECT * FROM orders;
 SELECT * FROM users;
-
+SELECT * FROM one_time_password_tokens;
