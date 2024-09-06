@@ -18,20 +18,22 @@ enum UserGender {
   WOMAN
 }
 model User {
-  id                  BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  uniqueId            String     @unique @db.VarChar(512)
-  name                String     @db.VarChar(255)
-  gender              UserGender @default(MAN)
-  email               String     @unique @db.VarChar(255)
-  password            String     @db.VarChar(512)
-  telephone           String     @unique @db.VarChar(13)
-  pin                 String?    @db.Char(6)
-  photoPath           String?    @map("photo_path") @db.VarChar(255)
-  Mentor              Mentor?
-  Order               Order[]
-  Cart                Cart?
-  originUserChat      Chat[]     @relation(name: "originUserRelation")
-  destinationUserChat Chat[]     @relation(name: "destinationUserRelation")
+  id                   BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  uniqueId             String                 @unique @db.VarChar(512)
+  name                 String                 @db.VarChar(255)
+  gender               UserGender             @default(MAN)
+  email                String                 @unique @db.VarChar(255)
+  emailVerifiedAt      DateTime?              @map("email_verified_at") @db.Timestamp()
+  password             String                 @db.VarChar(512)
+  telephone            String                 @unique @db.VarChar(13)
+  pin                  String?                @db.Char(6)
+  photoPath            String?                @map("photo_path") @db.VarChar(255)
+  Mentor               Mentor?
+  Order                Order[]
+  Cart                 Cart?
+  originUserChat       Chat[]                 @relation(name: "originUserRelation")
+  destinationUserChat  Chat[]                 @relation(name: "destinationUserRelation")
+  oneTimePasswordToken OneTimePasswordToken[]
 
   @@map("users")
 }
@@ -300,4 +302,15 @@ model Chat {
   isDeleted         Boolean    @map("is_deleted") @default(false)
 
   @@map("chats")
+}
+
+model OneTimePasswordToken {
+  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  userId      BigInt   @map("user_id") @db.UnsignedBigInt
+  User        User     @relation(fields: [userId], references: [id])
+  hashedToken String   @map("hashed_token") @db.VarChar(255)
+  expiresAt   DateTime @map("expires_at") @db.Timestamp()
+  isValid     Boolean  @map("is_valid") @default(false)
+
+  @@map("one_time_password_tokens")
 }
