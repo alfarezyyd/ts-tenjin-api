@@ -36,6 +36,9 @@ import { MidtransService } from './midtrans.service';
       inject: [ConfigService], // Inject ConfigService
       useFactory: async (configService: ConfigService) => ({
         transport: {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true, // use SSL
           service: configService.get<string>('EMAIL_HOST'),
           auth: {
             user: configService.get<string>('EMAIL_USERNAME'),

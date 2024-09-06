@@ -39,7 +39,7 @@ export class AuthenticationService {
     const payloadJwt = {
       id: user.uniqueId,
       email: user.email,
-      mentorId: user.Mentor.id.toString() ?? null,
+      mentorId: user.Mentor?.id?.toString() ?? null,
     };
     return {
       accessToken: await this.jwtService.signAsync(payloadJwt),
@@ -79,7 +79,11 @@ export class AuthenticationService {
         );
       }
       await prismaTransaction.user.create({
-        data: { ...validatedSignUpDto, uniqueId: uuidv4() },
+        data: {
+          ...validatedSignUpDto,
+          uniqueId: uuidv4(),
+          password: await bcrypt.hash(validatedSignUpDto.password, 10),
+        },
       });
       return `Success! new user has been created`;
     });

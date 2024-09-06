@@ -15,5 +15,4 @@ SELECT * FROM tags;
 SELECT * FROM languages;
 SELECT * FROM orders;
 SELECT * FROM users;
-INSERT INTO users (uniqueId, name, email, password, telephone, pin, photo_path) VALUE (1, 'test', 'test', 'test', 'test', 'test', 'test');
-INSERT INTO users (uniqueId, name, email, password, telephone, pin, photo_path) VALUE (2, 'test2', 'test2', 'test2', 'test2', 'test2', 'test2')
+

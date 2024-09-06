@@ -39,7 +39,6 @@ export class AuthenticationController {
   }
 
   @Public()
-  @NoVerifiedEmail(true)
   @HttpCode(HttpStatus.OK)
   @Post('register')
   async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponse<string>> {
@@ -51,6 +50,7 @@ export class AuthenticationController {
   }
 
   @NoVerifiedEmail(true)
+  @Get('generate-otp')
   async generateOneTimePasswordVerification(
     @CurrentUser() currentUser: User,
   ): Promise<WebResponse<string>> {

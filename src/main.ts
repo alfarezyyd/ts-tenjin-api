@@ -24,7 +24,7 @@ async function bootstrap() {
 
   // Global Prefix
   app.setGlobalPrefix('api', {
-    exclude: ['authentication/login', 'authentication/register'],
+    exclude: ['authentication/(.*)'],
   });
 
   // Global Interceptor
