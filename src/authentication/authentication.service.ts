@@ -39,7 +39,10 @@ export class AuthenticationService {
     }
     const payloadJwt = {
       uniqueId: user.uniqueId,
+      name: user.name,
       email: user.email,
+      gender: user.gender,
+      telephone: user.telephone,
       mentorId: user.Mentor?.id?.toString() ?? null,
     };
     return {
