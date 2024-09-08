@@ -330,6 +330,8 @@ model MentorAddress {
   subDistrict         String @db.VarChar(255)
   district            String @db.VarChar(255)
   province            String @db.VarChar(255)
+
+  @@map("mentor_addresses")
 }
 
 model MentorBankAccount {
@@ -340,6 +342,8 @@ model MentorBankAccount {
   bankName              String @map("bank_name") @db.VarChar(255)
   accountNumber         String @map("account_number") @db.VarChar(255)
   paymentRecipientEmail String @map("payment_recipient_email") @db.VarChar(255)
+
+  @@map("mentor_bank_accounts")
 }
 
 model MentorResource {
