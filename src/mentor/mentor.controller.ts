@@ -8,16 +8,12 @@ import {
   Delete,
   ParseIntPipe,
   HttpCode,
-  Req,
   UseInterceptors,
   UploadedFiles,
-  ParseFilePipeBuilder,
-  HttpStatus,
 } from '@nestjs/common';
 import { MentorService } from './mentor.service';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import { WebResponse } from '../model/web.response';
-import { Request } from 'express';
 import {
   RegisterMentorDto,
   RegisterMentorResourceDto,

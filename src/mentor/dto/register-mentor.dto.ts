@@ -1,5 +1,5 @@
 export class RegisterMentorDto {
-  mentorAddresses: {
+  mentorAddress: {
     street: string;
     village: string;
     neighbourhoodNumber: string;
