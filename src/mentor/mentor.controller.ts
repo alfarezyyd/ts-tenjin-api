@@ -41,6 +41,7 @@ export class MentorController {
     @Body() registerMentorDto: RegisterMentorDto,
     @CurrentUser() currentUser: LoggedUser,
   ): Promise<WebResponse<string>> {
+    console.log(registerMentorDto, files);
     return {
       result: {
         data: await this.mentorService.create(

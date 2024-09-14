@@ -16,3 +16,5 @@ SELECT * FROM languages;
 SELECT * FROM orders;
 SELECT * FROM users;
 SELECT * FROM one_time_password_tokens;
+SELECT * FROM mentors;
+SELECT * FROM mentor_addresses;

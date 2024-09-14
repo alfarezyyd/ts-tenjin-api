@@ -1,21 +1,25 @@
 export class RegisterMentorDto {
-  mentorAddress: {
-    street: string;
-    village: string;
-    neighbourhoodNumber: string;
-    hamletNumber: string;
-    urbanVillage: string;
-    subDistrict: string;
-    district: string;
-    province: string;
-  };
+  mentorAddress: mentorAddressDto;
   pin: string;
-  mentorBankAccount: {
-    accountHolderName: string;
-    bankName: string;
-    accountNumber: string;
-    paymentRecipientEmail: string;
-  };
+  mentorBankAccount: mentorBankAccountDto;
+}
+
+class mentorAddressDto {
+  street: string;
+  village: string;
+  neighbourhoodNumber: string;
+  hamletNumber: string;
+  urbanVillage: string;
+  subDistrict: string;
+  district: string;
+  province: string;
+}
+
+class mentorBankAccountDto {
+  accountHolderName: string;
+  bankName: string;
+  accountNumber: string;
+  paymentRecipientEmail: string;
 }
 
 export class RegisterMentorResourceDto {

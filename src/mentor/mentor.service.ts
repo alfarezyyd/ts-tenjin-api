@@ -50,7 +50,7 @@ export class MentorService {
       });
       await prismaTransaction.mentorAddress.create({
         data: {
-          ...validatedRegisterMentorDto.mentorAddresses,
+          ...validatedRegisterMentorDto.mentorAddress,
           mentorId: mentorPrisma.id,
         },
       });
@@ -64,21 +64,21 @@ export class MentorService {
       mentorResourcesPayload.push(
         await CommonHelper.handleSaveFile(
           this.configService,
-          uploadedFiles.curriculumVitae,
+          uploadedFiles.curriculumVitae[0],
           `mentor-resources/${mentorPrisma.id}`,
         ),
       );
       mentorResourcesPayload.push(
         await CommonHelper.handleSaveFile(
           this.configService,
-          uploadedFiles.identityCard,
+          uploadedFiles.identityCard[0],
           `mentor-resources/${mentorPrisma.id}`,
         ),
       );
-      await mentorResourcesPayload.push(
+      mentorResourcesPayload.push(
         await CommonHelper.handleSaveFile(
           this.configService,
-          uploadedFiles.photo,
+          uploadedFiles.photo[0],
           `mentor-resources/${mentorPrisma.id}`,
         ),
       );

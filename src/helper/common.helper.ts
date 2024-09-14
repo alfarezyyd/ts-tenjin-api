@@ -14,6 +14,7 @@ export default class CommonHelper {
     const generatedSingleFileName = `${uuid()}-${singleFile.originalname}`;
     const folderPath = `${configService.get<string>('MULTER_DEST')}/${folderName}/`;
     await fsPromises.mkdir(folderPath, { recursive: true });
+    console.log(singleFile);
     fs.writeFile(
       folderPath + generatedSingleFileName,
       singleFile.buffer,
