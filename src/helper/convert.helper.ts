@@ -12,7 +12,7 @@ export default class ConvertHelper {
     };
   }
 
-  static convertStringIntoEnum<T>(
+  static convertStringIntoEnum<T extends object>(
     arg: string,
     ctx: RefinementCtx,
     msg: string,
@@ -25,7 +25,7 @@ export default class ConvertHelper {
       });
       return z.NEVER;
     } else {
-      return arg.toUpperCase().toString();
+      return arg.toUpperCase();
     }
   }
 }
