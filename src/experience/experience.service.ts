@@ -16,6 +16,11 @@ import { EmploymentType, Experience } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import * as fs from 'node:fs';
 import * as fsPromise from 'node:fs/promises';
+import LoggedUser from '../authentication/dto/logged-user.dto';
+import {
+  ResponseExperienceDto,
+  ResponseExperienceResourceDto,
+} from './dto/response-experience.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ExperienceService {
@@ -73,8 +78,58 @@ export class ExperienceService {
     return 'Success! new experience has been created';
   }
 
-  findAll() {
-    return `This action returns all experience`;
+  async findAllByMentor(
+    loggedUser: LoggedUser,
+  ): Promise<ResponseExperienceDto[]> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User not found`);
+        });
+      await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            userId: userPrisma.id,
+            id: BigInt(loggedUser.mentorId),
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User haven't registered as mentor`);
+        });
+      const allMentorExperience = await prismaTransaction.experience.findMany({
+        where: {
+          mentorId: BigInt(loggedUser.mentorId),
+        },
+        include: {
+          ExperienceResource: true,
+        },
+      });
+      return allMentorExperience.map((mentorExperience) => {
+        const allMentorExperienceResource: ResponseExperienceResourceDto[] = [];
+        for (const mentorExperienceResourceElement of mentorExperience.ExperienceResource) {
+          const mentorExperienceResource: ResponseExperienceResourceDto = {
+            id: mentorExperienceResourceElement.id.toString(),
+            imagePath: mentorExperienceResourceElement.imagePath,
+            videoUrl: mentorExperienceResourceElement.videoUrl,
+          };
+          allMentorExperienceResource.push(mentorExperienceResource);
+        }
+        delete mentorExperience.ExperienceResource;
+        const responseExperienceDto: ResponseExperienceDto = {
+          ...mentorExperience,
+          id: mentorExperience.id.toString(),
+          mentorId: mentorExperience.mentorId.toString(),
+          experienceResource: allMentorExperienceResource,
+        };
+
+        return responseExperienceDto;
+      });
+    });
   }
 
   async employmentTypeEnum() {

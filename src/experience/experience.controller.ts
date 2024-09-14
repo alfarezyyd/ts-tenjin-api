@@ -15,6 +15,9 @@ import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { WebResponse } from '../model/web.response';
+import { CurrentUser } from '../authentication/decorator/current-user.decorator';
+import LoggedUser from '../authentication/dto/logged-user.dto';
+import { ResponseExperienceDto } from './dto/response-experience.dto';
 
 @Controller('experiences')
 export class ExperienceController {
@@ -37,8 +40,19 @@ export class ExperienceController {
   }
 
   @Get()
-  findAll() {
-    return this.experienceService.findAll();
+  async findAllByMentor(
+    @CurrentUser() currentUser: LoggedUser,
+  ): Promise<WebResponse<ResponseExperienceDto[]>> {
+    console.log(await this.experienceService.findAllByMentor(currentUser));
+    console.log(
+      (await this.experienceService.findAllByMentor(currentUser))[0]
+        .experienceResource,
+    );
+    return {
+      result: {
+        data: await this.experienceService.findAllByMentor(currentUser),
+      },
+    };
   }
 
   @Get('enums/employment-types')
