@@ -15,14 +15,19 @@ import { TagModule } from './tag/tag.module';
 import { ReviewModule } from './review/review.module';
 import { LanguageModule } from './language/language.module';
 import { CartModule } from './cart/cart.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public', 'assets'), // Pastikan path ini benar
+      serveRoot: '/public/assets/', // Akses URL file statis
+    }),
     CommonModule,
-    UserModule,
     MentorModule,
     EducationModule,
     AuthenticationModule,
