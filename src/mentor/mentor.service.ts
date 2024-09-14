@@ -11,7 +11,6 @@ import LoggedUser from '../authentication/dto/logged-user.dto';
 import { MentorValidation } from './mentor.validation';
 import CommonHelper from '../helper/common.helper';
 import { ConfigService } from '@nestjs/config';
-import * as process from 'node:process';
 
 @Injectable()
 export class MentorService {

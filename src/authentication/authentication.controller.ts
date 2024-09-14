@@ -18,7 +18,6 @@ import { WebResponse } from '../model/web.response';
 import { ResponseAuthenticationDto } from './dto/response-authentication';
 import { NoVerifiedEmail } from './decorator/set-no-verified-email.decorator';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { User } from '@prisma/client';
 import LoggedUser from './dto/logged-user.dto';
 
 @Controller('authentication')
