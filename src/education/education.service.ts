@@ -1,11 +1,20 @@
-import { HttpException, Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
-import { Education } from '@prisma/client';
+import { Education, Mentor } from '@prisma/client';
 import EducationValidation from './education.validation';
 import { REQUEST } from '@nestjs/core';
+import LoggedUser from '../authentication/dto/logged-user.dto';
+import { ResponseExperienceDto } from '../experience/dto/response-experience.dto';
+import ResponseEducationDto from './dto/response-education.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class EducationService {
@@ -45,8 +54,43 @@ export class EducationService {
     return 'Success! new education has been created';
   }
 
-  findAll() {
-    return `This action returns all education`;
+  async findAllByMentor(
+    loggedUser: LoggedUser,
+  ): Promise<ResponseEducationDto[]> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User not found`);
+        });
+      const mentorPrisma: Mentor = await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            userId: userPrisma.id,
+            id: BigInt(loggedUser.mentorId),
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User haven't registered as mentor`);
+        });
+      const allMentorEducation: Education[] =
+        await prismaTransaction.education.findMany({
+          where: {
+            mentorId: mentorPrisma.id,
+          },
+        });
+      return allMentorEducation.map((mentorEducation) => {
+        const mentorEducationResponse: ResponseEducationDto = {
+          ...mentorEducation,
+          id: mentorEducation.id.toString(),
+        };
+        return mentorEducationResponse;
+      });
+    });
   }
 
   findOne(id: number) {

@@ -11,6 +11,8 @@ import { EducationService } from './education.service';
 import { CreateEducationDto } from './dto/create-education.dto';
 import { UpdateEducationDto } from './dto/update-education.dto';
 import { WebResponse } from '../model/web.response';
+import { CurrentUser } from '../authentication/decorator/current-user.decorator';
+import LoggedUser from '../authentication/dto/logged-user.dto';
 
 @Controller('educations')
 export class EducationController {
@@ -28,8 +30,8 @@ export class EducationController {
   }
 
   @Get()
-  findAll() {
-    return this.educationService.findAll();
+  findAllByMentor(@CurrentUser() loggedUser: LoggedUser) {
+    return this.educationService.findAllByMentor(loggedUser);
   }
 
   @Get(':id')
