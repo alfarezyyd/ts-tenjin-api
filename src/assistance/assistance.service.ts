@@ -61,12 +61,12 @@ export class AssistanceService {
       await prismaTransaction.category
         .findFirstOrThrow({
           where: {
-            id: createAssistanceDto.categoryId,
+            id: validatedCreateAssistanceDto.categoryId,
           },
         })
         .catch(() => {
           throw new NotFoundException(
-            `Category with categoryId ${createAssistanceDto.categoryId} not found`,
+            `Category with categoryId ${validatedCreateAssistanceDto.categoryId} not found`,
           );
         });
       const allTagPrisma: Tag[] = await prismaTransaction.tag.findMany({

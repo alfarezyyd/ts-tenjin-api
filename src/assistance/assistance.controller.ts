@@ -15,7 +15,7 @@ import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { WebResponse } from '../model/web.response';
 import { Category, Language, Tag } from '@prisma/client';
 import { Public } from 'src/authentication/decorator/set-metadata.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('assistants')
 export class AssistanceController {
@@ -37,11 +37,12 @@ export class AssistanceController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('images'))
+  @UseInterceptors(FilesInterceptor('images'))
   async store(
     @Body() createAssistanceDto: CreateAssistanceDto,
     @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
+    console.log(createAssistanceDto);
     return {
       result: {
         message: await this.assistanceService.store(
