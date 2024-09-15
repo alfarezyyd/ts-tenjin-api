@@ -8,4 +8,5 @@ export default class ResponseEducationDto {
   activity: string;
   society: string;
   description: string;
+  mentorId: string;
 }

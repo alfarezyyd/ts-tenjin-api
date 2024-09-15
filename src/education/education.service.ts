@@ -87,6 +87,7 @@ export class EducationService {
         const mentorEducationResponse: ResponseEducationDto = {
           ...mentorEducation,
           id: mentorEducation.id.toString(),
+          mentorId: mentorEducation.mentorId.toString(),
         };
         return mentorEducationResponse;
       });

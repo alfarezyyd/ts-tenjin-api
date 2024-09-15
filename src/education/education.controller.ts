@@ -13,6 +13,8 @@ import { UpdateEducationDto } from './dto/update-education.dto';
 import { WebResponse } from '../model/web.response';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
+import { ResponseExperienceDto } from '../experience/dto/response-experience.dto';
+import ResponseEducationDto from './dto/response-education.dto';
 
 @Controller('educations')
 export class EducationController {
@@ -30,8 +32,14 @@ export class EducationController {
   }
 
   @Get()
-  findAllByMentor(@CurrentUser() loggedUser: LoggedUser) {
-    return this.educationService.findAllByMentor(loggedUser);
+  async findAllByMentor(
+    @CurrentUser() loggedUser: LoggedUser,
+  ): Promise<WebResponse<ResponseEducationDto[]>> {
+    return {
+      result: {
+        data: await this.educationService.findAllByMentor(loggedUser),
+      },
+    };
   }
 
   @Get(':id')
