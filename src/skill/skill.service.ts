@@ -11,6 +11,8 @@ import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import SkillValidation from './skill.validation';
 import { REQUEST } from '@nestjs/core';
+import ResponseSkillDto from './dto/response-skill.dto';
+import { Skill } from '@prisma/client';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SkillService {
@@ -36,8 +38,21 @@ export class SkillService {
     return 'Success! new skill has been created';
   }
 
-  findAll() {
-    return `This action returns all skill`;
+  async findAll(): Promise<ResponseSkillDto[]> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const allSkillPrisma: Skill[] = await prismaTransaction.skill.findMany({
+        where: {
+          mentorId: this.expressRequest['user']['mentorId'],
+        },
+      });
+      return allSkillPrisma.map((skillPrisma): ResponseSkillDto => {
+        return {
+          ...skillPrisma,
+          id: skillPrisma.id.toString(),
+          mentorId: skillPrisma.mentorId.toString(),
+        };
+      });
+    });
   }
 
   findOne(id: number) {

@@ -11,6 +11,8 @@ import {
 import { SkillService } from './skill.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
+import { WebResponse } from '../model/web.response';
+import ResponseSkillDto from './dto/response-skill.dto';
 
 @Controller('skills')
 export class SkillController {
@@ -26,8 +28,12 @@ export class SkillController {
   }
 
   @Get()
-  findAll() {
-    return this.skillService.findAll();
+  async findAllByMentor(): Promise<WebResponse<ResponseSkillDto[]>> {
+    return {
+      result: {
+        data: await this.skillService.findAll(),
+      },
+    };
   }
 
   @Get(':id')
