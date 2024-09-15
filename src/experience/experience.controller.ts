@@ -43,11 +43,6 @@ export class ExperienceController {
   async findAllByMentor(
     @CurrentUser() currentUser: LoggedUser,
   ): Promise<WebResponse<ResponseExperienceDto[]>> {
-    console.log(await this.experienceService.findAllByMentor(currentUser));
-    console.log(
-      (await this.experienceService.findAllByMentor(currentUser))[0]
-        .experienceResource,
-    );
     return {
       result: {
         data: await this.experienceService.findAllByMentor(currentUser),

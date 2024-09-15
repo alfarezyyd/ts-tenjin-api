@@ -29,8 +29,6 @@ export class AuthenticationGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace('-', '+').replace('_', '/');
     if (!token) {
       throw new UnauthorizedException();
     }
