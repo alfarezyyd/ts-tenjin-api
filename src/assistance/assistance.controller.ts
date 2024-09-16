@@ -16,6 +16,9 @@ import { WebResponse } from '../model/web.response';
 import { Category, Language, Tag } from '@prisma/client';
 import { Public } from 'src/authentication/decorator/set-metadata.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ResponseAssistanceDto } from './dto/response-assistance.dto';
+import { CurrentUser } from '../authentication/decorator/current-user.decorator';
+import LoggedUser from '../authentication/dto/logged-user.dto';
 
 @Controller('assistants')
 export class AssistanceController {
@@ -55,10 +58,21 @@ export class AssistanceController {
 
   @Public()
   @Get()
-  async findAll() {
+  async findAll(): Promise<WebResponse<ResponseAssistanceDto[]>> {
     return {
       result: {
         data: await this.assistanceService.findAll(),
+      },
+    };
+  }
+
+  @Get('mentor')
+  async findAllByMentor(
+    @CurrentUser() loggedUser: LoggedUser,
+  ): Promise<WebResponse<ResponseAssistanceDto[]>> {
+    return {
+      result: {
+        data: await this.assistanceService.findAllByMentor(loggedUser),
       },
     };
   }

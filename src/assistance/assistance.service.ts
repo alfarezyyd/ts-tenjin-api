@@ -7,10 +7,19 @@ import PrismaService from '../common/prisma.service';
 import { AssistanceValidation } from './assistance.validation';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { Assistance, Category, Language, Tag } from '@prisma/client';
+import {
+  Assistance,
+  AssistanceLanguage,
+  Category,
+  Language,
+  Mentor,
+  Tag,
+} from '@prisma/client';
 import * as fs from 'node:fs';
 import { ResponseAssistanceDto } from './dto/response-assistance.dto';
 import CommonHelper from '../helper/common.helper';
+import LoggedUser from '../authentication/dto/logged-user.dto';
+import ConvertHelper from '../helper/convert.helper';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AssistanceService {
@@ -136,25 +145,9 @@ export class AssistanceService {
           AssistanceLanguage: true,
         },
       });
-    const allResponseAssistants: ResponseAssistanceDto[] = [];
-    for (const assistantWithRelationship of allAssistantsWithRelationship) {
-      const { topic, durationMinutes, price, format, isActive } =
-        assistantWithRelationship;
-      const responseAssistant: ResponseAssistanceDto = {
-        id: assistantWithRelationship.id.toString(),
-        mentorId: assistantWithRelationship.mentorId.toString(),
-        categoryId: assistantWithRelationship['categoryId'].toString(),
-        categoryName: assistantWithRelationship['category']['name'],
-        topic,
-        durationMinutes: durationMinutes.toString(),
-        price: price.toString(),
-        format,
-        isActive,
-      };
-      allResponseAssistants.push(responseAssistant);
-    }
-    console.log(allResponseAssistants);
-    return allResponseAssistants;
+    return ConvertHelper.assistantPrismaIntoAssistantResponse(
+      allAssistantsWithRelationship,
+    );
   }
 
   findOne(id: number) {
@@ -276,5 +269,38 @@ export class AssistanceService {
       });
     });
     return `Success! assistance with assistantId ${id} has been deleted`;
+  }
+
+  async findAllByMentor(
+    loggedUser: LoggedUser,
+  ): Promise<ResponseAssistanceDto[]> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            id: BigInt(loggedUser.mentorId),
+            user: {
+              uniqueId: loggedUser.uniqueId,
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User or mentor not found`);
+        });
+      const allAssistantsWithRelationship =
+        await prismaTransaction.assistance.findMany({
+          where: {
+            mentorId: BigInt(loggedUser.mentorId),
+          },
+          include: {
+            mentor: true,
+            category: true,
+            AssistanceLanguage: true,
+          },
+        });
+      return ConvertHelper.assistantPrismaIntoAssistantResponse(
+        allAssistantsWithRelationship,
+      );
+    });
   }
 }
