@@ -1,5 +1,6 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
 import {
+  $Enums,
   Assistance,
   AssistanceLanguage,
   Language,
@@ -8,6 +9,7 @@ import {
 } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseAssistanceDto } from '../assistance/dto/response-assistance.dto';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export default class ConvertHelper {
   static async userPrismaIntoUserResponse(
@@ -20,7 +22,25 @@ export default class ConvertHelper {
   }
 
   static async assistantPrismaIntoAssistantResponse(
-    allAssistantsWithRelationship,
+    allAssistantsWithRelationship: ({
+      category: { id: number; name: string; logo: string };
+      mentor: { id: bigint; userId: bigint };
+      AssistanceLanguage: { assistantId: bigint; languageId: number }[];
+    } & {
+      id: bigint;
+      mentorId: bigint;
+      categoryId: number;
+      topic: string;
+      description: string;
+      durationMinutes: number;
+      price: number;
+      format: $Enums.AssistanceFormat;
+      capacity: number;
+      isActive: boolean;
+      ratingAverage: Decimal;
+      createdAt: Date;
+      updatedAt: Date | null;
+    })[],
   ) {
     const allResponseAssistants: ResponseAssistanceDto[] = [];
     for (const assistantWithRelationship of allAssistantsWithRelationship) {

@@ -70,6 +70,7 @@ export class AssistanceController {
   async findAllByMentor(
     @CurrentUser() loggedUser: LoggedUser,
   ): Promise<WebResponse<ResponseAssistanceDto[]>> {
+    console.log(await this.assistanceService.findAllByMentor(loggedUser));
     return {
       result: {
         data: await this.assistanceService.findAllByMentor(loggedUser),
