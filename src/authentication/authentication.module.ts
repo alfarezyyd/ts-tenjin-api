@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './guard/authentication.guard';
 import { CommonModule } from '../common/common.module';
+import { GoogleAuthenticationModule } from './google-authentication/google-authentication.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { CommonModule } from '../common/common.module';
       inject: [ConfigService],
     }),
     CommonModule,
+    GoogleAuthenticationModule,
   ],
   controllers: [AuthenticationController],
   providers: [

@@ -20,7 +20,7 @@ import { NoVerifiedEmail } from './decorator/set-no-verified-email.decorator';
 import { CurrentUser } from './decorator/current-user.decorator';
 import LoggedUser from './dto/logged-user.dto';
 
-@Controller('authentication')
+@Controller('authentication/self')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
