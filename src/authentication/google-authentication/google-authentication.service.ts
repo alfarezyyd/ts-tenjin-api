@@ -14,7 +14,7 @@ export class GoogleAuthenticationService {
 
   async generateGoogleAuthenticationToken(code) {
     try {
-      const responseAxios = firstValueFrom(
+      const responseAxios = await firstValueFrom(
         this.httpService.post('https://oauth2.googleapis.com/token', null, {
           params: {
             code,
@@ -27,6 +27,7 @@ export class GoogleAuthenticationService {
           },
         }),
       );
+      console.log(responseAxios);
       const { access_token: accessToken } = responseAxios['data'];
       return accessToken;
     } catch (error) {
@@ -35,7 +36,7 @@ export class GoogleAuthenticationService {
   }
 
   async getAuthenticatedGoogleUserInformation(accessToken: string) {
-    return firstValueFrom(
+    return await firstValueFrom(
       this.httpService.get('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -45,6 +46,7 @@ export class GoogleAuthenticationService {
   }
 
   generateJwtToken(payloadJwt: any) {
+    console.log(payloadJwt);
     return this.jwtService.signAsync(payloadJwt, { expiresIn: '1h' });
   }
 

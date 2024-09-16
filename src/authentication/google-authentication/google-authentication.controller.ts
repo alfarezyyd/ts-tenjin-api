@@ -37,11 +37,11 @@ export class GoogleAuthenticationController {
       await this.googleAuthenticationService.getAuthenticatedGoogleUserInformation(
         generatedAccessToken,
       );
-
+    console.log(googleAuthenticatedUser);
     // Generate JWT Token
     const generatedJWTToken =
       await this.googleAuthenticationService.generateJwtToken({
-        sub: googleAuthenticatedUser['sub'],
+        sub: googleAuthenticatedUser['data']['sub'],
       });
     return {
       result: {
