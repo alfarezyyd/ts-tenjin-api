@@ -1,6 +1,7 @@
 export class ResponseAssistanceDto {
   id: string;
   mentorId: string;
+  mentorName: string;
   categoryId: string;
   topic: string;
   durationMinutes: string;

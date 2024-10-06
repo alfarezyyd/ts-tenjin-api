@@ -29,6 +29,7 @@ export class AssistanceService {
     private readonly prismaService: PrismaService,
     @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
+
   async create(): Promise<{
     languages: Language[];
     categories: Category[];
@@ -140,7 +141,11 @@ export class AssistanceService {
     const allAssistantsWithRelationship =
       await this.prismaService.assistance.findMany({
         include: {
-          mentor: true,
+          mentor: {
+            include: {
+              user: true,
+            },
+          },
           category: true,
           AssistanceLanguage: true,
         },
@@ -293,7 +298,11 @@ export class AssistanceService {
             mentorId: BigInt(loggedUser.mentorId),
           },
           include: {
-            mentor: true,
+            mentor: {
+              include: {
+                user: true,
+              },
+            },
             category: true,
             AssistanceLanguage: true,
           },

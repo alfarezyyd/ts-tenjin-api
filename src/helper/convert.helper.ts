@@ -2,10 +2,12 @@ import { ResponseUserDto } from '../user/dto/response-user.dto';
 import {
   $Enums,
   Assistance,
+  AssistanceFormat,
   AssistanceLanguage,
   Language,
   Mentor,
   User,
+  UserGender,
 } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseAssistanceDto } from '../assistance/dto/response-assistance.dto';
@@ -23,32 +25,34 @@ export default class ConvertHelper {
 
   static async assistantPrismaIntoAssistantResponse(
     allAssistantsWithRelationship: ({
-      category: { id: number; name: string; logo: string };
-      mentor: { id: bigint; userId: bigint };
       AssistanceLanguage: { assistantId: bigint; languageId: number }[];
+      category: { id: number; logo: string; name: string };
+      mentor: { id: bigint; userId: bigint };
     } & {
-      id: bigint;
-      mentorId: bigint;
+      capacity: number;
       categoryId: number;
-      topic: string;
+      createdAt: Date;
       description: string;
       durationMinutes: number;
-      price: number;
-      format: $Enums.AssistanceFormat;
-      capacity: number;
+      format: AssistanceFormat;
+      id: bigint;
       isActive: boolean;
+      mentorId: bigint;
+      price: number;
       ratingAverage: Decimal;
-      createdAt: Date;
-      updatedAt: Date | null;
+      topic: string;
+      updatedAt: Date;
     })[],
   ) {
     const allResponseAssistants: ResponseAssistanceDto[] = [];
     for (const assistantWithRelationship of allAssistantsWithRelationship) {
       const { topic, durationMinutes, price, format, isActive } =
         assistantWithRelationship;
+      console.log(assistantWithRelationship);
       const responseAssistant: ResponseAssistanceDto = {
         id: assistantWithRelationship.id.toString(),
         mentorId: assistantWithRelationship.mentorId.toString(),
+        mentorName: assistantWithRelationship['mentor']['user']['name'],
         categoryId: assistantWithRelationship['categoryId'].toString(),
         categoryName: assistantWithRelationship['category']['name'],
         topic,
