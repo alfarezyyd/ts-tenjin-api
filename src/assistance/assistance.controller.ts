@@ -79,8 +79,14 @@ export class AssistanceController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.assistanceService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+  ): Promise<WebResponse<ResponseAssistanceDto>> {
+    return {
+      result: {
+        data: await this.assistanceService.findOne(+id),
+      },
+    };
   }
 
   @Patch(':assistanceId')

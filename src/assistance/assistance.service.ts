@@ -7,14 +7,7 @@ import PrismaService from '../common/prisma.service';
 import { AssistanceValidation } from './assistance.validation';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import {
-  Assistance,
-  AssistanceLanguage,
-  Category,
-  Language,
-  Mentor,
-  Tag,
-} from '@prisma/client';
+import { Assistance, Category, Language, Tag } from '@prisma/client';
 import * as fs from 'node:fs';
 import { ResponseAssistanceDto } from './dto/response-assistance.dto';
 import CommonHelper from '../helper/common.helper';
@@ -155,8 +148,25 @@ export class AssistanceService {
     );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} assistance`;
+  async findOne(id: number) {
+    const allAssistantsWithRelationship =
+      await this.prismaService.assistance.findMany({
+        where: {
+          id: id,
+        },
+        include: {
+          mentor: {
+            include: {
+              user: true,
+            },
+          },
+          category: true,
+          AssistanceLanguage: true,
+        },
+      });
+    return await ConvertHelper.assistantPrismaIntoAssistantResponse(
+      allAssistantsWithRelationship,
+    )[0];
   }
 
   async update(assistantId: bigint, updateAssistanceDto: UpdateAssistanceDto) {
@@ -276,9 +286,9 @@ export class AssistanceService {
     return `Success! assistance with assistantId ${id} has been deleted`;
   }
 
-  async findAllByMentor(
-    loggedUser: LoggedUser,
-  ): Promise<ResponseAssistanceDto[]> {
+  async;
+
+  findAllByMentor(loggedUser: LoggedUser): Promise<ResponseAssistanceDto[]> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor
         .findFirstOrThrow({
