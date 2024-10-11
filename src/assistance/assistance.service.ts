@@ -164,9 +164,10 @@ export class AssistanceService {
           AssistanceLanguage: true,
         },
       });
+    console.log(allAssistantsWithRelationship);
     return await ConvertHelper.assistantPrismaIntoAssistantResponse(
       allAssistantsWithRelationship,
-    )[0];
+    );
   }
 
   async update(assistantId: bigint, updateAssistanceDto: UpdateAssistanceDto) {

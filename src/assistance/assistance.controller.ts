@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
@@ -80,11 +81,11 @@ export class AssistanceController {
 
   @Get(':id')
   async findOne(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<ResponseAssistanceDto>> {
     return {
       result: {
-        data: await this.assistanceService.findOne(+id),
+        data: (await this.assistanceService.findOne(+id))[0],
       },
     };
   }

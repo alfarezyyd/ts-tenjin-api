@@ -13,7 +13,6 @@ SELECT * FROM experiences;
 SELECT * FROM experience_resources;
 SELECT * FROM tags;
 SELECT * FROM languages;
-SELECT * FROM orders;
 SELECT * FROM users;
 SELECT * FROM one_time_password_tokens;
 SELECT * FROM mentors;

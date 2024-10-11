@@ -11,6 +11,7 @@ export class OrderController {
   async create(
     @Body() createOrderDto: CreateOrderDto,
   ): Promise<WebResponse<string>> {
+    console.log(createOrderDto);
     return {
       result: {
         data: await this.orderService.create(createOrderDto),

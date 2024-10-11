@@ -1,5 +1,5 @@
 export class CreateOrderDto {
-  assistanceId: bigint;
+  assistantId: bigint;
   mentorId: bigint;
   sessionTimestamp: string;
   minutesDurations: number;

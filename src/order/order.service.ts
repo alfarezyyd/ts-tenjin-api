@@ -11,7 +11,7 @@ import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import { MidtransService } from '../common/midtrans.service';
 import { OrderValidation } from './order.validation';
-import { Assistance, Order, User } from '@prisma/client';
+import { Assistance, Mentor, Order, User } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import { MidtransCreateOrderDtoBuilder } from './dto/midtrans-create-order.dto';
 
@@ -39,10 +39,10 @@ export class OrderService {
         })
         .catch(() => {
           throw new NotFoundException(
-            `Assistance with assistance ${createOrderDto.assistanceId} not found`,
+            `Assistance with assistance ${createOrderDto.assistantId} not found`,
           );
         });
-      await prismaTransaction.mentor
+      const mentorPrisma: Mentor = await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
             id: validatedCreateOrderDto.mentorId,
@@ -65,6 +65,7 @@ export class OrderService {
         userId: userPrisma.id,
         createdAt: new Date(),
       };
+      console.log(createOrderPayload);
       const newCreatedOrder: Order = await prismaTransaction.order.create({
         data: {
           ...createOrderPayload,
