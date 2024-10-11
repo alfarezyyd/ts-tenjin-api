@@ -8,6 +8,7 @@ import { ClassSerializerInterceptor } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
 import PrismaService from './common/prisma.service';
+
 declare const module: any;
 
 async function bootstrap() {
@@ -48,6 +49,11 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  BigInt.prototype.toJSON = function () {
+    const int = Number.parseInt(this.toString());
+    return int ?? this.toString();
+  };
 
   app.useWebSocketAdapter(new IoAdapter(app));
 
