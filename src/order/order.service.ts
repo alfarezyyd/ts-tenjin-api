@@ -11,9 +11,10 @@ import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import { MidtransService } from '../common/midtrans.service';
 import { OrderValidation } from './order.validation';
-import { Assistance, Mentor, Order, User } from '@prisma/client';
+import { Assistance, Order, User } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import { MidtransCreateOrderDtoBuilder } from './dto/midtrans-create-order.dto';
+import LoggedUser from '../authentication/dto/logged-user.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -42,7 +43,7 @@ export class OrderService {
             `Assistance with assistance ${createOrderDto.assistantId} not found`,
           );
         });
-      const mentorPrisma: Mentor = await prismaTransaction.mentor
+      await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
             id: validatedCreateOrderDto.mentorId,
@@ -114,5 +115,34 @@ export class OrderService {
 
   findOne(id: number) {
     return `This action returns a #${id} order`;
+  }
+
+  async findAllByUserId(loggedUser: LoggedUser): Promise<
+    (Order & {
+      assistance: Assistance;
+    })[]
+  > {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma: User = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `User with unique id ${loggedUser.uniqueId} not found`,
+          );
+        });
+
+      return prismaTransaction.order.findMany({
+        where: {
+          userId: userPrisma.id,
+        },
+        include: {
+          assistance: true,
+        },
+      });
+    });
   }
 }

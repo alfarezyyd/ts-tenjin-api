@@ -2,6 +2,9 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { WebResponse } from '../model/web.response';
+import LoggedUser from '../authentication/dto/logged-user.dto';
+import { CurrentUser } from '../authentication/decorator/current-user.decorator';
+import { Assistance, Order } from '@prisma/client';
 
 @Controller('orders')
 export class OrderController {
@@ -20,8 +23,18 @@ export class OrderController {
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  async findAllByUserId(@CurrentUser() loggedUser: LoggedUser): Promise<
+    WebResponse<
+      (Order & {
+        assistance: Assistance;
+      })[]
+    >
+  > {
+    return {
+      result: {
+        data: await this.orderService.findAllByUserId(loggedUser),
+      },
+    };
   }
 
   @Get(':id')
