@@ -50,11 +50,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  BigInt.prototype.toJSON = function () {
-    const int = Number.parseInt(this.toString());
-    return int ?? this.toString();
+  BigInt.prototype['toJSON'] = function () {
+    return this.toString();
   };
-
   app.useWebSocketAdapter(new IoAdapter(app));
 
   await app.listen(3001);
