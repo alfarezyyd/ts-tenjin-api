@@ -17,4 +17,6 @@ export default class AuthenticationValidation {
     password: z.coerce.string().min(8).max(50),
     telephone: z.coerce.string().min(10).max(15),
   });
+
+  static readonly FORGOT_PASSWORD: ZodType = z.string().email();
 }

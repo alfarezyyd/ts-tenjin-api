@@ -79,6 +79,19 @@ export class AuthenticationController {
     };
   }
 
+  @NoVerifiedEmail(true)
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body() { email }: { email: string },
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.authenticationService.getForgotPasswordToken(email),
+      },
+    };
+  }
+
   @Get()
   findAll() {
     return this.authenticationService.findAll();

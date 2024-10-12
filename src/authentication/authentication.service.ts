@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignInDto } from './dto/sign-in.dto';
@@ -175,5 +176,45 @@ export class AuthenticationService {
         return false;
       }
     });
+  }
+
+  async getForgotPasswordToken(email: string) {
+    const validatedForgotPasswordRequest =
+      await this.validationService.validate(
+        AuthenticationValidation.FORGOT_PASSWORD,
+        email,
+      );
+    const generatedOneTimePassword =
+      await CommonHelper.generateOneTimePassword();
+    const hashedOneTimePassword = await bcrypt.hash(
+      generatedOneTimePassword,
+      10,
+    );
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma: User = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            email: validatedForgotPasswordRequest,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User not found`);
+        });
+      await prismaTransaction.oneTimePasswordToken.create({
+        data: {
+          userId: userPrisma['id'],
+          hashedToken: hashedOneTimePassword,
+          expiresAt: new Date(new Date().getTime() + 10 * 60 * 1000),
+        },
+      });
+      return generatedOneTimePassword;
+    });
+    await this.mailerService.sendMail({
+      from: this.configService.get<string>('EMAIL_USERNAME'),
+      to: validatedForgotPasswordRequest,
+      subject: 'One Time Password Verification',
+      text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
+    });
+    return `Successfully send one time password`;
   }
 }

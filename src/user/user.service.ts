@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import ValidationService from '../common/validation.service';
@@ -59,22 +59,29 @@ export class UserService {
   async findOne(
     userIdentifier: string,
   ): Promise<User & { Mentor?: Mentor | null }> {
+    console.log(userIdentifier);
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      return prismaTransaction.user.findFirstOrThrow({
-        where: {
-          OR: [
-            {
-              email: userIdentifier,
-            },
-            {
-              uniqueId: userIdentifier,
-            },
-          ],
-        },
-        include: {
-          Mentor: true,
-        },
-      });
+      return prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            OR: [
+              {
+                email: userIdentifier,
+              },
+              {
+                uniqueId: userIdentifier,
+              },
+            ],
+          },
+          include: {
+            Mentor: true,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(
+            `User with email or uniqueId ${userIdentifier} not found`,
+          );
+        });
     });
   }
 
