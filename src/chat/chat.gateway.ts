@@ -54,28 +54,31 @@ export class ChatGateway
       webSocketClient.handshake.headers['session-id'] = sessionId;
       webSocketClient.handshake.headers['user-unique-id'] =
         chatSessionTrait.userUniqueId;
-      webSocketClient.handshake.headers['name'] = chatSessionTrait.name;
+      webSocketClient.handshake.headers['email'] = chatSessionTrait.email;
     }
-    const name = webSocketClient.handshake.headers['name'] as string;
+    const email = webSocketClient.handshake.headers['email'] as string;
     const userUniqueId = webSocketClient.handshake.headers[
       'user-unique-id'
     ] as string;
-    if (!name || !userUniqueId) {
+    if (!email || !userUniqueId) {
+      webSocketClient.emit('error', {
+        message: 'Specified user not found',
+      });
       throw new NotFoundException(`Specified user not found`);
     }
 
     webSocketClient.handshake.headers['session-id'] = uuidv4();
     webSocketClient.handshake.headers['user'] = userUniqueId;
-    webSocketClient.handshake.headers['name'] = name;
+    webSocketClient.handshake.headers['email'] = email;
     const newChatSessionTraitBuilder = new ChatSessionTraitBuilder()
       .setSessionId(webSocketClient.handshake.headers['session-id'] as string)
       .setUserUniqueId(userUniqueId)
-      .setName(name);
+      .setEmail(email);
     await this.redisService
       .getClient()
       .hSet(
         'onlineUsers',
-        newChatSessionTraitBuilder.sessionId,
+        userUniqueId,
         JSON.stringify(newChatSessionTraitBuilder),
       );
 
@@ -114,9 +117,9 @@ export class ChatGateway
       const messagesPerUser = new Map();
       for (const messageFromUser of allMessageFromUser) {
         const anotherUser =
-          userPrisma.id === messageFromUser.id
+          userPrisma.id === messageFromUser.destinationUserId
             ? messageFromUser.id
-            : userPrisma;
+            : messageFromUser.destinationUserId;
         if (messagesPerUser.has(anotherUser)) {
           messagesPerUser.get(anotherUser).push(messageFromUser.payloadMessage);
         } else {
@@ -129,12 +132,12 @@ export class ChatGateway
         .hGetAll('onlineUsers');
 
       // Melakukan loop terhadap semua user online
-      for (const [sessionId, chatPayload] of Object.entries(
+      for (const [userUniqueId, chatPayload] of Object.entries(
         allOnlineUsersFromRedis,
       )) {
         const parsedChatPayload = JSON.parse(chatPayload);
         allOnlineUsers.push({
-          sessionId: sessionId,
+          userUniqueId: userUniqueId,
           userId: parsedChatPayload.userId,
           name: parsedChatPayload.name,
           messages: messagesPerUser.get(parsedChatPayload.userId) || [],
@@ -146,21 +149,21 @@ export class ChatGateway
 
   async handleDisconnect(webSocketClient: Socket) {
     const matchingSockets = await webSocketClient
-      .in(webSocketClient.handshake.headers['sessionId'] as string)
+      .in(webSocketClient.handshake.headers['user-unique-id'] as string)
       .fetchSockets();
     const isDisconnected = matchingSockets.length === 0;
     if (isDisconnected) {
       // notify other users
       webSocketClient.broadcast.emit(
         'user disconnected',
-        webSocketClient.handshake.headers['userUniqueId'] as string,
+        webSocketClient.handshake.headers['user-unique-id'] as string,
       );
       // update the connection status of the session
       await this.redisService
         .getClient()
         .hDel(
           'onlineUsers',
-          webSocketClient.handshake.headers['sessionId'] as string,
+          webSocketClient.handshake.headers['user-unique-id'] as string,
         );
     }
   }
@@ -188,7 +191,7 @@ export class ChatGateway
   @SubscribeMessage('privateMessage')
   async handlePrivateMessage(
     @MessageBody('message') message: string,
-    @MessageBody('destinationUser') destinationSessionId: string,
+    @MessageBody('destinationUserUniqueId') destinationUserUniqueId: string,
     @ConnectedSocket() webSocketClient: Socket,
   ): Promise<void> {
     const originChatSessionTrait: ChatSessionTrait = JSON.parse(
@@ -196,14 +199,16 @@ export class ChatGateway
         .getClient()
         .hGet(
           'onlineUsers',
-          webSocketClient.handshake.headers['sessionId'] as string,
+          webSocketClient.handshake.headers['user-unique-id'] as string,
         ),
     );
+
     const destinationChatSessionTrait: ChatSessionTrait = JSON.parse(
       await this.redisService
         .getClient()
-        .hGet('onlineUsers', destinationSessionId),
+        .hGet('onlineUsers', destinationUserUniqueId),
     );
+    console.log(originChatSessionTrait, destinationChatSessionTrait);
     let destinationUser = null;
     let originUser = null;
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -228,7 +233,7 @@ export class ChatGateway
       destinationUser = userPrisma.find(
         (user) => user.uniqueId === destinationChatSessionTrait.userUniqueId,
       );
-      prismaTransaction.chat.create({
+      await prismaTransaction.chat.create({
         data: {
           originUserId: originUser.id,
           destinationUserId: destinationUser.id,
@@ -237,6 +242,7 @@ export class ChatGateway
         },
       });
     });
+    console.log(originUser, destinationUser);
     if (originUser && destinationUser) {
       webSocketClient
         .to(destinationUser.uniqueId)
@@ -245,7 +251,7 @@ export class ChatGateway
     } else {
       webSocketClient.emit('message', {
         user: 'system',
-        text: `User ${destinationSessionId} is not online`,
+        text: `User ${destinationUser['name']} is not online`,
       });
     }
   }

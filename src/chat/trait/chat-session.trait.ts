@@ -1,13 +1,13 @@
 export class ChatSessionTrait {
   sessionId: string;
   userUniqueId: string;
-  name: string;
+  email: string;
 }
 
 export class ChatSessionTraitBuilder {
   sessionId: string;
   userUniqueId: string;
-  name: string;
+  email: string;
   setSessionId(sessionId: string): ChatSessionTraitBuilder {
     this.sessionId = sessionId;
     return this;
@@ -16,8 +16,8 @@ export class ChatSessionTraitBuilder {
     this.userUniqueId = userUniqueId;
     return this;
   }
-  setName(name: string): ChatSessionTraitBuilder {
-    this.name = name;
+  setEmail(email: string): ChatSessionTraitBuilder {
+    this.email = email;
     return this;
   }
 }
