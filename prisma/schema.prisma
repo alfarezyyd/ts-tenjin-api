@@ -17,6 +17,7 @@ enum UserGender {
   MAN
   WOMAN
 }
+
 model User {
   id                   BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
   uniqueId             String                 @unique @db.VarChar(512)
@@ -25,7 +26,7 @@ model User {
   email                String                 @unique @db.VarChar(255)
   emailVerifiedAt      DateTime?              @map("email_verified_at") @db.Timestamp()
   password             String                 @db.VarChar(512)
-  telephone            String                 @unique @db.VarChar(13)
+  telephone            String?                @unique @db.VarChar(13)
   pin                  String?                @db.Char(6)
   photoPath            String?                @map("photo_path") @db.VarChar(255)
   Mentor               Mentor?
@@ -56,7 +57,7 @@ model Mentor {
 
 model Category {
   id         Int          @id @default(autoincrement()) @db.UnsignedInt
-  name       String       @db.VarChar(255) @unique
+  name       String       @unique @db.VarChar(255)
   logo       String       @db.VarChar(255)
   Assistance Assistance[]
   Tag        Tag[]
@@ -166,14 +167,14 @@ model Assistance {
   price              Int                  @db.UnsignedInt
   format             AssistanceFormat     @default(INDIVIDUAL)
   capacity           Int                  @db.UnsignedInt
-  isActive           Boolean              @map("is_active") @default(true)
-  ratingAverage      Decimal              @map("rating_average") @db.Decimal(3, 2) @default(0)
+  isActive           Boolean              @default(true) @map("is_active")
+  ratingAverage      Decimal              @default(0) @map("rating_average") @db.Decimal(3, 2)
   Order              Order[]
   AssistanceTag      AssistanceTags[]
   AssistanceResource AssistanceResource[]
   AssistanceLanguage AssistanceLanguage[]
-  createdAt          DateTime             @map("created_at") @default(now())
-  updatedAt          DateTime?            @map("updated_at") @default(now())
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime?            @default(now()) @map("updated_at")
   AssistanceCart     AssistanceCart[]
   Review             Review[]
 
@@ -214,10 +215,10 @@ model Order {
   minutesDurations   Int                @map("minutes_duration") @db.UnsignedInt
   totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)
   transactionToken   String?            @map("transaction_token") @db.VarChar(255)
-  orderStatus        OrderStatus        @map("order_status") @default(PROCESSED)
-  orderPaymentStatus OrderPaymentStatus @map("order_payment_status") @default(NOT_YET_PAID)
+  orderStatus        OrderStatus        @default(PROCESSED) @map("order_status")
+  orderPaymentStatus OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
   note               String             @db.Text
-  createdAt          DateTime           @map("created_at") @default(now())
+  createdAt          DateTime           @default(now()) @map("created_at")
   Review             Review[]
 
   @@map("orders")
@@ -231,7 +232,7 @@ model Review {
   Assistance     Assistance       @relation(fields: [assistantId], references: [id])
   rating         Decimal          @db.Decimal(3, 2)
   review         String           @db.Text
-  createdAt      DateTime         @map("created_at") @default(now())
+  createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime?        @map("updated_at")
   ReviewResource ReviewResource[]
 
@@ -251,7 +252,7 @@ model ReviewResource {
 
 model Language {
   id                 Int                  @id @default(autoincrement()) @db.UnsignedInt
-  name               String               @db.VarChar(255) @unique
+  name               String               @unique @db.VarChar(255)
   AssistanceLanguage AssistanceLanguage[]
 
   @@map("languages")
@@ -269,7 +270,7 @@ model AssistanceLanguage {
 
 model Cart {
   id             BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
-  userId         BigInt           @map("user_id") @db.UnsignedBigInt @unique
+  userId         BigInt           @unique @map("user_id") @db.UnsignedBigInt
   User           User             @relation(fields: [userId], references: [id])
   AssistanceCart AssistanceCart[]
 
@@ -292,6 +293,7 @@ enum ChatStatus {
   DELIVERED
   READ
 }
+
 model Chat {
   id                BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
   originUserId      BigInt     @map("origin_user_ud") @db.UnsignedBigInt
@@ -299,10 +301,10 @@ model Chat {
   destinationUserId BigInt     @map("destination_user_id") @db.UnsignedBigInt
   destinationUser   User       @relation(fields: [destinationUserId], references: [id], name: "destinationUserRelation")
   payloadMessage    String     @map("payload_message") @db.LongText
-  createdAt         DateTime   @map("created_at") @default(now())
+  createdAt         DateTime   @default(now()) @map("created_at")
   updatedAt         DateTime?  @map("updated_at")
   status            ChatStatus @default(SENT)
-  isDeleted         Boolean    @map("is_deleted") @default(false)
+  isDeleted         Boolean    @default(false) @map("is_deleted")
 
   @@map("chats")
 }
@@ -313,14 +315,14 @@ model OneTimePasswordToken {
   User        User     @relation(fields: [userId], references: [id])
   hashedToken String   @map("hashed_token") @db.VarChar(255)
   expiresAt   DateTime @map("expires_at") @db.Timestamp()
-  isValid     Boolean  @map("is_valid") @default(false)
+  isValid     Boolean  @default(false) @map("is_valid")
 
   @@map("one_time_password_tokens")
 }
 
 model MentorAddress {
   id                  BigInt @id @default(autoincrement()) @db.UnsignedBigInt
-  mentorId            BigInt @db.UnsignedBigInt @map("mentor_id") @unique
+  mentorId            BigInt @unique @map("mentor_id") @db.UnsignedBigInt
   Mentor              Mentor @relation(fields: [mentorId], references: [id])
   street              String @db.VarChar(255)
   neighbourhoodNumber String @db.VarChar(10)
@@ -336,7 +338,7 @@ model MentorAddress {
 
 model MentorBankAccount {
   id                    BigInt @id @default(autoincrement()) @db.UnsignedBigInt
-  mentorId              BigInt @db.UnsignedBigInt @map("mentor_id")
+  mentorId              BigInt @map("mentor_id") @db.UnsignedBigInt
   Mentor                Mentor @relation(fields: [mentorId], references: [id])
   accountHolderName     String @map("account_holder_name") @db.VarChar(255)
   bankName              String @map("bank_name") @db.VarChar(255)

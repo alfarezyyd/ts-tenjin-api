@@ -83,6 +83,8 @@ export class AuthenticationService {
           `${signUpDto.email} has been registered before`,
         );
       }
+      delete validatedSignUpDto['confirm_password'];
+      console.log(validatedSignUpDto);
       await prismaTransaction.user.create({
         data: {
           ...validatedSignUpDto,
