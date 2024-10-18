@@ -31,6 +31,9 @@ export default class CommonHelper {
     firstImagePath: string,
     secondImageFile: Express.Multer.File,
   ) {
+    if (firstImagePath === null) {
+      return true;
+    }
     const firstImage = await fsPromises.readFile(firstImagePath);
 
     const firstImageBase64 = firstImage.toString('base64');

@@ -10,6 +10,10 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import { SettingGeneralDataUserDto } from './dto/setting-general-data-user.dto';
+import LoggedUser from '../authentication/dto/logged-user.dto';
+import CommonHelper from '../helper/common.helper';
+import * as fs from 'node:fs';
 
 @Injectable()
 export class UserService {
@@ -145,5 +149,64 @@ export class UserService {
       });
     });
     return `Success! user has been deleted`;
+  }
+
+  async settingGeneralData(
+    settingGeneralDataUserDto: SettingGeneralDataUserDto,
+    loggedUser: LoggedUser,
+    photoFile: Express.Multer.File,
+  ): Promise<string> {
+    const validatedSettingGeneralDataUserDto = this.validationService.validate(
+      UserValidation.SETTING_GENERAL_DATA,
+      settingGeneralDataUserDto,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+          select: {
+            photoPath: true,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('User not found');
+        });
+      const isImageDifferent = await CommonHelper.compareImagesFromUpload(
+        userPrisma.photoPath,
+        photoFile,
+      );
+      let nameFile = userPrisma.photoPath;
+      if (isImageDifferent) {
+        fs.unlink(
+          `${this.configService.get<string>('MULTER_DEST')}/user-resources/${userPrisma.photoPath}`,
+          async (err) => {
+            if (err && userPrisma.photoPath !== null) {
+              console.log(err);
+              throw new HttpException(`Error when trying to update image`, 500);
+            }
+            nameFile = await CommonHelper.handleSaveFile(
+              this.configService,
+              photoFile,
+              'user-resources',
+            );
+          },
+        );
+      }
+      console.log(nameFile);
+      await prismaTransaction.user.update({
+        where: {
+          uniqueId: loggedUser.uniqueId,
+        },
+        data: {
+          ...validatedSettingGeneralDataUserDto, // Menyebarkan data baru untuk di-update
+          gender: UserGender[validatedSettingGeneralDataUserDto.gender],
+          photoPath: nameFile,
+          emailVerifiedAt: null,
+        },
+      });
+      return 'Success! settings user has been updated';
+    });
   }
 }
