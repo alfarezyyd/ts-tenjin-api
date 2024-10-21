@@ -1,14 +1,5 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
-import {
-  $Enums,
-  Assistance,
-  AssistanceFormat,
-  AssistanceLanguage,
-  Language,
-  Mentor,
-  User,
-  UserGender,
-} from '@prisma/client';
+import { AssistanceFormat, User } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
 import { ResponseAssistanceDto } from '../assistance/dto/response-assistance.dto';
 import { Decimal } from '@prisma/client/runtime/library';

@@ -20,6 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { WebResponse } from '../model/web.response';
 import { Public } from 'src/authentication/decorator/set-metadata.decorator';
 import { Category } from '@prisma/client';
+import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 
 @Controller('categories')
 export class CategoryController {

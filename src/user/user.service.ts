@@ -63,7 +63,6 @@ export class UserService {
   async findOne(
     userIdentifier: string,
   ): Promise<User & { Mentor?: Mentor | null }> {
-    console.log(userIdentifier);
     return this.prismaService.$transaction(async (prismaTransaction) => {
       return prismaTransaction.user
         .findFirstOrThrow({
@@ -183,15 +182,14 @@ export class UserService {
           `${this.configService.get<string>('MULTER_DEST')}/user-resources/${userPrisma.photoPath}`,
           async (err) => {
             if (err && userPrisma.photoPath !== null) {
-              console.log(err);
               throw new HttpException(`Error when trying to update image`, 500);
             }
-            nameFile = await CommonHelper.handleSaveFile(
-              this.configService,
-              photoFile,
-              'user-resources',
-            );
           },
+        );
+        nameFile = await CommonHelper.handleSaveFile(
+          this.configService,
+          photoFile,
+          'user-resources',
         );
       }
       console.log(nameFile);

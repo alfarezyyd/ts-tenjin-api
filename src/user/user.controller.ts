@@ -26,6 +26,7 @@ import { SettingGeneralDataUserDto } from './dto/setting-general-data-user.dto';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 
 @Controller('users')
 export class UserController {
@@ -45,10 +46,12 @@ export class UserController {
   }
 
   @Get(':userId')
+  @NoVerifiedEmail(true)
   async findOne(
     @Param('userId') userId: string,
   ): Promise<WebResponse<ResponseUserDto>> {
     const userDetail: User = await this.userService.findOne(userId);
+    console.log(userDetail);
     return {
       result: {
         data: await ConvertHelper.userPrismaIntoUserResponse(userDetail),
@@ -79,6 +82,7 @@ export class UserController {
 
   @Put('/settings/general-data')
   @UseInterceptors(FileInterceptor('photo'))
+  @NoVerifiedEmail(true)
   async settingGeneralData(
     @Body() settingGeneralDataUserDto: SettingGeneralDataUserDto,
     @CurrentUser() loggedUser: LoggedUser,
