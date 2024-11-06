@@ -16,7 +16,7 @@ import { GoogleAuthenticationModule } from './google-authentication/google-authe
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' },
+        signOptions: { expiresIn: '1200m' },
       }),
       inject: [ConfigService],
     }),

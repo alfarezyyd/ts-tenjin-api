@@ -21,6 +21,7 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
+import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 
 @Controller('mentors')
 export class MentorController {
@@ -35,6 +36,7 @@ export class MentorController {
       { name: 'identityCard', maxCount: 1 },
     ]),
   )
+  @NoVerifiedEmail(true)
   async create(
     @UploadedFiles()
     files: RegisterMentorResourceDto,

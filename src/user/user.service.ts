@@ -14,6 +14,7 @@ import { SettingGeneralDataUserDto } from './dto/setting-general-data-user.dto';
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import CommonHelper from '../helper/common.helper';
 import * as fs from 'node:fs';
+import { join } from 'path';
 
 @Injectable()
 export class UserService {
@@ -172,20 +173,26 @@ export class UserService {
         .catch(() => {
           throw new NotFoundException('User not found');
         });
-      const isImageDifferent = await CommonHelper.compareImagesFromUpload(
+      const existingImagePath = join(
+        process.cwd(),
+        this.configService.get<string>('MULTER_DEST'),
+        'user-resources',
         userPrisma.photoPath,
+      );
+      const isImageSame = await CommonHelper.compareImagesFromUpload(
+        existingImagePath,
         photoFile,
       );
       let nameFile = userPrisma.photoPath;
-      if (isImageDifferent) {
-        fs.unlink(
-          `${this.configService.get<string>('MULTER_DEST')}/user-resources/${userPrisma.photoPath}`,
-          async (err) => {
-            if (err && userPrisma.photoPath !== null) {
-              throw new HttpException(`Error when trying to update image`, 500);
-            }
-          },
-        );
+      console.log(isImageSame);
+      if (!isImageSame) {
+        try {
+          fs.unlinkSync(existingImagePath);
+        } catch (err) {
+          if (err && userPrisma.photoPath !== null) {
+            throw new HttpException(`Error when trying to update image`, 500);
+          }
+        }
         nameFile = await CommonHelper.handleSaveFile(
           this.configService,
           photoFile,
