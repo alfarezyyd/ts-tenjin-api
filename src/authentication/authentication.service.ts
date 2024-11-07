@@ -85,14 +85,25 @@ export class AuthenticationService {
       }
       delete validatedSignUpDto['confirm_password'];
       console.log(validatedSignUpDto);
+      const uniqueId = uuidv4();
       await prismaTransaction.user.create({
         data: {
           ...validatedSignUpDto,
-          uniqueId: uuidv4(),
+          uniqueId: uniqueId,
           password: await bcrypt.hash(validatedSignUpDto.password, 10),
         },
       });
-      return `Success! new user has been created`;
+      const payloadJwt = {
+        uniqueId: uniqueId,
+        name: validatedSignUpDto.name,
+        email: validatedSignUpDto.email,
+        gender: validatedSignUpDto.gender,
+        telephone: validatedSignUpDto.telephone,
+        mentorId: validatedSignUpDto.Mentor?.id?.toString() ?? null,
+      };
+      return {
+        accessToken: await this.jwtService.signAsync(payloadJwt),
+      };
     });
   }
 

@@ -41,7 +41,9 @@ export class AuthenticationController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('register')
-  async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponse<string>> {
+  async signUp(
+    @Body() signUpDto: SignUpDto,
+  ): Promise<WebResponse<ResponseAuthenticationDto>> {
     return {
       result: {
         data: await this.authenticationService.signUp(signUpDto),
