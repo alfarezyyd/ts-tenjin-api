@@ -88,9 +88,7 @@ export class MentorService {
     });
   }
 
-  findAll() {
-    return `This action returns all mentor`;
-  }
+  async findAllByCategoryId() {}
 
   findOne(mentorId: bigint) {
     return `This action returns a #${mentorId} mentor`;

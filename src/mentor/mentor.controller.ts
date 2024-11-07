@@ -22,6 +22,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
+import { Public } from '../authentication/decorator/set-metadata.decorator';
 
 @Controller('mentors')
 export class MentorController {
@@ -53,11 +54,6 @@ export class MentorController {
         ),
       },
     };
-  }
-
-  @Get()
-  findAll() {
-    return this.mentorService.findAll();
   }
 
   @Get(':mentorId')
