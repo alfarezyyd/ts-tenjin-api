@@ -31,6 +31,8 @@ export class OrderService {
       OrderValidation.SAVE,
       createOrderDto,
     );
+    console.log('In Controller');
+    console.log(validatedCreateOrderDto);
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const assistancePrisma: Assistance = await prismaTransaction.assistance
         .findFirstOrThrow({
@@ -62,11 +64,11 @@ export class OrderService {
       const createOrderPayload: Order = {
         ...validatedCreateOrderDto,
         totalPrice:
-          validatedCreateOrderDto.minutesDurations * assistancePrisma.price,
+          validatedCreateOrderDto.sessionCount * assistancePrisma.price,
         userId: userPrisma.id,
         createdAt: new Date(),
       };
-      console.log(createOrderPayload);
+      delete createOrderPayload['sessionCount'];
       const newCreatedOrder: Order = await prismaTransaction.order.create({
         data: {
           ...createOrderPayload,

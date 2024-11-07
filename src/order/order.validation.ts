@@ -21,6 +21,7 @@ export class OrderValidation {
         message: 'Invalid date format',
       }),
     minutesDurations: z.number().min(1),
+    sessionCount: z.number().min(1).max(100),
     note: z.optional(z.string().min(1)),
   });
 }
