@@ -39,7 +39,7 @@ export class CategoryController {
     )
     logoFile: Express.Multer.File,
     @Body() createCategoryDto: CreateCategoryDto,
-  ): Promise<WebResponse<string>> {
+  ): Promise<WebResponse<any>> {
     return {
       result: {
         message: await this.categoryService.create(logoFile, createCategoryDto),
@@ -53,6 +53,16 @@ export class CategoryController {
     return {
       result: {
         data: await this.categoryService.findAll(),
+      },
+    };
+  }
+
+  @Public()
+  @Get('/mentors')
+  async findAllCategoryWithMentor() {
+    return {
+      result: {
+        data: await this.categoryService.handleFindAllCategoryWithMentor(),
       },
     };
   }

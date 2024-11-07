@@ -137,4 +137,33 @@ export class CategoryService {
     });
     return `Success! category has been deleted`;
   }
+
+  async handleFindAllCategoryWithMentor() {
+    const categoryPrisma = await this.prismaService.category.findMany({
+      select: {
+        id: true, // Tambahkan ini jika Anda perlu ID kategori
+        name: true, // Tambahkan ini jika Anda perlu nama kategori
+        Assistance: {
+          take: 5, // Limit 5 Assistance per Category
+          select: {
+            id: true, // Tambahkan ini jika Anda memerlukan ID assistance
+            topic: true, // Contoh kolom assistance jika diperlukan
+            mentor: {
+              select: {
+                id: true, // Tambahkan ini jika Anda perlu ID mentor
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                }, // Nama mentor
+                // Tambahkan kolom lain yang Anda butuhkan dari Mentor
+              },
+            },
+          },
+        },
+      },
+    });
+    return categoryPrisma;
+  }
 }
