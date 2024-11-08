@@ -13,6 +13,7 @@ import { UpdateCoinDto } from './dto/update-coin.dto';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import { WebResponse } from '../model/web.response';
 import LoggedUser from '../authentication/dto/logged-user.dto';
+import { CoinOrder } from '@prisma/client';
 
 @Controller('coins')
 export class CoinController {
@@ -34,8 +35,14 @@ export class CoinController {
   }
 
   @Get()
-  findAll() {
-    return this.coinService.findAll();
+  async findAllByUserId(
+    @CurrentUser() loggedUser: LoggedUser,
+  ): Promise<WebResponse<CoinOrder[]>> {
+    return {
+      result: {
+        data: await this.coinService.findAllByUserId(loggedUser),
+      },
+    };
   }
 
   @Get(':id')

@@ -84,8 +84,26 @@ export class CoinService {
     });
   }
 
-  findAll() {
-    return `This action returns all coin`;
+  async findAllByUserId(loggedUser: LoggedUser): Promise<CoinOrder[]> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const { id: userId } = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+          select: {
+            id: true,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`User not found`);
+        });
+      return prismaTransaction.coinOrder.findMany({
+        where: {
+          userId: userId,
+        },
+      });
+    });
   }
 
   findOne(id: number) {
