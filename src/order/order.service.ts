@@ -31,8 +31,6 @@ export class OrderService {
       OrderValidation.SAVE,
       createOrderDto,
     );
-    console.log('In Controller');
-    console.log(validatedCreateOrderDto);
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const assistancePrisma: Assistance = await prismaTransaction.assistance
         .findFirstOrThrow({
