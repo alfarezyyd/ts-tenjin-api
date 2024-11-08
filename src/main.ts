@@ -1,12 +1,10 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
 import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
-import PrismaService from './common/prisma.service';
 
 declare const module: any;
 
