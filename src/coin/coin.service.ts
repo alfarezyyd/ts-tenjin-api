@@ -23,7 +23,10 @@ export class CoinService {
     loggedUser: LoggedUser,
     createCoinOrderDto: CreateCoinOrderDto,
   ): Promise<string> {
-    this.validationService.validate(CoinValidation.CREATE, createCoinOrderDto);
+    const validatedCreateCoinOrderDto = this.validationService.validate(
+      CoinValidation.CREATE,
+      createCoinOrderDto,
+    );
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma: User = await prismaTransaction.user
         .findFirstOrThrow({
@@ -36,7 +39,8 @@ export class CoinService {
         });
 
       const createCoinOrderPayload = {
-        ...createCoinOrderDto,
+        coinAmount: validatedCreateCoinOrderDto.coinAmount as number,
+        totalPrice: validatedCreateCoinOrderDto.totalPrice as number,
         user: {
           connect: { id: userPrisma.id },
         },

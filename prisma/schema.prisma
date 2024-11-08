@@ -369,4 +369,6 @@ model CoinOrder {
   totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)
   orderPaymentStatus OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
   createdAt          DateTime           @default(now()) @map("created_at")
+
+  @@map("coin_orders")
 }
