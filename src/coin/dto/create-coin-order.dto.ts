@@ -1,1 +1,4 @@
-export class CreateCoinOrderDto {}
+export class CreateCoinOrderDto {
+  coinAmount: number;
+  totalPrice: number;
+}
