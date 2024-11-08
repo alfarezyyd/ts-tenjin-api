@@ -71,6 +71,7 @@ export class AuthenticationController {
     @CurrentUser() currentUser: LoggedUser,
     @Param('oneTimePassword') oneTimePassword: string,
   ): Promise<WebResponse<boolean>> {
+    console.log(oneTimePassword);
     return {
       result: {
         data: await this.authenticationService.verifyOneTimePasswordToken(

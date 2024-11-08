@@ -165,10 +165,14 @@ export class AuthenticationService {
           where: {
             userId: userPrisma.id,
             expiresAt: {
-              gte: new Date(),
+              gte: new Date(), // pastikan expiresAt lebih besar atau sama dengan waktu saat ini
             },
           },
+          orderBy: {
+            expiresAt: 'desc', // Urutkan berdasarkan expiresAt secara descending
+          },
         });
+      console.log(validOneTimePasswordToken, oneTimePassword);
       if (
         validOneTimePasswordToken &&
         (await bcrypt.compare(
