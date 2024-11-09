@@ -18,3 +18,8 @@ SELECT * FROM one_time_password_tokens;
 SELECT * FROM mentors;
 SELECT * FROM mentor_addresses;
 SELECT * FROM chats;
+SELECT * FROM mentor_resources;
+SELECT * FROM mentor_bank_accounts;
+DELETE FROM mentor_bank_accounts;
+DELETE FROM mentor_addresses;
+DELETE FROM mentors;
