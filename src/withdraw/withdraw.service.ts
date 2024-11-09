@@ -1,12 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateWithdrawDto } from './dto/create-withdraw.dto';
 import { UpdateWithdrawDto } from './dto/update-withdraw.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { WithdrawValidation } from './withdraw.validation';
 import LoggedUser from '../authentication/dto/logged-user.dto';
-import { Mentor, MentorBankAccount } from '@prisma/client';
-import { Withdraw } from './entities/withdraw.entity';
+import { MentorBankAccount } from '@prisma/client';
 
 @Injectable()
 export class WithdrawService {
@@ -24,11 +27,20 @@ export class WithdrawService {
       createWithdrawDto,
     );
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      const mentorPrisma: Mentor = await prismaTransaction.mentor
+      const mentorPrisma = await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
             user: {
               uniqueId: loggedUser.uniqueId,
+            },
+          },
+          select: {
+            id: true,
+            userId: true,
+            user: {
+              select: {
+                totalCoin: true,
+              },
             },
           },
         })
@@ -46,6 +58,9 @@ export class WithdrawService {
           .catch(() => {
             throw new NotFoundException('Mentor bank account data not found');
           });
+      if (mentorPrisma.user.totalCoin > validatedCreateWithdrawDto.totalCoin) {
+        throw new BadRequestException('Coin not sufficient');
+      }
       await prismaTransaction.withdrawRequest.create({
         data: {
           userId: mentorPrisma.userId,
