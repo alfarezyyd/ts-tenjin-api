@@ -114,7 +114,7 @@ export class AuthenticationController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async signOut(@Param('id') id: string) {
     return this.authenticationService.remove(+id);
   }
 }
