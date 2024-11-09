@@ -1,6 +1,12 @@
-import { Controller, Get, Query, Redirect } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Redirect,
+  Res,
+  Response,
+} from '@nestjs/common';
 import { GoogleAuthenticationService } from './google-authentication.service';
-import { WebResponse } from '../../model/web.response';
 import { Public } from '../decorator/set-metadata.decorator';
 import { NoVerifiedEmail } from '../decorator/set-no-verified-email.decorator';
 
@@ -22,31 +28,27 @@ export class GoogleAuthenticationController {
       url: await this.googleAuthenticationService.forwardGoogleAuthentication(),
     };
   }
+
   @Public()
   @NoVerifiedEmail(true)
   @Get('callback')
-  async handleGoogleAuthenticationCallback(
-    @Query('code') code: string,
-  ): Promise<WebResponse<string>> {
+  @Redirect('', 302)
+  async handleGoogleAuthenticationCallback(@Query('code') code: string) {
     const generatedAccessToken =
       await this.googleAuthenticationService.generateGoogleAuthenticationToken(
         code,
       );
 
-    const googleAuthenticatedUser =
+    const jwtPayload =
       await this.googleAuthenticationService.getAuthenticatedGoogleUserInformation(
         generatedAccessToken,
       );
-    console.log(googleAuthenticatedUser);
+    console.log(jwtPayload);
     // Generate JWT Token
     const generatedJWTToken =
-      await this.googleAuthenticationService.generateJwtToken({
-        sub: googleAuthenticatedUser['data']['sub'],
-      });
+      await this.googleAuthenticationService.generateJwtToken(jwtPayload);
     return {
-      result: {
-        data: generatedJWTToken,
-      },
+      url: `http://localhost:3000/auth/login?token=${generatedJWTToken}`,
     };
   }
 }

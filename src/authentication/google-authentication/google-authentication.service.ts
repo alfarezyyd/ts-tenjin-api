@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
+import PrismaService from '../../common/prisma.service';
+import { Mentor, User } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class GoogleAuthenticationService {
@@ -10,6 +13,7 @@ export class GoogleAuthenticationService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   async generateGoogleAuthenticationToken(code) {
@@ -36,18 +40,46 @@ export class GoogleAuthenticationService {
   }
 
   async getAuthenticatedGoogleUserInformation(accessToken: string) {
-    return await firstValueFrom(
+    const userInformation = await firstValueFrom(
       this.httpService.get('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       }),
     );
+    const userData = userInformation['data'];
+    let userPrisma: User & { Mentor?: Mentor | null } =
+      await this.prismaService.user.findFirst({
+        where: {
+          email: userData.email,
+        },
+        include: {
+          Mentor: true,
+        },
+      });
+    if (!userPrisma) {
+      userPrisma = await this.prismaService.user.create({
+        data: {
+          name: userData['name'],
+          email: userData['email'],
+          emailVerifiedAt: new Date(),
+          uniqueId: uuidv4(),
+        },
+      });
+      userPrisma.Mentor.id = null;
+    }
+    return {
+      uniqueId: userPrisma.uniqueId,
+      name: userPrisma.name,
+      email: userPrisma.email,
+      gender: userPrisma.gender,
+      telephone: userPrisma.telephone,
+      mentorId: userPrisma.Mentor?.id?.toString() ?? null,
+    };
   }
 
   generateJwtToken(payloadJwt: any) {
-    console.log(payloadJwt);
-    return this.jwtService.signAsync(payloadJwt, { expiresIn: '1h' });
+    return this.jwtService.signAsync(payloadJwt);
   }
 
   async forwardGoogleAuthentication() {
