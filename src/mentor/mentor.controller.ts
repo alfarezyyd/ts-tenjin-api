@@ -22,6 +22,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
+import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
 
 @Controller('mentors')
 export class MentorController {
@@ -42,7 +43,7 @@ export class MentorController {
     files: RegisterMentorResourceDto,
     @Body() registerMentorDto: RegisterMentorDto,
     @CurrentUser() currentUser: LoggedUser,
-  ): Promise<WebResponse<string>> {
+  ): Promise<WebResponse<ResponseAuthenticationDto>> {
     return {
       result: {
         data: await this.mentorService.create(

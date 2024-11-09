@@ -11,6 +11,7 @@ import LoggedUser from '../authentication/dto/logged-user.dto';
 import { MentorValidation } from './mentor.validation';
 import CommonHelper from '../helper/common.helper';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class MentorService {
@@ -18,6 +19,7 @@ export class MentorService {
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async create(
@@ -89,7 +91,14 @@ export class MentorService {
       await prismaTransaction.mentorResource.createMany({
         data: mentorResourcesPayload,
       });
-      return 'Success! your application to be mentor has been registered';
+      const payloadJwt = {
+        uniqueId: currentUser.uniqueId,
+        email: currentUser.email,
+        mentorId: mentorPrisma.id,
+      };
+      return {
+        accessToken: await this.jwtService.signAsync(payloadJwt),
+      };
     });
   }
 
