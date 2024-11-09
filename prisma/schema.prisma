@@ -25,7 +25,7 @@ model User {
   gender               UserGender             @default(MAN)
   email                String                 @unique @db.VarChar(255)
   emailVerifiedAt      DateTime?              @map("email_verified_at") @db.Timestamp()
-  password             String                 @db.VarChar(512)
+  password             String?                @db.VarChar(512)
   telephone            String?                @unique @db.VarChar(13)
   pin                  String?                @db.Char(6)
   photoPath            String?                @map("photo_path") @db.VarChar(255)
