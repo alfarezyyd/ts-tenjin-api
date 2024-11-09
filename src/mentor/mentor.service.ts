@@ -60,28 +60,33 @@ export class MentorService {
         },
       });
       const mentorResourcesPayload = [];
-      mentorResourcesPayload.push(
-        await CommonHelper.handleSaveFile(
+      mentorResourcesPayload.push({
+        imagePath: await CommonHelper.handleSaveFile(
           this.configService,
           uploadedFiles.curriculumVitae[0],
           `mentor-resources/${mentorPrisma.id}`,
         ),
-      );
-      mentorResourcesPayload.push(
-        await CommonHelper.handleSaveFile(
+        mentorId: mentorPrisma.id,
+      });
+      mentorResourcesPayload.push({
+        imagePath: await CommonHelper.handleSaveFile(
           this.configService,
           uploadedFiles.identityCard[0],
           `mentor-resources/${mentorPrisma.id}`,
         ),
-      );
-      mentorResourcesPayload.push(
-        await CommonHelper.handleSaveFile(
+        mentorId: mentorPrisma.id,
+      });
+
+      mentorResourcesPayload.push({
+        imagePath: await CommonHelper.handleSaveFile(
           this.configService,
           uploadedFiles.photo[0],
           `mentor-resources/${mentorPrisma.id}`,
         ),
-      );
-      prismaTransaction.mentorResource.createMany({
+        mentorId: mentorPrisma.id,
+      });
+
+      await prismaTransaction.mentorResource.createMany({
         data: mentorResourcesPayload,
       });
       return 'Success! your application to be mentor has been registered';
