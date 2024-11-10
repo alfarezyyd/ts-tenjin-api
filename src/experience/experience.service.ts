@@ -238,7 +238,7 @@ export class ExperienceService {
       await prismaTransaction.experienceResource.createMany({
         data: allExperienceResourcePayload,
       });
-      if (deletedFilesName === null) {
+      if (deletedFilesName !== null) {
         for (const deletedFileName of deletedFilesName) {
           fs.stat(
             `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}/${deletedFileName}`,
