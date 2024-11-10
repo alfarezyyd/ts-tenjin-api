@@ -41,16 +41,24 @@ export class SkillController {
     return this.skillService.findOne(+id);
   }
 
-  @Put('skillId')
-  update(
+  @Put(':skillId')
+  async update(
     @Param('skillId') skillId: bigint,
     @Body() updateSkillDto: UpdateSkillDto,
   ) {
-    return this.skillService.update(skillId, updateSkillDto);
+    return {
+      result: {
+        data: await this.skillService.update(skillId, updateSkillDto),
+      },
+    };
   }
 
   @Delete(':skillId')
-  remove(@Param('skillId', ParseIntPipe) skillId: bigint) {
-    return this.skillService.remove(skillId);
+  async remove(@Param('skillId', ParseIntPipe) skillId: bigint) {
+    return {
+      result: {
+        data: await this.skillService.remove(skillId),
+      },
+    };
   }
 }
