@@ -6,6 +6,6 @@ export class CreateAssistanceDto {
   price: number;
   format: string;
   capacity: number;
-  language: string;
+  languageId: number;
   tagId: number[];
 }

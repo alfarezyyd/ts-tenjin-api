@@ -49,7 +49,7 @@ export class AssistanceService {
       AssistanceValidation.SAVE,
       createAssistanceDto,
     );
-    await this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
@@ -82,8 +82,7 @@ export class AssistanceService {
       if (allTagPrisma.length != validatedCreateAssistanceDto.tagId.size) {
         throw new NotFoundException(`Some tagId not found`);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { tagId, categoryId, language, ...prismaPayload } =
+      const { tagId, categoryId, languageId, ...prismaPayload } =
         validatedCreateAssistanceDto;
       const newAssistancePrisma: Assistance =
         await prismaTransaction.assistance.create({
@@ -97,7 +96,7 @@ export class AssistanceService {
             },
             category: {
               connect: {
-                id: validatedCreateAssistanceDto.categoryId,
+                id: categoryId,
               },
             },
           },
@@ -117,17 +116,22 @@ export class AssistanceService {
       await prismaTransaction.assistanceResource.createMany({
         data: assistanceResourceInsertPayload,
       });
-      const assistanceTagsInsertPayload = Array.from(
-        validatedCreateAssistanceDto.tagId,
-      ).map((value) => ({
+      const assistanceTagsInsertPayload = Array.from(tagId).map((value) => ({
         assistantId: newAssistancePrisma.id,
         tagId: value as number,
       }));
       await prismaTransaction.assistanceTags.createMany({
         data: assistanceTagsInsertPayload,
       });
+
+      await prismaTransaction.assistanceLanguage.create({
+        data: {
+          assistantId: newAssistancePrisma.id,
+          languageId: languageId,
+        },
+      });
+      return 'Success! new assistance has been created';
     });
-    return 'Success! new assistance has been created';
   }
 
   async findAll(): Promise<ResponseAssistanceDto[]> {

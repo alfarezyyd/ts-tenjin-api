@@ -18,7 +18,7 @@ export class AssistanceValidation {
       );
     }),
     capacity: z.coerce.number().min(1).max(100),
-    language: z.string(),
+    languageId: z.coerce.number(),
     tagId: z.array(z.coerce.number()).transform((arr) => new Set(arr)),
   });
 }
