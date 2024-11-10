@@ -165,9 +165,9 @@ export class EducationService {
     });
   }
 
-  async remove(educationId: bigint) {
-    await this.prismaService.$transaction(async (prismaTransaction) => {
-      prismaTransaction.education.deleteMany({
+  async remove(educationId: bigint): Promise<boolean> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.education.deleteMany({
         where: {
           AND: [
             { id: educationId },
@@ -175,6 +175,7 @@ export class EducationService {
           ],
         },
       });
+      return true;
     });
   }
 }

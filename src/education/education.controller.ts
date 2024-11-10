@@ -73,7 +73,11 @@ export class EducationController {
   }
 
   @Delete(':educationId')
-  remove(@Param('educationId') educationId: bigint) {
-    return this.educationService.remove(educationId);
+  async remove(@Param('educationId') educationId: bigint) {
+    return {
+      result: {
+        data: await this.educationService.remove(educationId),
+      },
+    };
   }
 }
