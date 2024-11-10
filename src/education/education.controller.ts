@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { EducationService } from './education.service';
 import { CreateEducationDto } from './dto/create-education.dto';
@@ -43,13 +44,32 @@ export class EducationController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.educationService.findOne(+id);
+  async findOne(
+    @CurrentUser() loggedUser: LoggedUser,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return {
+      result: {
+        data: await this.educationService.findOne(loggedUser, +id),
+      },
+    };
   }
 
-  @Put()
-  update(@Body() updateEducationDto: UpdateEducationDto) {
-    return this.educationService.update(updateEducationDto);
+  @Put(':id')
+  async update(
+    @CurrentUser() loggedUser: LoggedUser,
+    @Body() updateEducationDto: UpdateEducationDto,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WebResponse<boolean>> {
+    return {
+      result: {
+        data: await this.educationService.update(
+          loggedUser,
+          updateEducationDto,
+          id,
+        ),
+      },
+    };
   }
 
   @Delete(':educationId')

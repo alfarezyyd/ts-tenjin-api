@@ -1,5 +1,5 @@
 export default class ResponseEducationDto {
-  id: string;
+  id: bigint;
   name: string;
   degree: string;
   studyField: string;
@@ -8,5 +8,5 @@ export default class ResponseEducationDto {
   activity: string;
   society: string;
   description: string;
-  mentorId: string;
+  mentorId: bigint;
 }

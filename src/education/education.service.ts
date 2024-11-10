@@ -86,48 +86,83 @@ export class EducationService {
       return allMentorEducation.map((mentorEducation) => {
         const mentorEducationResponse: ResponseEducationDto = {
           ...mentorEducation,
-          id: mentorEducation.id.toString(),
-          mentorId: mentorEducation.mentorId.toString(),
+          id: mentorEducation.id,
+          mentorId: mentorEducation.mentorId,
         };
         return mentorEducationResponse;
       });
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} education`;
+  async findOne(
+    loggedUser: LoggedUser,
+    id: number,
+  ): Promise<ResponseEducationDto> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const mentorPrisma: Mentor = await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            id: BigInt(loggedUser.mentorId),
+            user: {
+              uniqueId: loggedUser.uniqueId,
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`Mentor or user data not found`);
+        });
+      const educationPrisma: Education = await prismaTransaction.education
+        .findFirstOrThrow({
+          where: {
+            mentorId: mentorPrisma.id,
+            id,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`Education data not found`);
+        });
+      let responseEducationDto = new ResponseEducationDto();
+      responseEducationDto = { ...educationPrisma };
+      return responseEducationDto;
+    });
   }
 
-  async update(updateEducationDto: UpdateEducationDto) {
+  async update(
+    loggedUser: LoggedUser,
+    updateEducationDto: UpdateEducationDto,
+    id: number,
+  ): Promise<boolean> {
     const validatedCreateEducationDto: Education =
       this.validationService.validate(
         EducationValidation.UPDATE,
         updateEducationDto,
       );
-    await this.prismaService.$transaction(async (prismaTransaction) => {
-      prismaTransaction.mentor
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
-            id: this.expressRequest['user']['mentorId'],
+            id: BigInt(loggedUser.mentorId),
+            user: {
+              uniqueId: loggedUser.uniqueId,
+            },
           },
         })
         .catch(() => {
           throw new HttpException(
-            `Mentor with mentorId ${this.expressRequest['user']['mentorId']} not found`,
+            `Mentor with mentorId ${loggedUser.mentorId} not found`,
             404,
           );
         });
-      prismaTransaction.education.update({
+      await prismaTransaction.education.update({
         data: {
           ...validatedCreateEducationDto,
         },
         where: {
-          id: updateEducationDto.educationId,
+          id,
         },
       });
+      return true;
     });
-
-    return 'Success! new education has been updated';
   }
 
   async remove(educationId: bigint) {
