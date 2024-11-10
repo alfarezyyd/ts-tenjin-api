@@ -122,8 +122,8 @@ export class ExperienceService {
         delete mentorExperience.ExperienceResource;
         const responseExperienceDto: ResponseExperienceDto = {
           ...mentorExperience,
-          id: mentorExperience.id.toString(),
-          mentorId: mentorExperience.mentorId.toString(),
+          id: mentorExperience.id,
+          mentorId: mentorExperience.mentorId,
           experienceResource: allMentorExperienceResource,
         };
 
@@ -136,8 +136,46 @@ export class ExperienceService {
     return Object.values(EmploymentType);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} experience`;
+  async findOne(
+    currentUser: LoggedUser,
+    id: number,
+  ): Promise<ResponseExperienceDto> {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const experiencePrisma: Experience = await prismaTransaction.experience
+        .findFirstOrThrow({
+          where: {
+            id: id,
+            mentorId: BigInt(currentUser.mentorId),
+            Mentor: {
+              user: {
+                uniqueId: currentUser.uniqueId,
+              },
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException(`Experience not found`);
+        });
+      const allExperienceResource =
+        await prismaTransaction.experienceResource.findMany({
+          where: {
+            experienceId: experiencePrisma.id,
+          },
+        });
+      let responseExperienceDto = new ResponseExperienceDto();
+      responseExperienceDto = { ...experiencePrisma, experienceResource: [] };
+      for (const experienceResource of allExperienceResource) {
+        let responseExperienceResource = new ResponseExperienceResourceDto();
+        responseExperienceResource = {
+          ...experienceResource,
+          id: experienceResource.id.toString(),
+        };
+        responseExperienceDto['experienceResource'].push(
+          responseExperienceResource,
+        );
+      }
+      return responseExperienceDto;
+    });
   }
 
   async update(

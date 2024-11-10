@@ -60,8 +60,15 @@ export class ExperienceController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.experienceService.findOne(+id);
+  async findOne(
+    @CurrentUser() currentUser: LoggedUser,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WebResponse<ResponseExperienceDto>> {
+    return {
+      result: {
+        data: await this.experienceService.findOne(currentUser, id),
+      },
+    };
   }
 
   @Put(':experienceId')
@@ -71,6 +78,7 @@ export class ExperienceController {
     @UploadedFiles() experienceResources: Array<Express.Multer.File>,
     @Body() updateExperienceDto: UpdateExperienceDto,
   ): Promise<WebResponse<string>> {
+    console.log('updateExperienceDto', updateExperienceDto);
     return {
       result: {
         message: await this.experienceService.update(
