@@ -23,3 +23,5 @@ SELECT * FROM mentor_bank_accounts;
 DELETE FROM mentor_bank_accounts;
 DELETE FROM mentor_addresses;
 DELETE FROM mentors;
+DELETE FROM experience_resources;
+DELETE FROM experiences;
