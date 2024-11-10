@@ -90,6 +90,8 @@ model Experience {
   endDate            DateTime             @map("end_date") @db.Date
   description        String?              @db.Text
   mentorId           BigInt               @map("mentor_id") @db.UnsignedBigInt
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @default(now()) @map("updated_at")
   Mentor             Mentor               @relation(fields: [mentorId], references: [id])
   ExperienceResource ExperienceResource[]
 
