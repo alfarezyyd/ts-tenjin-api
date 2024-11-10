@@ -1,5 +1,5 @@
 export class ResponseExperienceDto {
-  id: string;
+  id: bigint;
   positionName: string;
   companyName: string;
   employmentType: string;
@@ -7,7 +7,9 @@ export class ResponseExperienceDto {
   startDate: Date;
   endDate: Date;
   description: string | null;
-  mentorId: string;
+  mentorId: bigint;
+  createdAt: Date;
+  updatedAt: Date;
   experienceResource: ResponseExperienceResourceDto[];
 }
 
