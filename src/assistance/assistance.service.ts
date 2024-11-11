@@ -282,6 +282,11 @@ export class AssistanceService {
           assistantId: assistancePrisma.id,
         },
       });
+      await prismaTransaction.assistanceLanguage.deleteMany({
+        where: {
+          assistantId: assistancePrisma.id,
+        },
+      });
       await prismaTransaction.assistance.delete({
         where: {
           id: assistancePrisma.id,
