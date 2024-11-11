@@ -3,10 +3,14 @@ export class ResponseAssistanceDto {
   mentorId: string;
   mentorName: string;
   categoryId: string;
+  capacity: number;
   topic: string;
   durationMinutes: string;
   price: string;
   format: string;
   isActive: boolean;
   categoryName: string;
+  description: string;
+  tagId: number[];
+  imagePath: string[];
 }

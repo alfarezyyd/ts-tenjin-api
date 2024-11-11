@@ -19,6 +19,8 @@ export default class ConvertHelper {
       AssistanceLanguage: { assistantId: bigint; languageId: number }[];
       category: { id: number; logo: string; name: string };
       mentor: { id: bigint; userId: bigint };
+      AssistanceTag: { tagId: number }[];
+      AssistanceResource: { imagePath: string }[];
     } & {
       capacity: number;
       categoryId: number;
@@ -46,6 +48,14 @@ export default class ConvertHelper {
         mentorName: assistantWithRelationship['mentor']['user']['name'],
         categoryId: assistantWithRelationship['categoryId'].toString(),
         categoryName: assistantWithRelationship['category']['name'],
+        capacity: assistantWithRelationship['capacity'],
+        description: assistantWithRelationship['description'],
+        tagId: assistantWithRelationship['AssistanceTag'].map(
+          (tag) => tag.tagId,
+        ),
+        imagePath: assistantWithRelationship['AssistanceResource'].map(
+          (resource) => resource.imagePath,
+        ),
         topic,
         durationMinutes: durationMinutes.toString(),
         price: price.toString(),
@@ -56,6 +66,7 @@ export default class ConvertHelper {
     }
     return allResponseAssistants;
   }
+
   static convertStringIntoEnum<T extends object>(
     arg: string,
     ctx: RefinementCtx,

@@ -145,8 +145,19 @@ export class AssistanceService {
           },
           category: true,
           AssistanceLanguage: true,
+          AssistanceTag: {
+            select: {
+              tagId: true,
+            },
+          },
+          AssistanceResource: {
+            select: {
+              imagePath: true,
+            },
+          },
         },
       });
+    console.log(allAssistantsWithRelationship);
     return ConvertHelper.assistantPrismaIntoAssistantResponse(
       allAssistantsWithRelationship,
     );
@@ -166,6 +177,16 @@ export class AssistanceService {
           },
           category: true,
           AssistanceLanguage: true,
+          AssistanceTag: {
+            select: {
+              tagId: true,
+            },
+          },
+          AssistanceResource: {
+            select: {
+              imagePath: true,
+            },
+          },
         },
       });
     console.log(allAssistantsWithRelationship);
@@ -296,9 +317,9 @@ export class AssistanceService {
     return `Success! assistance with assistantId ${id} has been deleted`;
   }
 
-  async;
-
-  findAllByMentor(loggedUser: LoggedUser): Promise<ResponseAssistanceDto[]> {
+  async findAllByMentor(
+    loggedUser: LoggedUser,
+  ): Promise<ResponseAssistanceDto[]> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor
         .findFirstOrThrow({
@@ -325,6 +346,16 @@ export class AssistanceService {
             },
             category: true,
             AssistanceLanguage: true,
+            AssistanceTag: {
+              select: {
+                tagId: true,
+              },
+            },
+            AssistanceResource: {
+              select: {
+                imagePath: true,
+              },
+            },
           },
         });
       return ConvertHelper.assistantPrismaIntoAssistantResponse(
