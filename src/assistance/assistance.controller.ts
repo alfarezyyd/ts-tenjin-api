@@ -89,10 +89,13 @@ export class AssistanceController {
   }
 
   @Put(':assistanceId')
+  @UseInterceptors(FilesInterceptor('images'))
   async update(
     @Param('assistanceId') assistanceId: bigint,
     @Body() updateAssistanceDto: UpdateAssistanceDto,
+    @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
+    console.log(updateAssistanceDto);
     return {
       result: {
         message: await this.assistanceService.update(

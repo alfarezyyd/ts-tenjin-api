@@ -194,7 +194,7 @@ export class AssistanceService {
   }
 
   async update(assistantId: bigint, updateAssistanceDto: UpdateAssistanceDto) {
-    const validatedCreateAssistanceDto = this.validationService.validate(
+    const validatedUpdateAssistanceDto = this.validationService.validate(
       AssistanceValidation.SAVE,
       updateAssistanceDto,
     );
@@ -213,7 +213,7 @@ export class AssistanceService {
       await prismaTransaction.category
         .findFirstOrThrow({
           where: {
-            id: updateAssistanceDto.categoryId,
+            id: Number(updateAssistanceDto.categoryId),
           },
         })
         .catch(() => {
@@ -224,15 +224,16 @@ export class AssistanceService {
       const allTagPrisma: Tag[] = await prismaTransaction.tag.findMany({
         where: {
           id: {
-            in: [...validatedCreateAssistanceDto.tagId],
+            in: [...validatedUpdateAssistanceDto.tagId],
           },
         },
       });
-      if (allTagPrisma.length != validatedCreateAssistanceDto.tagId.size) {
+      if (allTagPrisma.length != validatedUpdateAssistanceDto.tagId.size) {
         throw new NotFoundException(`Some tagId not found`);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { tagId, categoryId, ...prismaPayload } = updateAssistanceDto;
+      const { tagId, categoryId, languageId, ...prismaPayload } =
+        validatedUpdateAssistanceDto;
       const updateAssistancePrisma: Assistance =
         await prismaTransaction.assistance.update({
           where: {
@@ -248,17 +249,23 @@ export class AssistanceService {
             },
             category: {
               connect: {
-                id: validatedCreateAssistanceDto.categoryId,
+                id: validatedUpdateAssistanceDto.categoryId,
               },
             },
           },
         });
-      const assistanceTagsInsertPayload = Array.from(
-        validatedCreateAssistanceDto.tagId,
-      ).map((value) => ({
-        assistantId: updateAssistancePrisma.id,
-        tagId: value as number,
-      }));
+
+      const filteredNewTag = Array.from(
+        validatedUpdateAssistanceDto.tagId,
+      ).filter((tagId) => !allTagPrisma.some((tag) => tag.id === tagId));
+
+      console.log(filteredNewTag);
+      const assistanceTagsInsertPayload = Array.from(filteredNewTag).map(
+        (value) => ({
+          assistantId: updateAssistancePrisma.id,
+          tagId: value as number,
+        }),
+      );
       await prismaTransaction.assistanceTags.createMany({
         data: assistanceTagsInsertPayload,
       });
