@@ -60,6 +60,8 @@ export default class ConvertHelper {
         price: price.toString(),
         format,
         isActive,
+        languageId:
+          assistantWithRelationship['AssistanceLanguage'][0]['languageId'],
       };
       allResponseAssistants.push(responseAssistant);
     }
