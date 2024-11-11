@@ -46,7 +46,6 @@ export class ChatGateway
 
   async handleConnection(webSocketClient: Socket) {
     const sessionId = webSocketClient.handshake.headers['session-id'] as string;
-    console.log('Middleware ' + sessionId);
     if (sessionId) {
       const chatSessionTrait: ChatSessionTrait = JSON.parse(
         await this.redisService.getClient().hGet('onlineUsers', sessionId),
@@ -208,7 +207,6 @@ export class ChatGateway
         .getClient()
         .hGet('onlineUsers', destinationUserUniqueId),
     );
-    console.log(originChatSessionTrait, destinationChatSessionTrait);
     let destinationUser = null;
     let originUser = null;
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -242,7 +240,6 @@ export class ChatGateway
         },
       });
     });
-    console.log(originUser, destinationUser);
     if (originUser && destinationUser) {
       webSocketClient
         .to(destinationUser.uniqueId)

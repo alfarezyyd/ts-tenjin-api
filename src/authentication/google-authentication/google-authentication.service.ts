@@ -31,7 +31,6 @@ export class GoogleAuthenticationService {
           },
         }),
       );
-      console.log(responseAxios);
       const { access_token: accessToken } = responseAxios['data'];
       return accessToken;
     } catch (error) {

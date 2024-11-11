@@ -21,9 +21,6 @@ export class GoogleAuthenticationController {
   @Get('')
   @Redirect('', 301)
   async redirectGoogleAuthentication() {
-    console.log(
-      await this.googleAuthenticationService.forwardGoogleAuthentication(),
-    );
     return {
       url: await this.googleAuthenticationService.forwardGoogleAuthentication(),
     };
@@ -43,7 +40,6 @@ export class GoogleAuthenticationController {
       await this.googleAuthenticationService.getAuthenticatedGoogleUserInformation(
         generatedAccessToken,
       );
-    console.log(jwtPayload);
     // Generate JWT Token
     const generatedJWTToken =
       await this.googleAuthenticationService.generateJwtToken(jwtPayload);

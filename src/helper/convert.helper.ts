@@ -41,7 +41,6 @@ export default class ConvertHelper {
     for (const assistantWithRelationship of allAssistantsWithRelationship) {
       const { topic, durationMinutes, price, format, isActive } =
         assistantWithRelationship;
-      console.log(assistantWithRelationship);
       const responseAssistant: ResponseAssistanceDto = {
         id: assistantWithRelationship.id.toString(),
         mentorId: assistantWithRelationship.mentorId.toString(),

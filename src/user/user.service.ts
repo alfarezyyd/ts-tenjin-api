@@ -184,7 +184,6 @@ export class UserService {
         photoFile,
       );
       let nameFile = userPrisma.photoPath;
-      console.log(isImageSame);
       if (!isImageSame) {
         try {
           fs.unlinkSync(existingImagePath);
@@ -199,7 +198,6 @@ export class UserService {
           'user-resources',
         );
       }
-      console.log(nameFile);
       await prismaTransaction.user.update({
         where: {
           uniqueId: loggedUser.uniqueId,

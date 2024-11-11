@@ -157,7 +157,6 @@ export class AssistanceService {
           },
         },
       });
-    console.log(allAssistantsWithRelationship);
     return ConvertHelper.assistantPrismaIntoAssistantResponse(
       allAssistantsWithRelationship,
     );
@@ -189,7 +188,6 @@ export class AssistanceService {
           },
         },
       });
-    console.log(allAssistantsWithRelationship);
     return await ConvertHelper.assistantPrismaIntoAssistantResponse(
       allAssistantsWithRelationship,
     );

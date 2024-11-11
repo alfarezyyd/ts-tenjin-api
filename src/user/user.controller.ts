@@ -51,7 +51,6 @@ export class UserController {
     @Param('userId') userId: string,
   ): Promise<WebResponse<ResponseUserDto>> {
     const userDetail: User = await this.userService.findOne(userId);
-    console.log(userDetail);
     return {
       result: {
         data: await ConvertHelper.userPrismaIntoUserResponse(userDetail),

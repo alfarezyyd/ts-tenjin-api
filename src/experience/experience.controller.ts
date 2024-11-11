@@ -78,7 +78,6 @@ export class ExperienceController {
     @UploadedFiles() experienceResources: Array<Express.Multer.File>,
     @Body() updateExperienceDto: UpdateExperienceDto,
   ): Promise<WebResponse<string>> {
-    console.log('updateExperienceDto', updateExperienceDto);
     return {
       result: {
         message: await this.experienceService.update(

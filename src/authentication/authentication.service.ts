@@ -84,7 +84,6 @@ export class AuthenticationService {
         );
       }
       delete validatedSignUpDto['confirm_password'];
-      console.log(validatedSignUpDto);
       const uniqueId = uuidv4();
       await prismaTransaction.user.create({
         data: {
@@ -172,7 +171,6 @@ export class AuthenticationService {
             expiresAt: 'desc', // Urutkan berdasarkan expiresAt secara descending
           },
         });
-      console.log(validOneTimePasswordToken, oneTimePassword);
       if (
         validOneTimePasswordToken &&
         (await bcrypt.compare(
