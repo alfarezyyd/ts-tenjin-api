@@ -3,12 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
   UploadedFiles,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
@@ -89,7 +89,7 @@ export class AssistanceController {
     };
   }
 
-  @Patch(':assistanceId')
+  @Put(':assistanceId')
   async update(
     @Param('assistanceId') assistanceId: bigint,
     @Body() updateAssistanceDto: UpdateAssistanceDto,
