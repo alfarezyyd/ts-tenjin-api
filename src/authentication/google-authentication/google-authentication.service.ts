@@ -65,7 +65,10 @@ export class GoogleAuthenticationService {
           uniqueId: uuidv4(),
         },
       });
-      userPrisma.Mentor.id = null;
+      userPrisma.Mentor = {
+        id: null,
+        userId: null,
+      };
     }
     return {
       uniqueId: userPrisma.uniqueId,
