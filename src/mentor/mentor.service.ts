@@ -110,7 +110,11 @@ export class MentorService {
         },
         include: {
           user: true,
-          Assistance: true,
+          Assistance: {
+            include: {
+              category: true,
+            },
+          },
           MentorResource: true,
         },
       })
