@@ -184,6 +184,7 @@ model Assistance {
   AssistanceCart     AssistanceCart[]
   Review             Review[]
 
+  @@unique([categoryId, mentorId])
   @@map("assistants")
 }
 
