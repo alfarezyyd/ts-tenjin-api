@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
@@ -102,10 +102,21 @@ export class MentorService {
     });
   }
 
-  async findAllByCategoryId() {}
-
-  findOne(mentorId: bigint) {
-    return `This action returns a #${mentorId} mentor`;
+  async findOne(mentorId: bigint) {
+    return this.prismaService.mentor
+      .findFirstOrThrow({
+        where: {
+          id: mentorId,
+        },
+        include: {
+          user: true,
+          Assistance: true,
+          MentorResource: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Mentor not found');
+      });
   }
 
   update(id: number, updateMentorDto: UpdateMentorDto) {

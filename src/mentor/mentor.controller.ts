@@ -1,15 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  ParseIntPipe,
+  Get,
   HttpCode,
-  UseInterceptors,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
   UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MentorService } from './mentor.service';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
@@ -23,6 +23,7 @@ import { CurrentUser } from '../authentication/decorator/current-user.decorator'
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
+import { Public } from 'src/authentication/decorator/set-metadata.decorator';
 
 @Controller('mentors')
 export class MentorController {
@@ -55,9 +56,16 @@ export class MentorController {
     };
   }
 
+  @Public()
   @Get(':mentorId')
-  findOne(@Param('mentorId', ParseIntPipe) mentorId: bigint) {
-    return this.mentorService.findOne(mentorId);
+  async findOne(
+    @Param('mentorId', ParseIntPipe) mentorId: bigint,
+  ): Promise<WebResponse<any>> {
+    return {
+      result: {
+        data: await this.mentorService.findOne(mentorId),
+      },
+    };
   }
 
   @Patch(':id')
