@@ -45,6 +45,7 @@ export default class ConvertHelper {
         id: assistantWithRelationship.id.toString(),
         mentorId: assistantWithRelationship.mentorId.toString(),
         mentorName: assistantWithRelationship['mentor']['user']['name'],
+        gender: assistantWithRelationship['mentor']['user']['gender'],
         categoryId: assistantWithRelationship['categoryId'].toString(),
         categoryName: assistantWithRelationship['category']['name'],
         capacity: assistantWithRelationship['capacity'],
@@ -62,6 +63,7 @@ export default class ConvertHelper {
         isActive,
         languageId:
           assistantWithRelationship['AssistanceLanguage'][0]['languageId'],
+        uniqueId: assistantWithRelationship['mentor']['user']['uniqueId'],
       };
       allResponseAssistants.push(responseAssistant);
     }

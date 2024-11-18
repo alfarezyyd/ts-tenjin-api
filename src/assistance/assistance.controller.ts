@@ -1,14 +1,14 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  UploadedFiles,
+  Get,
+  Param,
   ParseIntPipe,
+  Post,
   Put,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AssistanceService } from './assistance.service';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
@@ -77,6 +77,7 @@ export class AssistanceController {
     };
   }
 
+  @Public()
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,

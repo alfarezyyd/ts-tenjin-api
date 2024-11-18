@@ -2,6 +2,7 @@ export class ResponseAssistanceDto {
   id: string;
   mentorId: string;
   mentorName: string;
+  gender: string;
   categoryId: string;
   capacity: number;
   topic: string;
@@ -14,4 +15,5 @@ export class ResponseAssistanceDto {
   tagId: number[];
   imagePath: string[];
   languageId: number;
+  uniqueId: string;
 }
