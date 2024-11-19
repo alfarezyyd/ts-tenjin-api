@@ -14,7 +14,7 @@ export default class AuthenticationValidation {
         .string()
         .min(8, { message: 'Password must be at least 8 characters long' })
         .max(50, { message: 'Password must be at most 50 characters long' }),
-      confirm_password: z.coerce
+      confirmPassword: z.coerce
         .string()
         .min(8, {
           message: 'Confirm Password must be at least 8 characters long',
@@ -23,9 +23,9 @@ export default class AuthenticationValidation {
           message: 'Confirm Password must be at most 50 characters long',
         }),
     })
-    .refine((data) => data.password === data.confirm_password, {
+    .refine((data) => data.password === data.confirmPassword, {
       message: 'Passwords do not match',
-      path: ['confirm_password'], // Menentukan field yang akan mendapatkan pesan error
+      path: ['confirmPassword'], // Menentukan field yang akan mendapatkan pesan error
     });
   static readonly FORGOT_PASSWORD: ZodType = z.string().email();
 }
