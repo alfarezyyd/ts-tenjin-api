@@ -66,7 +66,6 @@ export class OrderService {
         userId: userPrisma.id,
         createdAt: new Date(),
       };
-      console.log(createOrderPayload);
       delete createOrderPayload['sessionCount'];
       const newCreatedOrder: Order = await prismaTransaction.order.create({
         data: createOrderPayload,

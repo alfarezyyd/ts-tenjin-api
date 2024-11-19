@@ -96,7 +96,6 @@ export class AssistanceController {
     @Body() updateAssistanceDto: UpdateAssistanceDto,
     @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
-    console.log(updateAssistanceDto);
     return {
       result: {
         message: await this.assistanceService.update(

@@ -259,7 +259,6 @@ export class AssistanceService {
         validatedUpdateAssistanceDto.tagId,
       ).filter((tagId) => !allTagPrisma.some((tag) => tag.id === tagId));
 
-      console.log(filteredNewTag);
       const assistanceTagsInsertPayload = Array.from(filteredNewTag).map(
         (value) => ({
           assistantId: updateAssistancePrisma.id,
