@@ -1,7 +1,8 @@
 export class CreateOrderDto {
   assistantId: bigint;
   mentorId: bigint;
-  sessionTimestamp: string;
+  sessionStartTimestamp: string;
+  sessionEndTimestamp: string;
   minutesDurations: number;
   note: string;
   sessionCount: number;
