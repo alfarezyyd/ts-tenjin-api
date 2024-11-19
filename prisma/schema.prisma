@@ -211,22 +211,23 @@ enum OrderPaymentStatus {
 }
 
 model Order {
-  id                 String             @id @default(uuid()) @db.VarChar(255)
-  assistantId        BigInt             @map("assistance_id") @db.UnsignedBigInt
-  assistance         Assistance         @relation(fields: [assistantId], references: [id])
-  mentorId           BigInt             @map("mentor_id") @db.UnsignedBigInt
-  mentor             Mentor             @relation(fields: [mentorId], references: [id])
-  userId             BigInt             @map("user_id") @db.UnsignedBigInt
-  user               User               @relation(fields: [userId], references: [id])
-  sessionTimestamp   DateTime           @map("session_timestamp")
-  minutesDurations   Int                @map("minutes_duration") @db.UnsignedInt
-  totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)
-  transactionToken   String?            @map("transaction_token") @db.VarChar(255)
-  orderStatus        OrderStatus        @default(PROCESSED) @map("order_status")
-  orderPaymentStatus OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
-  note               String             @db.Text
-  createdAt          DateTime           @default(now()) @map("created_at")
-  Review             Review[]
+  id                    String             @id @default(uuid()) @db.VarChar(255)
+  assistantId           BigInt             @map("assistance_id") @db.UnsignedBigInt
+  assistance            Assistance         @relation(fields: [assistantId], references: [id])
+  mentorId              BigInt             @map("mentor_id") @db.UnsignedBigInt
+  mentor                Mentor             @relation(fields: [mentorId], references: [id])
+  userId                BigInt             @map("user_id") @db.UnsignedBigInt
+  user                  User               @relation(fields: [userId], references: [id])
+  sessionStartTimestamp DateTime           @map("session_start_timestamp")
+  sessionEndTimestamp   DateTime           @map("session_end_timestamp")
+  minutesDurations      Int                @map("minutes_duration") @db.UnsignedInt
+  totalPrice            Decimal            @map("total_price") @db.Decimal(10, 3)
+  transactionToken      String?            @map("transaction_token") @db.VarChar(255)
+  orderStatus           OrderStatus        @default(PROCESSED) @map("order_status")
+  orderPaymentStatus    OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
+  note                  String             @db.Text
+  createdAt             DateTime           @default(now()) @map("created_at")
+  Review                Review[]
 
   @@map("orders")
 }
