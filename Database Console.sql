@@ -28,3 +28,4 @@ DELETE FROM mentor_addresses;
 DELETE FROM mentors;
 DELETE FROM experience_resources;
 DELETE FROM experiences;
+DELETE FROM orders;
