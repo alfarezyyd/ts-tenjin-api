@@ -63,23 +63,8 @@ export class ChatGateway
       webSocketClient.emit('error', {
         message: 'Specified user not found',
       });
-      throw new NotFoundException(`Specified user not found`);
+      return;
     }
-
-    webSocketClient.handshake.headers['session-id'] = uuidv4();
-    webSocketClient.handshake.headers['user'] = userUniqueId;
-    webSocketClient.handshake.headers['email'] = email;
-    const newChatSessionTraitBuilder = new ChatSessionTraitBuilder()
-      .setSessionId(webSocketClient.handshake.headers['session-id'] as string)
-      .setUserUniqueId(userUniqueId)
-      .setEmail(email);
-    await this.redisService
-      .getClient()
-      .hSet(
-        'onlineUsers',
-        userUniqueId,
-        JSON.stringify(newChatSessionTraitBuilder),
-      );
 
     webSocketClient.emit('session', {
       sessionId: webSocketClient.handshake.headers['session-id'] as string,
@@ -91,7 +76,7 @@ export class ChatGateway
       webSocketClient.handshake.headers['user-unique-id'] as string,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
-      const userPrisma = await prismaTransaction.user
+      const userPrisma = await this.prismaService.user
         .findFirstOrThrow({
           where: {
             uniqueId: webSocketClient.handshake.headers[
@@ -108,38 +93,78 @@ export class ChatGateway
           });
           throw new NotFoundException(`User not found`);
         });
+
+      webSocketClient.handshake.headers['session-id'] = uuidv4();
+      webSocketClient.handshake.headers['user'] = userUniqueId;
+      webSocketClient.handshake.headers['email'] = email;
+      const newChatSessionTraitBuilder = new ChatSessionTraitBuilder()
+        .setSessionId(webSocketClient.handshake.headers['session-id'] as string)
+        .setUserUniqueId(userUniqueId)
+        .setEmail(email)
+        .setUserId(userPrisma.id);
+
+      await this.redisService
+        .getClient()
+        .hSet(
+          'onlineUsers',
+          userUniqueId,
+          JSON.stringify(newChatSessionTraitBuilder),
+        );
+
       const allMessageFromUser: Chat[] = await prismaTransaction.chat.findMany({
         where: {
-          originUserId: userPrisma.id,
+          OR: [
+            {
+              originUserId: userPrisma.id,
+            },
+            {
+              destinationUserId: userPrisma.id,
+            },
+          ],
         },
       });
       const messagesPerUser = new Map();
       for (const messageFromUser of allMessageFromUser) {
+        console.log(userPrisma);
         const anotherUser =
-          userPrisma.id === messageFromUser.destinationUserId
-            ? messageFromUser.id
-            : messageFromUser.destinationUserId;
+          userPrisma.id === messageFromUser.originUserId
+            ? messageFromUser.destinationUserId
+            : messageFromUser.originUserId;
         if (messagesPerUser.has(anotherUser)) {
-          messagesPerUser.get(anotherUser).push(messageFromUser.payloadMessage);
+          messagesPerUser.get(anotherUser).push({
+            isSender: userPrisma.id === messageFromUser.originUserId,
+            message: messageFromUser.payloadMessage,
+          });
         } else {
-          messagesPerUser.set(anotherUser, [messageFromUser.payloadMessage]);
+          messagesPerUser.set(anotherUser, [
+            {
+              isSender: userPrisma.id === messageFromUser.originUserId,
+              message: messageFromUser.payloadMessage,
+            },
+          ]);
         }
       }
+      console.log('Keys in Map:', [...messagesPerUser.keys()]);
+      console.log(
+        'Types of Keys:',
+        [...messagesPerUser.keys()].map((key) => typeof key),
+      );
+
       const allOnlineUsers = [];
       const allOnlineUsersFromRedis = await this.redisService
         .getClient()
         .hGetAll('onlineUsers');
-
       // Melakukan loop terhadap semua user online
       for (const [userUniqueId, chatPayload] of Object.entries(
         allOnlineUsersFromRedis,
       )) {
         const parsedChatPayload = JSON.parse(chatPayload);
+        console.log(parsedChatPayload);
         allOnlineUsers.push({
           userUniqueId: userUniqueId,
           userId: parsedChatPayload.userId,
           name: parsedChatPayload.name,
-          messages: messagesPerUser.get(parsedChatPayload.userId) || [],
+          messages: messagesPerUser.get(BigInt(parsedChatPayload.userId)) || [],
         });
       }
       webSocketClient.emit('onlineUsers', allOnlineUsers);
