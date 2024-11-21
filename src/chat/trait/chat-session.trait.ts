@@ -9,6 +9,7 @@ export class ChatSessionTraitBuilder {
   userUniqueId: string;
   email: string;
   userId: bigint;
+  name: string;
 
   setSessionId(sessionId: string): ChatSessionTraitBuilder {
     this.sessionId = sessionId;
@@ -25,8 +26,13 @@ export class ChatSessionTraitBuilder {
     return this;
   }
 
-  setUserId(value: bigint): ChatSessionTraitBuilder {
-    this.userId = value;
+  setUserId(userId: bigint): ChatSessionTraitBuilder {
+    this.userId = userId;
+    return this;
+  }
+
+  setName(name: string): ChatSessionTraitBuilder {
+    this.name = name;
     return this;
   }
 }

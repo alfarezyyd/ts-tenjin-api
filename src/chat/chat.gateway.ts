@@ -27,7 +27,12 @@ import { v4 as uuidv4 } from 'uuid';
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'email',
+      'user-unique-id',
+    ],
   },
 })
 export class ChatGateway
@@ -85,6 +90,7 @@ export class ChatGateway
           },
           select: {
             id: true,
+            name: true,
           },
         })
         .catch(() => {
@@ -101,7 +107,8 @@ export class ChatGateway
         .setSessionId(webSocketClient.handshake.headers['session-id'] as string)
         .setUserUniqueId(userUniqueId)
         .setEmail(email)
-        .setUserId(userPrisma.id);
+        .setUserId(userPrisma.id)
+        .setName(userPrisma.name);
 
       await this.redisService
         .getClient()
@@ -125,7 +132,6 @@ export class ChatGateway
       });
       const messagesPerUser = new Map();
       for (const messageFromUser of allMessageFromUser) {
-        console.log(userPrisma);
         const anotherUser =
           userPrisma.id === messageFromUser.originUserId
             ? messageFromUser.destinationUserId
@@ -144,22 +150,16 @@ export class ChatGateway
           ]);
         }
       }
-      console.log('Keys in Map:', [...messagesPerUser.keys()]);
-      console.log(
-        'Types of Keys:',
-        [...messagesPerUser.keys()].map((key) => typeof key),
-      );
-
       const allOnlineUsers = [];
       const allOnlineUsersFromRedis = await this.redisService
         .getClient()
         .hGetAll('onlineUsers');
       // Melakukan loop terhadap semua user online
+      console.log(allOnlineUsersFromRedis);
       for (const [userUniqueId, chatPayload] of Object.entries(
         allOnlineUsersFromRedis,
       )) {
         const parsedChatPayload = JSON.parse(chatPayload);
-        console.log(parsedChatPayload);
         allOnlineUsers.push({
           userUniqueId: userUniqueId,
           userId: parsedChatPayload.userId,
@@ -232,6 +232,7 @@ export class ChatGateway
         .getClient()
         .hGet('onlineUsers', destinationUserUniqueId),
     );
+    console.log(destinationChatSessionTrait);
     let destinationUser = null;
     let originUser = null;
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -269,7 +270,7 @@ export class ChatGateway
       webSocketClient
         .to(destinationUser.uniqueId)
         .to(originUser.uniqueId)
-        .emit('privateMessage', { from: originUser.id, text: message });
+        .emit('privateMessage', { from: originUser.uniqueId, text: message });
     } else {
       webSocketClient.emit('message', {
         user: 'system',
