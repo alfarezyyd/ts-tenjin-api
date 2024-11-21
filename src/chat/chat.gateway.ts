@@ -140,12 +140,16 @@ export class ChatGateway
           messagesPerUser.get(anotherUser).push({
             isSender: userPrisma.id === messageFromUser.originUserId,
             message: messageFromUser.payloadMessage,
+            timestamp: messageFromUser.createdAt,
+            status: messageFromUser.status,
           });
         } else {
           messagesPerUser.set(anotherUser, [
             {
               isSender: userPrisma.id === messageFromUser.originUserId,
               message: messageFromUser.payloadMessage,
+              timestamp: messageFromUser.createdAt,
+              status: messageFromUser.status,
             },
           ]);
         }
@@ -155,7 +159,6 @@ export class ChatGateway
         .getClient()
         .hGetAll('onlineUsers');
       // Melakukan loop terhadap semua user online
-      console.log(allOnlineUsersFromRedis);
       for (const [userUniqueId, chatPayload] of Object.entries(
         allOnlineUsersFromRedis,
       )) {
@@ -218,6 +221,8 @@ export class ChatGateway
     @MessageBody('destinationUserUniqueId') destinationUserUniqueId: string,
     @ConnectedSocket() webSocketClient: Socket,
   ): Promise<void> {
+    // Mendapatkan pengirim di redis
+    console.log(webSocketClient.handshake.headers['user-unique-id'] as string);
     const originChatSessionTrait: ChatSessionTrait = JSON.parse(
       await this.redisService
         .getClient()
@@ -227,12 +232,13 @@ export class ChatGateway
         ),
     );
 
+    // Mendapatkan penerima di redis
     const destinationChatSessionTrait: ChatSessionTrait = JSON.parse(
       await this.redisService
         .getClient()
         .hGet('onlineUsers', destinationUserUniqueId),
     );
-    console.log(destinationChatSessionTrait);
+    console.log(originChatSessionTrait, destinationChatSessionTrait);
     let destinationUser = null;
     let originUser = null;
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -248,8 +254,11 @@ export class ChatGateway
         select: {
           id: true,
           uniqueId: true,
+          name: true,
         },
       });
+
+      // Memisahkan origin dan destination user
       originUser = userPrisma.find(
         (user) => user.uniqueId === originChatSessionTrait.userUniqueId,
       );
@@ -257,7 +266,7 @@ export class ChatGateway
       destinationUser = userPrisma.find(
         (user) => user.uniqueId === destinationChatSessionTrait.userUniqueId,
       );
-      await prismaTransaction.chat.create({
+      const chatPrisma = await prismaTransaction.chat.create({
         data: {
           originUserId: originUser.id,
           destinationUserId: destinationUser.id,
@@ -265,18 +274,28 @@ export class ChatGateway
           payloadMessage: message,
         },
       });
+      if (originUser && destinationUser) {
+        webSocketClient.nsp
+          .to(originUser.uniqueId)
+          .to(destinationUser.uniqueId)
+          .emit('privateMessage', {
+            originUserName: originUser.name,
+            originUserUniqueId: originUser.uniqueId,
+            destinationUserUniqueId: destinationUser.uniqueId,
+            message: {
+              isSender: originUser.id === chatPrisma.originUserId,
+              message: chatPrisma.payloadMessage,
+              timestamp: chatPrisma.createdAt,
+              status: chatPrisma.status,
+            },
+          });
+      } else {
+        webSocketClient.emit('message', {
+          user: 'system',
+          text: `User ${destinationUser['name']} is not online`,
+        });
+      }
     });
-    if (originUser && destinationUser) {
-      webSocketClient
-        .to(destinationUser.uniqueId)
-        .to(originUser.uniqueId)
-        .emit('privateMessage', { from: originUser.uniqueId, text: message });
-    } else {
-      webSocketClient.emit('message', {
-        user: 'system',
-        text: `User ${destinationUser['name']} is not online`,
-      });
-    }
   }
 
   @SubscribeMessage('createChat')
