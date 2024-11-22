@@ -154,23 +154,25 @@ export class ChatGateway
           ]);
         }
       }
-      const allOnlineUsers = [];
-      const allOnlineUsersFromRedis = await this.redisService
-        .getClient()
-        .hGetAll('onlineUsers');
-      // Melakukan loop terhadap semua user online
-      for (const [userUniqueId, chatPayload] of Object.entries(
-        allOnlineUsersFromRedis,
-      )) {
-        const parsedChatPayload = JSON.parse(chatPayload);
-        allOnlineUsers.push({
-          userUniqueId: userUniqueId,
-          userId: parsedChatPayload.userId,
-          name: parsedChatPayload.name,
-          messages: messagesPerUser.get(BigInt(parsedChatPayload.userId)) || [],
+
+      const allRelatedUser = [];
+      const allRelatedUserPrisma = await prismaTransaction.user.findMany({
+        where: {
+          id: {
+            in: Array.from(messagesPerUser.keys()),
+          },
+        },
+      });
+      for (const relatedUserPrisma of allRelatedUserPrisma) {
+        allRelatedUser.push({
+          userUniqueId: relatedUserPrisma.uniqueId,
+          userId: relatedUserPrisma.id,
+          name: relatedUserPrisma.name,
+          messages: messagesPerUser.get(BigInt(relatedUserPrisma.id)) || [],
         });
       }
-      webSocketClient.emit('onlineUsers', allOnlineUsers);
+      console.log(allRelatedUserPrisma);
+      webSocketClient.emit('allRelatedUsers', allRelatedUser);
     });
   }
 
