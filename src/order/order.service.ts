@@ -138,7 +138,16 @@ export class OrderService {
           userId: userPrisma.id,
         },
         include: {
-          assistance: true,
+          assistance: {
+            include: {
+              category: true,
+              mentor: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
         },
       });
     });
