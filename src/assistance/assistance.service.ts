@@ -297,7 +297,7 @@ export class AssistanceService {
             },
             category: {
               connect: {
-                id: validatedUpdateAssistanceDto.categoryId,
+                id: categoryId,
               },
             },
           },
@@ -318,17 +318,17 @@ export class AssistanceService {
         data: allAssistanceResourcePayload,
       });
       if (deletedFilesName !== undefined && deletedFilesName.length > 0) {
-        console.log(deletedFilesName);
-        await prismaTransaction.assistanceResource.findMany({
-          where: {
-            assistantId: assistantId,
-            imagePath: {
-              in: deletedFilesName,
+        const allDeletedFilesName =
+          await prismaTransaction.assistanceResource.findMany({
+            where: {
+              assistantId: assistantId,
+              imagePath: {
+                in: deletedFilesName,
+              },
             },
-          },
-        });
+          });
 
-        for (const deletedFileName of deletedFilesName) {
+        for (const deletedFileName of allDeletedFilesName) {
           fs.stat(
             `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
             function (err) {
