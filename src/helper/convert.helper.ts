@@ -62,7 +62,7 @@ export default class ConvertHelper {
         format,
         isActive,
         languageId:
-          assistantWithRelationship['AssistanceLanguage'][0]['languageId'],
+          assistantWithRelationship.AssistanceLanguage?.[0]['languageId'],
         uniqueId: assistantWithRelationship['mentor']['user']['uniqueId'],
       };
       allResponseAssistants.push(responseAssistant);
