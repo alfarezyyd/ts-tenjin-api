@@ -82,7 +82,21 @@ export class AssistanceService {
       if (allTagPrisma.length != validatedCreateAssistanceDto.tagId.size) {
         throw new NotFoundException(`Some tagId not found`);
       }
-      const { tagId, categoryId, languageId, ...prismaPayload } =
+      const allLanguagePrisma: Language[] =
+        await prismaTransaction.language.findMany({
+          where: {
+            id: {
+              in: [...validatedCreateAssistanceDto.languages],
+            },
+          },
+        });
+
+      if (
+        allLanguagePrisma.length != validatedCreateAssistanceDto.languages.size
+      ) {
+        throw new NotFoundException('Some languageId  not found');
+      }
+      const { tagId, categoryId, languages, ...prismaPayload } =
         validatedCreateAssistanceDto;
       const newAssistancePrisma: Assistance =
         await prismaTransaction.assistance.create({
@@ -123,12 +137,14 @@ export class AssistanceService {
       await prismaTransaction.assistanceTags.createMany({
         data: assistanceTagsInsertPayload,
       });
-
-      await prismaTransaction.assistanceLanguage.create({
-        data: {
+      const assistanceLanguagesInsertPayload = Array.from(languages).map(
+        (value) => ({
           assistantId: newAssistancePrisma.id,
-          languageId: languageId,
-        },
+          languageId: value as number,
+        }),
+      );
+      await prismaTransaction.assistanceLanguage.createMany({
+        data: assistanceLanguagesInsertPayload,
       });
       return 'Success! new assistance has been created';
     });
