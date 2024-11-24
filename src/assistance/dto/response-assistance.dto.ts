@@ -14,6 +14,6 @@ export class ResponseAssistanceDto {
   description: string;
   tagId: number[];
   imagePath: string[];
-  languageId: number;
+  languageIds: number[];
   uniqueId: string;
 }

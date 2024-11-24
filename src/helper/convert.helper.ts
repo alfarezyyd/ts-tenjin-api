@@ -61,8 +61,9 @@ export default class ConvertHelper {
         price: price.toString(),
         format,
         isActive,
-        languageId:
-          assistantWithRelationship.AssistanceLanguage?.[0]['languageId'],
+        languageIds: assistantWithRelationship.AssistanceLanguage.map(
+          (language) => language.languageId,
+        ),
         uniqueId: assistantWithRelationship['mentor']['user']['uniqueId'],
       };
       allResponseAssistants.push(responseAssistant);
