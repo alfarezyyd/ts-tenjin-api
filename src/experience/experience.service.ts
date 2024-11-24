@@ -202,14 +202,6 @@ export class ExperienceService {
         });
       const { deletedFilesName, ...shatteredValidatedUpdateExperienceDto } =
         validatedUpdateExperienceDto;
-      await prismaTransaction.experienceResource.deleteMany({
-        where: {
-          experienceId: experienceId,
-          imagePath: {
-            in: deletedFilesName,
-          },
-        },
-      });
 
       await prismaTransaction.experience.updateMany({
         data: {
@@ -239,6 +231,14 @@ export class ExperienceService {
         data: allExperienceResourcePayload,
       });
       if (deletedFilesName !== undefined && deletedFilesName?.length > 0) {
+        await prismaTransaction.experienceResource.deleteMany({
+          where: {
+            experienceId: experienceId,
+            imagePath: {
+              in: deletedFilesName,
+            },
+          },
+        });
         for (const deletedFileName of deletedFilesName) {
           fs.stat(
             `${this.configService.get<string>('MULTER_DEST')}/experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}/${deletedFileName}`,
