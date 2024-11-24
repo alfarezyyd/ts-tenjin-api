@@ -227,6 +227,8 @@ export class AssistanceService {
       AssistanceValidation.UPDATE,
       updateAssistanceDto,
     );
+    console.log(validatedUpdateAssistanceDto);
+
     await this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor
         .findFirstOrThrow({
@@ -316,6 +318,7 @@ export class AssistanceService {
         data: allAssistanceResourcePayload,
       });
       if (deletedFilesName !== undefined && deletedFilesName.length > 0) {
+        console.log(deletedFilesName);
         await prismaTransaction.assistanceResource.findMany({
           where: {
             assistantId: assistantId,
