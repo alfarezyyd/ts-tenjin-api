@@ -30,6 +30,8 @@ DELETE FROM experience_resources;
 DELETE FROM experiences;
 DELETE FROM orders;
 DELETE FROM assistance_languages;
+DELETE FROM orders;
 DELETE FROM assistance_tags;
 DELETE FROM assistance_carts;
 DELETE FROM assistance_resources;
+DELETE FROM assistants;
