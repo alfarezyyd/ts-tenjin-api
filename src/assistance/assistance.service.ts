@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { CreateAssistanceDto } from './dto/create-assistance.dto';
 import { UpdateAssistanceDto } from './dto/update-assistance.dto';
 import { ConfigService } from '@nestjs/config';
@@ -90,11 +96,14 @@ export class AssistanceService {
             },
           },
         });
-
+      console.log(
+        allLanguagePrisma,
+        validatedCreateAssistanceDto.languages.size,
+      );
       if (
         allLanguagePrisma.length != validatedCreateAssistanceDto.languages.size
       ) {
-        throw new NotFoundException('Some languageId  not found');
+        throw new NotFoundException('Some languageId not found');
       }
       const { tagId, categoryId, languages, ...prismaPayload } =
         validatedCreateAssistanceDto;
@@ -209,9 +218,13 @@ export class AssistanceService {
     );
   }
 
-  async update(assistantId: bigint, updateAssistanceDto: UpdateAssistanceDto) {
+  async update(
+    assistantId: bigint,
+    updateAssistanceDto: UpdateAssistanceDto,
+    uploadedFiles: Array<Express.Multer.File>,
+  ) {
     const validatedUpdateAssistanceDto = this.validationService.validate(
-      AssistanceValidation.SAVE,
+      AssistanceValidation.UPDATE,
       updateAssistanceDto,
     );
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -244,12 +257,29 @@ export class AssistanceService {
           },
         },
       });
+      const allLanguagePrisma: Language[] =
+        await prismaTransaction.language.findMany({
+          where: {
+            id: {
+              in: [...validatedUpdateAssistanceDto.languages],
+            },
+          },
+        });
       if (allTagPrisma.length != validatedUpdateAssistanceDto.tagId.size) {
         throw new NotFoundException(`Some tagId not found`);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { tagId, categoryId, languageId, ...prismaPayload } =
-        validatedUpdateAssistanceDto;
+      if (
+        allLanguagePrisma.length != validatedUpdateAssistanceDto.languages.size
+      ) {
+        throw new NotFoundException('Some languages not found');
+      }
+      const {
+        tagId,
+        categoryId,
+        languages,
+        deletedFilesName,
+        ...prismaPayload
+      } = validatedUpdateAssistanceDto;
       const updateAssistancePrisma: Assistance =
         await prismaTransaction.assistance.update({
           where: {
@@ -270,11 +300,61 @@ export class AssistanceService {
             },
           },
         });
+      const allAssistanceResourcePayload = [];
+      for (const file of uploadedFiles) {
+        const newResourceImagePath = await CommonHelper.handleSaveFile(
+          this.configService,
+          file,
+          `assistants/${this.expressRequest['user']['mentorId']}/${assistantId}`,
+        );
+        allAssistanceResourcePayload.push({
+          assistantId: assistantId,
+          imagePath: newResourceImagePath,
+        });
+      }
+      await prismaTransaction.assistanceResource.createMany({
+        data: allAssistanceResourcePayload,
+      });
+      if (deletedFilesName !== undefined && deletedFilesName.length > 0) {
+        await prismaTransaction.assistanceResource.findMany({
+          where: {
+            assistantId: assistantId,
+            imagePath: {
+              in: deletedFilesName,
+            },
+          },
+        });
 
-      const filteredNewTag = Array.from(
-        validatedUpdateAssistanceDto.tagId,
-      ).filter((tagId) => !allTagPrisma.some((tag) => tag.id === tagId));
+        for (const deletedFileName of deletedFilesName) {
+          fs.stat(
+            `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
+            function (err) {
+              if (err) {
+                throw new NotFoundException(
+                  `File with fileName ${deletedFileName} not found`,
+                );
+              }
+            },
+          );
 
+          for (const deletedFileName of deletedFilesName) {
+            fs.unlink(
+              `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
+              (err) => {
+                if (err) {
+                  throw new HttpException(
+                    `Error when trying to change file`,
+                    500,
+                  );
+                }
+              },
+            );
+          }
+        }
+      }
+      const filteredNewTag = Array.from(tagId).filter(
+        (tagId) => !allTagPrisma.some((tag) => tag.id === tagId),
+      );
       const assistanceTagsInsertPayload = Array.from(filteredNewTag).map(
         (value) => ({
           assistantId: updateAssistancePrisma.id,
@@ -283,6 +363,21 @@ export class AssistanceService {
       );
       await prismaTransaction.assistanceTags.createMany({
         data: assistanceTagsInsertPayload,
+      });
+      const filteredNewLanguage = Array.from(languages).filter(
+        (language) =>
+          !allLanguagePrisma.some(
+            (languagePrisma) => languagePrisma.id === language,
+          ),
+      );
+      const assistanceLanguagesInsertPayload = Array.from(
+        filteredNewLanguage,
+      ).map((value) => ({
+        assistantId: updateAssistancePrisma.id,
+        languageId: value as number,
+      }));
+      await prismaTransaction.assistanceLanguage.createMany({
+        data: assistanceLanguagesInsertPayload,
       });
     });
     return 'Success! assistance has been updated';
