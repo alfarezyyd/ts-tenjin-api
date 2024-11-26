@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Inject,
   Injectable,
@@ -215,22 +216,24 @@ export class ExperienceService {
         },
       });
 
-      const allExperienceResourcePayload = [];
-      for (const experienceResource of experienceResources) {
-        allExperienceResourcePayload.push({
-          experienceId: experienceId,
-          imagePath: await CommonHelper.handleSaveFile(
-            this.configService,
-            experienceResource,
-            `experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}`,
-          ),
-        });
-      }
-
-      await prismaTransaction.experienceResource.createMany({
-        data: allExperienceResourcePayload,
-      });
       if (deletedFilesName !== undefined && deletedFilesName?.length > 0) {
+        const countAllExperienceResource =
+          await prismaTransaction.experienceResource.count({
+            where: {
+              experienceId: experienceId,
+            },
+          });
+        console.log(
+          countAllExperienceResource,
+          deletedFilesName.length,
+          experienceResources.length,
+        );
+        if (
+          countAllExperienceResource === deletedFilesName.length &&
+          experienceResources.length == 0
+        ) {
+          throw new BadRequestException('Please upload at least one image');
+        }
         await prismaTransaction.experienceResource.deleteMany({
           where: {
             experienceId: experienceId,
@@ -265,6 +268,22 @@ export class ExperienceService {
             },
           );
         }
+
+        const allExperienceResourcePayload = [];
+        for (const experienceResource of experienceResources) {
+          allExperienceResourcePayload.push({
+            experienceId: experienceId,
+            imagePath: await CommonHelper.handleSaveFile(
+              this.configService,
+              experienceResource,
+              `experience-resources/${this.expressRequest['user']['mentorId']}/${experienceId}`,
+            ),
+          });
+        }
+
+        await prismaTransaction.experienceResource.createMany({
+          data: allExperienceResourcePayload,
+        });
       }
     });
     return 'Success! new experience has been updated';
