@@ -188,8 +188,8 @@ export class AssistanceService {
   }
 
   async findOne(id: number) {
-    const allAssistantsWithRelationship =
-      await this.prismaService.assistance.findMany({
+    return this.prismaService.assistance
+      .findFirstOrThrow({
         where: {
           id: id,
         },
@@ -201,21 +201,13 @@ export class AssistanceService {
           },
           category: true,
           AssistanceLanguage: true,
-          AssistanceTag: {
-            select: {
-              tagId: true,
-            },
-          },
-          AssistanceResource: {
-            select: {
-              imagePath: true,
-            },
-          },
+          AssistanceTag: true,
+          AssistanceResource: true,
         },
+      })
+      .catch(() => {
+        throw new NotFoundException('Assistance not found');
       });
-    return await ConvertHelper.assistantPrismaIntoAssistantResponse(
-      allAssistantsWithRelationship,
-    );
   }
 
   async update(
