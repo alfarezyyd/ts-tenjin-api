@@ -11,10 +11,17 @@ import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import { MidtransService } from '../common/midtrans.service';
 import { OrderValidation } from './order.validation';
-import { Assistance, Order, User } from '@prisma/client';
+import {
+  Assistance,
+  Order,
+  OrderPaymentStatus,
+  OrderStatus,
+  User,
+} from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
 import { MidtransCreateOrderDtoBuilder } from './dto/midtrans-create-order.dto';
 import LoggedUser from '../authentication/dto/logged-user.dto';
+import { PaymentNotificationDto } from './dto/payment-notification.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -150,6 +157,52 @@ export class OrderService {
           },
         },
       });
+    });
+  }
+
+  async handlePaymentNotification(
+    paymentNotificationPayload: PaymentNotificationDto,
+  ) {
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      switch (paymentNotificationPayload.transaction_status) {
+        case 'settlement':
+          await prismaTransaction.order.update({
+            where: {
+              id: paymentNotificationPayload.order_id,
+            },
+            data: {
+              orderStatus: OrderStatus.FINISHED,
+              orderPaymentStatus: OrderPaymentStatus.PAID,
+            },
+          });
+          break;
+        case 'cancel':
+        case 'deny':
+        case 'expire':
+          await prismaTransaction.order.update({
+            where: {
+              id: paymentNotificationPayload.order_id,
+            },
+            data: {
+              orderStatus: OrderStatus.CANCELLED,
+              orderPaymentStatus: OrderPaymentStatus.NOT_YET_PAID,
+            },
+          });
+          break;
+        case 'pending':
+          await prismaTransaction.order.update({
+            where: {
+              id: paymentNotificationPayload.order_id,
+            },
+            data: {
+              orderStatus: OrderStatus.PROCESSED,
+              orderPaymentStatus: OrderPaymentStatus.NOT_YET_PAID,
+            },
+          });
+          break;
+        default:
+          break;
+      }
     });
   }
 }

@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { WebResponse } from '../model/web.response';
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import { Assistance, Order } from '@prisma/client';
+import { Public } from 'src/authentication/decorator/set-metadata.decorator';
+import { PaymentNotificationDto } from './dto/payment-notification.dto';
 
 @Controller('orders')
 export class OrderController {
@@ -19,6 +21,16 @@ export class OrderController {
         data: await this.orderService.create(createOrderDto),
       },
     };
+  }
+
+  @Public()
+  @Post('notifications')
+  async paymentNotification(
+    @Body() paymentNotificationPayload: PaymentNotificationDto,
+  ) {
+    await this.orderService.handlePaymentNotification(
+      paymentNotificationPayload,
+    );
   }
 
   @Get()
