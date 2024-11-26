@@ -113,6 +113,25 @@ export class MentorService {
           Assistance: {
             include: {
               category: true,
+              AssistanceLanguage: {
+                include: {
+                  language: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+              AssistanceTag: {
+                include: {
+                  tag: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+              AssistanceResource: true,
             },
           },
           MentorResource: true,
