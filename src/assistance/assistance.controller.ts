@@ -83,9 +83,13 @@ export class AssistanceController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<ResponseAssistanceDto>> {
+    const detailAssistance = await this.assistanceService.findOne(+id);
     return {
       result: {
-        data: (await this.assistanceService.findOne(+id))[0],
+        data: {
+          ...detailAssistance,
+          ratingAverage: detailAssistance.ratingAverage.toString(),
+        },
       },
     };
   }
