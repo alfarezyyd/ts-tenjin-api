@@ -139,31 +139,32 @@ export class CategoryService {
   }
 
   async handleFindAllCategoryWithMentor() {
-    const categoryPrisma = await this.prismaService.category.findMany({
-      select: {
-        id: true, // Tambahkan ini jika Anda perlu ID kategori
-        name: true, // Tambahkan ini jika Anda perlu nama kategori
+    return this.prismaService.category.findMany({
+      include: {
         Assistance: {
-          take: 5, // Limit 5 Assistance per Category
+          take: 5,
           select: {
-            id: true, // Tambahkan ini jika Anda memerlukan ID assistance
-            topic: true, // Contoh kolom assistance jika diperlukan
+            id: true,
+            topic: true,
+            price: true,
+            durationMinutes: true,
             mentor: {
               select: {
-                id: true, // Tambahkan ini jika Anda perlu ID mentor
+                id: true,
                 user: {
                   select: {
                     id: true,
                     name: true,
                   },
-                }, // Nama mentor
-                // Tambahkan kolom lain yang Anda butuhkan dari Mentor
+                },
               },
+            },
+            AssistanceResource: {
+              take: 1,
             },
           },
         },
       },
     });
-    return categoryPrisma;
   }
 }
