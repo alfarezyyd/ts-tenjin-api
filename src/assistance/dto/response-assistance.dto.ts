@@ -1,19 +1,28 @@
+import {
+  AssistanceLanguage,
+  AssistanceResource,
+  AssistanceTags,
+  Category,
+  Mentor,
+} from '@prisma/client';
+
 export class ResponseAssistanceDto {
-  id: string;
-  mentorId: string;
-  mentorName: string;
-  gender: string;
-  categoryId: string;
-  capacity: number;
+  id: bigint;
+  mentorId: bigint;
+  categoryId: number;
   topic: string;
-  durationMinutes: string;
-  price: string;
-  format: string;
-  isActive: boolean;
-  categoryName: string;
   description: string;
-  tagId: number[];
-  imagePath: string[];
-  languageIds: number[];
-  uniqueId: string;
+  durationMinutes: number;
+  price: number;
+  format: string;
+  capacity: number;
+  isActive: boolean;
+  ratingAverage: string;
+  createdAt: Date;
+  updatedAt: Date;
+  mentor: Mentor; // Relasi dengan Mentor
+  category: Category; // Relasi dengan Category
+  AssistanceLanguage: AssistanceLanguage[]; // Array relasi
+  AssistanceTag: AssistanceTags[]; // Array relasi
+  AssistanceResource: AssistanceResource[]; // Array resource
 }
