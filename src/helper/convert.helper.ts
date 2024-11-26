@@ -37,11 +37,11 @@ export default class ConvertHelper {
       updatedAt: Date;
     })[],
   ) {
-    const allResponseAssistants: ResponseAssistanceDto[] = [];
+    const allResponseAssistants: any[] = [];
     for (const assistantWithRelationship of allAssistantsWithRelationship) {
       const { topic, durationMinutes, price, format, isActive } =
         assistantWithRelationship;
-      const responseAssistant: ResponseAssistanceDto = {
+      const responseAssistant: any = {
         id: assistantWithRelationship.id.toString(),
         mentorId: assistantWithRelationship.mentorId.toString(),
         mentorName: assistantWithRelationship['mentor']['user']['name'],
