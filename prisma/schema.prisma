@@ -38,6 +38,7 @@ model User {
   oneTimePasswordToken OneTimePasswordToken[]
   CoinOrder            CoinOrder[]
   WithdrawRequest      WithdrawRequest[]
+  Invoice              Invoice[]
 
   @@map("users")
 }
@@ -183,6 +184,7 @@ model Assistance {
   updatedAt          DateTime?            @default(now()) @map("updated_at")
   AssistanceCart     AssistanceCart[]
   Review             Review[]
+  Invoice            Invoice[]
 
   @@unique([categoryId, mentorId])
   @@map("assistants")
@@ -228,6 +230,7 @@ model Order {
   note                  String             @db.Text
   createdAt             DateTime           @default(now()) @map("created_at")
   Review                Review[]
+  Invoice               Invoice[]
 
   @@map("orders")
 }
@@ -401,4 +404,20 @@ model WithdrawRequest {
   sentAt                DateTime?             @map("sent_at")
 
   @@map("withdraw_requests")
+}
+
+model Invoice {
+  id          String     @id @default(uuid()) @db.VarChar(255)
+  orderId     String     @map("order_id") @db.VarChar(255)
+  Order       Order      @relation(fields: [orderId], references: [id])
+  userId      BigInt     @unique @map("user_id") @db.UnsignedBigInt
+  User        User       @relation(fields: [userId], references: [id])
+  assistantId BigInt     @map("assistance_id") @db.UnsignedBigInt
+  assistance  Assistance @relation(fields: [assistantId], references: [id])
+  dueDate     DateTime   @default(now()) @map("due_date")
+  invoiceDate DateTime   @default(now()) @map("invoice_date")
+  paymentType String     @db.VarChar(255)
+  note        String     @db.VarChar(255)
+
+  @@unique([orderId, userId])
 }
