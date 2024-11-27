@@ -122,8 +122,20 @@ export class OrderService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  findOne(transactionToken: string) {
+    return this.prismaService.order.findFirstOrThrow({
+      where: {
+        transactionToken,
+      },
+      include: {
+        mentor: {
+          include: {
+            user: true,
+          },
+        },
+        assistance: true,
+      },
+    });
   }
 
   async findAllByUserId(loggedUser: LoggedUser): Promise<
