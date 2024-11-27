@@ -1,17 +1,17 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
+  FileTypeValidator,
+  Get,
+  MaxFileSizeValidator,
+  Param,
+  ParseFilePipe,
+  ParseIntPipe,
+  Post,
+  Put,
   UploadedFile,
   UseInterceptors,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-  ParseIntPipe,
-  Put,
 } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
@@ -29,10 +29,7 @@ export class TagController {
   async create(
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5000 * 100 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 5000 * 100 })],
       }),
     )
     iconFile: Express.Multer.File,
