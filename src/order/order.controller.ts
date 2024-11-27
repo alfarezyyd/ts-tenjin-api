@@ -48,6 +48,13 @@ export class OrderController {
     };
   }
 
+  @Post('invoice')
+  async generateInvoice(@Body() invoicePayload: { transactionToken: string }) {
+    await this.orderService.handleInvoiceOperation(
+      invoicePayload.transactionToken,
+    );
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(+id);

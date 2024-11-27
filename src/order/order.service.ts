@@ -22,6 +22,7 @@ import { REQUEST } from '@nestjs/core';
 import { MidtransCreateOrderDtoBuilder } from './dto/midtrans-create-order.dto';
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { PaymentNotificationDto } from './dto/payment-notification.dto';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -30,6 +31,7 @@ export class OrderService {
     private readonly validationService: ValidationService,
     private readonly prismaService: PrismaService,
     private readonly midtransService: MidtransService,
+    private readonly httpService: HttpService,
     @Inject(REQUEST) private readonly expressRequest: Request,
   ) {}
 
@@ -203,5 +205,12 @@ export class OrderService {
           break;
       }
     });
+  }
+
+  async handleInvoiceOperation(transactionToken: string) {
+    console.log(transactionToken);
+    this.httpService.post(
+      `${this.configService.get<string>('MIDTRANS_ENDPOINT')}/invoices`,
+    );
   }
 }
