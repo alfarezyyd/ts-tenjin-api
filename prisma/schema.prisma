@@ -406,18 +406,23 @@ model WithdrawRequest {
   @@map("withdraw_requests")
 }
 
+enum PaymentType {
+  VIRTUAL_ACCOUNT
+  PAYMENT_LINK
+}
+
 model Invoice {
-  id          String     @id @default(uuid()) @db.VarChar(255)
-  orderId     String     @map("order_id") @db.VarChar(255)
-  Order       Order      @relation(fields: [orderId], references: [id])
-  userId      BigInt     @unique @map("user_id") @db.UnsignedBigInt
-  User        User       @relation(fields: [userId], references: [id])
-  assistantId BigInt     @map("assistance_id") @db.UnsignedBigInt
-  assistance  Assistance @relation(fields: [assistantId], references: [id])
-  dueDate     DateTime   @default(now()) @map("due_date")
-  invoiceDate DateTime   @default(now()) @map("invoice_date")
-  paymentType String     @db.VarChar(255)
-  note        String     @db.VarChar(255)
+  id          String      @id @default(uuid()) @db.VarChar(255)
+  orderId     String      @map("order_id") @db.VarChar(255)
+  Order       Order       @relation(fields: [orderId], references: [id])
+  userId      BigInt      @unique @map("user_id") @db.UnsignedBigInt
+  User        User        @relation(fields: [userId], references: [id])
+  assistantId BigInt      @map("assistance_id") @db.UnsignedBigInt
+  assistance  Assistance  @relation(fields: [assistantId], references: [id])
+  dueDate     DateTime    @default(now()) @map("due_date")
+  invoiceDate DateTime    @default(now()) @map("invoice_date")
+  paymentType PaymentType @default(PAYMENT_LINK) @map("payment_type")
+  note        String      @db.VarChar(255)
 
   @@unique([orderId, userId])
 }
