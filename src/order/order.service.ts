@@ -34,6 +34,7 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<string> {
+    console.log(this.expressRequest['user']);
     const validatedCreateOrderDto = this.validationService.validate(
       OrderValidation.SAVE,
       createOrderDto,
@@ -63,9 +64,10 @@ export class OrderService {
         });
       const userPrisma: User = await prismaTransaction.user.findFirstOrThrow({
         where: {
-          uniqueId: this.expressRequest['user']['id'],
+          uniqueId: this.expressRequest['user']['uniqueId'],
         },
       });
+
       const createOrderPayload: Order = {
         ...validatedCreateOrderDto,
         totalPrice:
@@ -73,6 +75,7 @@ export class OrderService {
         userId: userPrisma.id,
         createdAt: new Date(),
       };
+      console.log(createOrderPayload);
       delete createOrderPayload['sessionCount'];
       const newCreatedOrder: Order = await prismaTransaction.order.create({
         data: createOrderPayload,
@@ -112,10 +115,6 @@ export class OrderService {
         });
       return transactionToken;
     });
-  }
-
-  findAll() {
-    return `This action returns all order`;
   }
 
   findOne(id: number) {
@@ -166,7 +165,7 @@ export class OrderService {
     this.prismaService.$transaction(async (prismaTransaction) => {
       switch (paymentNotificationPayload.transaction_status) {
         case 'settlement':
-          await prismaTransaction.order.update({
+          await prismaTransaction.order.updateMany({
             where: {
               id: paymentNotificationPayload.order_id,
             },
@@ -179,7 +178,7 @@ export class OrderService {
         case 'cancel':
         case 'deny':
         case 'expire':
-          await prismaTransaction.order.update({
+          await prismaTransaction.order.updateMany({
             where: {
               id: paymentNotificationPayload.order_id,
             },
@@ -190,7 +189,7 @@ export class OrderService {
           });
           break;
         case 'pending':
-          await prismaTransaction.order.update({
+          await prismaTransaction.order.updateMany({
             where: {
               id: paymentNotificationPayload.order_id,
             },
