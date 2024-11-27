@@ -35,3 +35,4 @@ DELETE FROM assistance_tags;
 DELETE FROM assistance_carts;
 DELETE FROM assistance_resources;
 DELETE FROM assistants;
+DELETE FROM invoices;
