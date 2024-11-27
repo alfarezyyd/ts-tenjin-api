@@ -49,8 +49,12 @@ export class OrderController {
   }
 
   @Post('invoice')
-  async generateInvoice(@Body() invoicePayload: { transactionToken: string }) {
+  async generateInvoice(
+    @CurrentUser() currentUser: LoggedUser,
+    @Body() invoicePayload: { transactionToken: string },
+  ) {
     await this.orderService.handleInvoiceOperation(
+      currentUser,
       invoicePayload.transactionToken,
     );
   }

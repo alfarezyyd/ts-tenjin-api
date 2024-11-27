@@ -11,11 +11,14 @@ import ValidationService from '../common/validation.service';
 import PrismaService from '../common/prisma.service';
 import { MidtransService } from '../common/midtrans.service';
 import { OrderValidation } from './order.validation';
+
 import {
   Assistance,
+  Invoice,
   Order,
   OrderPaymentStatus,
   OrderStatus,
+  PaymentType,
   User,
 } from '@prisma/client';
 import { REQUEST } from '@nestjs/core';
@@ -207,10 +210,72 @@ export class OrderService {
     });
   }
 
-  async handleInvoiceOperation(transactionToken: string) {
-    console.log(transactionToken);
-    this.httpService.post(
-      `${this.configService.get<string>('MIDTRANS_ENDPOINT')}/invoices`,
-    );
+  async handleInvoiceOperation(
+    currentUser: LoggedUser,
+    transactionToken: string,
+  ) {
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      const orderPrisma: Order = await prismaTransaction.order
+        .findFirstOrThrow({
+          where: {
+            transactionToken: transactionToken,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Order not found');
+        });
+      const assistancePrisma = await prismaTransaction.assistance
+        .findFirstOrThrow({
+          where: {
+            id: orderPrisma.assistantId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Assistance not found');
+        });
+      const userPrisma: User = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: currentUser.uniqueId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('User not found');
+        });
+      const invoicePrisma: Invoice = await prismaTransaction.invoice.create({
+        data: {
+          orderId: orderPrisma.id,
+          userId: userPrisma.id,
+          assistantId: orderPrisma.assistantId,
+          dueDate: new Date(),
+          invoiceDate: new Date(),
+          paymentType: PaymentType.PAYMENT_LINK,
+          note: orderPrisma.note,
+        },
+      });
+      const invoicePayload = {
+        order_id: orderPrisma.id,
+        invoice_number: invoicePrisma.id,
+        due_date: invoicePrisma.dueDate,
+        invoice_date: invoicePrisma.invoiceDate,
+        customer_details: {
+          id: userPrisma.uniqueId,
+          name: userPrisma.name,
+          email: userPrisma.email,
+          phone: userPrisma.telephone,
+        },
+        payment_type: invoicePrisma.paymentType.toString().toLowerCase(),
+        item_details: [
+          {
+            item_id: assistancePrisma.id,
+            description: assistancePrisma.topic,
+            quantity: 1,
+            price: orderPrisma.totalPrice,
+          },
+        ],
+        notes: invoicePrisma.note,
+      };
+      console.log(orderPrisma);
+    });
   }
 }
