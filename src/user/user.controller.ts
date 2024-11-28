@@ -56,9 +56,7 @@ export class UserController {
     };
     return {
       result: {
-        data: {
-          user: mergedObject,
-        },
+        data: mergedObject,
       },
     };
   }

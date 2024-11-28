@@ -307,7 +307,7 @@ export class UserService {
             orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
           ),
           end: new Date(
-            orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
+            orderPrisma.sessionEndTimestamp.getTime() + 7 * 60 * 60 * 1000,
           ),
         });
       }
