@@ -18,7 +18,7 @@ import LoggedUser from '../authentication/dto/logged-user.dto';
 export class WithdrawController {
   constructor(private readonly withdrawService: WithdrawService) {}
 
-  @Post()
+  @Post('')
   async create(
     @CurrentUser() loggedUser: LoggedUser,
     @Body() createWithdrawDto: CreateWithdrawDto,

@@ -18,6 +18,7 @@ import { CartModule } from './cart/cart.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CheckoutModule } from './checkout/checkout.module';
+import { WithdrawModule } from './withdraw/withdraw.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CheckoutModule } from './checkout/checkout.module';
     LanguageModule,
     CartModule,
     CheckoutModule,
+    WithdrawModule,
   ],
   controllers: [],
   providers: [],

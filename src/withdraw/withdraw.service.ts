@@ -39,6 +39,7 @@ export class WithdrawService {
             userId: true,
             user: {
               select: {
+                id: true,
                 totalBalance: true,
               },
             },
@@ -59,10 +60,20 @@ export class WithdrawService {
             throw new NotFoundException('Mentor bank account data not found');
           });
       if (
-        mentorPrisma.user.totalBalance > validatedCreateWithdrawDto.totalBalance
+        mentorPrisma.user.totalBalance < validatedCreateWithdrawDto.totalBalance
       ) {
-        throw new BadRequestException('Coin not sufficient');
+        throw new BadRequestException('Balance not sufficient');
       }
+      await prismaTransaction.user.update({
+        where: {
+          id: mentorPrisma.user.id,
+        },
+        data: {
+          totalBalance:
+            mentorPrisma.user.totalBalance -
+            BigInt(validatedCreateWithdrawDto.totalBalance),
+        },
+      });
       await prismaTransaction.withdrawRequest.create({
         data: {
           userId: mentorPrisma.userId,
@@ -71,6 +82,7 @@ export class WithdrawService {
           totalBalance: validatedCreateWithdrawDto.totaBalance,
         },
       });
+
       return 'Withdraw request successfully created';
     });
   }

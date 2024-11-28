@@ -1,4 +1,3 @@
 export class CreateWithdrawDto {
-  totalCoin: number;
-  bankAccountId: number;
+  totalBalance: number;
 }
