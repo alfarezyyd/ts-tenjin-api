@@ -63,6 +63,7 @@ export class GoogleAuthenticationService {
           email: userData['email'],
           emailVerifiedAt: new Date(),
           uniqueId: uuidv4(),
+          isExternal: true,
         },
       });
       userPrisma.Mentor = {
