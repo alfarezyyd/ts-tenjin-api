@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   UploadedFiles,
@@ -57,13 +56,13 @@ export class MentorController {
   }
 
   @Public()
-  @Get(':mentorId')
+  @Get(':uniqueId')
   async findOne(
-    @Param('mentorId', ParseIntPipe) mentorId: bigint,
+    @Param('uniqueId') uniqueId: string,
   ): Promise<WebResponse<any>> {
     return {
       result: {
-        data: await this.mentorService.findOne(mentorId),
+        data: await this.mentorService.findOne(uniqueId),
       },
     };
   }

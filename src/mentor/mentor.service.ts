@@ -102,11 +102,13 @@ export class MentorService {
     });
   }
 
-  async findOne(mentorId: bigint) {
+  async findOne(uniqueId: string) {
     return this.prismaService.mentor
       .findFirstOrThrow({
         where: {
-          id: mentorId,
+          user: {
+            uniqueId: uniqueId,
+          },
         },
         include: {
           user: true,
@@ -135,6 +137,24 @@ export class MentorService {
             },
           },
           MentorResource: true,
+          Experience: {
+            take: 1,
+            orderBy: {
+              createdAt: 'desc',
+            },
+          },
+          Education: {
+            take: 1,
+            orderBy: {
+              endDate: 'desc',
+            },
+          },
+          MentorAddress: {
+            select: {
+              district: true,
+              province: true,
+            },
+          },
         },
       })
       .catch(() => {
