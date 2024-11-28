@@ -2,7 +2,7 @@ import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateMentorDto } from './dto/update-mentor.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
-import { Mentor, User } from '@prisma/client';
+import { Mentor, OrderStatus, User } from '@prisma/client';
 import {
   RegisterMentorDto,
   RegisterMentorResourceDto,
@@ -164,6 +164,65 @@ export class MentorService {
       .catch(() => {
         throw new NotFoundException('Mentor not found');
       });
+  }
+
+  async findAllMentorSchedule(mentorPrisma: Mentor) {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const allOrderPrisma = await prismaTransaction.order.findMany({
+        where: {
+          AND: [
+            {
+              mentorId: mentorPrisma.id,
+            },
+            {
+              userId: {
+                not: mentorPrisma.userId,
+              },
+            },
+          ],
+        },
+        include: {
+          assistance: true,
+          user: true,
+        },
+      });
+      const allMentorSchedule = [];
+      const countMentorOrder = {
+        failed: 0,
+        process: 0,
+        completed: 0,
+      };
+      for (const orderPrisma of allOrderPrisma) {
+        switch (orderPrisma.orderStatus) {
+          case OrderStatus.FINISHED:
+            countMentorOrder.completed++;
+            break;
+          case OrderStatus.PROCESSED:
+          case OrderStatus.CONFIRMED:
+            countMentorOrder.process++;
+            break;
+          case OrderStatus.CANCELLED:
+            countMentorOrder.failed++;
+            break;
+          default:
+            break;
+        }
+        allMentorSchedule.push({
+          title: orderPrisma.assistance.topic,
+          userName: orderPrisma.user.name,
+          start: new Date(
+            orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
+          ),
+          end: new Date(
+            orderPrisma.sessionEndTimestamp.getTime() + 7 * 60 * 60 * 1000,
+          ),
+        });
+      }
+      return {
+        countMentorOrder,
+        allMentorSchedule,
+      };
+    });
   }
 
   update(id: number, updateMentorDto: UpdateMentorDto) {

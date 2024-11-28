@@ -19,5 +19,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   controllers: [MentorController],
   providers: [MentorService],
+  exports: [MentorService],
 })
 export class MentorModule {}
