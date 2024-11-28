@@ -38,7 +38,7 @@ model User {
   oneTimePasswordToken OneTimePasswordToken[]
   WithdrawRequest      WithdrawRequest[]
   Invoice              Invoice[]
-  TopUp                TopUp[]
+  TopUpBalance         TopUpBalance[]
 
   @@map("users")
 }
