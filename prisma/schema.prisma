@@ -30,6 +30,7 @@ model User {
   pin                  String?                @db.Char(6)
   photoPath            String?                @map("photo_path") @db.VarChar(255)
   isExternal           Boolean                @default(false) @map("is_external")
+  totalBalance         BigInt                 @default(0) @map("total_balance") @db.UnsignedBigInt
   Mentor               Mentor?
   Order                Order[]
   Cart                 Cart?
