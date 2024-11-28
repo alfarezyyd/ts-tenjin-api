@@ -33,13 +33,12 @@ model User {
   Mentor               Mentor?
   Order                Order[]
   Cart                 Cart?
-  totalCoin            Int                    @default(0) @map("total_coin") @db.UnsignedInt
   originUserChat       Chat[]                 @relation(name: "originUserRelation")
   destinationUserChat  Chat[]                 @relation(name: "destinationUserRelation")
   oneTimePasswordToken OneTimePasswordToken[]
-  CoinOrder            CoinOrder[]
   WithdrawRequest      WithdrawRequest[]
   Invoice              Invoice[]
+  TopUp                TopUp[]
 
   @@map("users")
 }
@@ -371,17 +370,17 @@ model MentorResource {
   @@map("mentor_resources")
 }
 
-model CoinOrder {
+model TopUpBalance {
   id                 String             @id @default(uuid()) @db.VarChar(255)
   user               User               @relation(fields: [userId], references: [id])
   userId             BigInt             @map("user_id") @db.UnsignedBigInt
   transactionToken   String?            @map("transaction_token") @db.VarChar(255)
-  coinAmount         Int                @map("token_amount") @db.UnsignedInt
+  balanceAmount      Int                @map("balance_amount") @db.UnsignedInt
   totalPrice         Decimal            @map("total_price") @db.Decimal(10, 3)
   orderPaymentStatus OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
   createdAt          DateTime           @default(now()) @map("created_at")
 
-  @@map("coin_orders")
+  @@map("top_up_balances")
 }
 
 enum WithdrawPaymentStatus {
@@ -398,7 +397,7 @@ model WithdrawRequest {
   mentorId              BigInt                @map("mentor_id") @db.UnsignedBigInt
   mentorBankAccount     MentorBankAccount     @relation(fields: [mentorBankAccountId], references: [id])
   mentorBankAccountId   BigInt                @map("mentor_bank_account_id") @db.UnsignedBigInt
-  totalCoin             Int                   @map("total_coin") @db.UnsignedInt
+  totalBalance          Int                   @default(0) @map("total_balance") @db.UnsignedInt
   withdrawPaymentStatus WithdrawPaymentStatus @default(PROCESSED) @map("withdraw_payment_status")
   createdAt             DateTime              @default(now()) @map("created_at")
   updatedAt             DateTime              @default(now()) @map("updated_at")
