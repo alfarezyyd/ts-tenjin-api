@@ -1,7 +1,6 @@
 import { ResponseUserDto } from '../user/dto/response-user.dto';
 import { AssistanceFormat, User } from '@prisma/client';
 import { RefinementCtx, z } from 'zod';
-import { ResponseAssistanceDto } from '../assistance/dto/response-assistance.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export default class ConvertHelper {

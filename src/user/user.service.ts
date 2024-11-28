@@ -4,7 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import ValidationService from '../common/validation.service';
 import { UserValidation } from './user.validation';
 import PrismaService from '../common/prisma.service';
-import { Mentor, User, UserGender } from '@prisma/client';
+import { Mentor, OrderStatus, User, UserGender } from '@prisma/client';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -258,6 +258,63 @@ export class UserService {
         },
       });
       return true;
+    });
+  }
+
+  async handleFindOneSpecific(userPrisma: User) {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const allOrderPrisma = await prismaTransaction.order.findMany({
+        where: {
+          userId: userPrisma.id,
+        },
+        include: {
+          assistance: {
+            include: {
+              mentor: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      const allUserSchedule = [];
+      const countOrder = {
+        failed: 0,
+        process: 0,
+        completed: 0,
+      };
+      for (const orderPrisma of allOrderPrisma) {
+        switch (orderPrisma.orderStatus) {
+          case OrderStatus.FINISHED:
+            countOrder.completed++;
+            break;
+          case OrderStatus.PROCESSED:
+          case OrderStatus.CONFIRMED:
+            countOrder.process++;
+            break;
+          case OrderStatus.CANCELLED:
+            countOrder.failed++;
+            break;
+          default:
+            break;
+        }
+        allUserSchedule.push({
+          title: orderPrisma.assistance.topic,
+          mentorName: orderPrisma.assistance.mentor.user.name,
+          start: new Date(
+            orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
+          ),
+          end: new Date(
+            orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
+          ),
+        });
+      }
+      return {
+        countOrder: countOrder,
+        schedule: allUserSchedule,
+      };
     });
   }
 }

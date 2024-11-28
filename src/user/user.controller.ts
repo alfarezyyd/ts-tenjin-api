@@ -18,8 +18,6 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WebResponse } from '../model/web.response';
-import { ResponseUserDto } from './dto/response-user.dto';
-import ConvertHelper from '../helper/convert.helper';
 import { User } from '@prisma/client';
 import { Public } from '../authentication/decorator/set-metadata.decorator';
 import { SettingGeneralDataUserDto } from './dto/setting-general-data-user.dto';
@@ -48,13 +46,19 @@ export class UserController {
 
   @Get(':userId')
   @NoVerifiedEmail(true)
-  async findOne(
-    @Param('userId') userId: string,
-  ): Promise<WebResponse<ResponseUserDto>> {
+  async findOne(@Param('userId') userId: string): Promise<WebResponse<any>> {
     const userDetail: User = await this.userService.findOne(userId);
+    const userSpecificSchedule =
+      await this.userService.handleFindOneSpecific(userDetail);
+    const mergedObject = {
+      userDetail,
+      userSpecificSchedule,
+    };
     return {
       result: {
-        data: await ConvertHelper.userPrismaIntoUserResponse(userDetail),
+        data: {
+          user: mergedObject,
+        },
       },
     };
   }
