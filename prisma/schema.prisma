@@ -29,6 +29,7 @@ model User {
   telephone            String?                @unique @db.VarChar(13)
   pin                  String?                @db.Char(6)
   photoPath            String?                @map("photo_path") @db.VarChar(255)
+  isExternal           Boolean                @default(false) @map("is_external")
   Mentor               Mentor?
   Order                Order[]
   Cart                 Cart?
