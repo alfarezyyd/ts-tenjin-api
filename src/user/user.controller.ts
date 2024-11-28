@@ -27,6 +27,7 @@ import { CurrentUser } from '../authentication/decorator/current-user.decorator'
 import LoggedUser from '../authentication/dto/logged-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
+import { ChangePassword } from './dto/change-password.dto';
 
 @Controller('users')
 export class UserController {
@@ -101,6 +102,23 @@ export class UserController {
           settingGeneralDataUserDto,
           loggedUser,
           photoFile,
+        ),
+      },
+    };
+  }
+
+  @Put('/settings/change-password')
+  @NoVerifiedEmail(true)
+  async settingChangePassword(
+    @Body() changePassword: ChangePassword,
+    @CurrentUser() loggedUser: LoggedUser,
+  ): Promise<WebResponse<boolean>> {
+    console.log(changePassword);
+    return {
+      result: {
+        data: await this.userService.handleChangePassword(
+          changePassword,
+          loggedUser,
         ),
       },
     };

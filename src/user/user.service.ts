@@ -15,6 +15,8 @@ import LoggedUser from '../authentication/dto/logged-user.dto';
 import CommonHelper from '../helper/common.helper';
 import * as fs from 'node:fs';
 import { join } from 'path';
+import { ChangePassword } from './dto/change-password.dto';
+import { ZodError } from 'zod';
 
 @Injectable()
 export class UserService {
@@ -210,6 +212,52 @@ export class UserService {
         },
       });
       return 'Success! settings user has been updated';
+    });
+  }
+
+  async handleChangePassword(
+    changePassword: ChangePassword,
+    loggedUser: LoggedUser,
+  ) {
+    const validatedChangePassword = this.validationService.validate(
+      UserValidation.SETTING_CHANGE_PASSWORD,
+      changePassword,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      console.log(validatedChangePassword);
+      const userPrisma: User = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('User not found');
+        });
+
+      if (bcrypt.compareSync(userPrisma.password, changePassword.oldPassword)) {
+        throw new ZodError([
+          {
+            path: ['oldPassword'], // Lokasi field yang error
+            message: 'Password lama tidak sesuai.',
+            code: 'custom', // Custom error code
+          },
+        ]);
+      }
+
+      const newPassword = await bcrypt.hash(
+        validatedChangePassword.newPassword,
+        10,
+      );
+      await prismaTransaction.user.update({
+        where: {
+          id: userPrisma.id,
+        },
+        data: {
+          password: newPassword,
+        },
+      });
+      return true;
     });
   }
 }

@@ -31,4 +31,28 @@ export class UserValidation {
     }),
     telephone: z.string().min(1).max(255),
   });
+
+  static readonly SETTING_CHANGE_PASSWORD = z
+    .object({
+      oldPassword: z
+        .string()
+        .min(8, { message: 'Password must be at least 8 characters long' })
+        .max(50, { message: 'Password must be at most 50 characters long' }),
+      newPassword: z
+        .string()
+        .min(8, { message: 'Password must be at least 8 characters long' })
+        .max(50, { message: 'Password must be at most 50 characters long' }),
+      confirmPassword: z
+        .string()
+        .min(8, {
+          message: 'Confirm Password must be at least 8 characters long',
+        })
+        .max(50, {
+          message: 'Confirm Password must be at most 50 characters long',
+        }),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: 'Passwords do not match',
+      path: ['confirmPassword'], // Menentukan field yang akan mendapatkan pesan error
+    });
 }
