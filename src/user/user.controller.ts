@@ -18,7 +18,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { WebResponse } from '../model/web.response';
-import { User } from '@prisma/client';
+import { Mentor, User } from '@prisma/client';
 import { Public } from '../authentication/decorator/set-metadata.decorator';
 import { SettingGeneralDataUserDto } from './dto/setting-general-data-user.dto';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
@@ -26,6 +26,7 @@ import LoggedUser from '../authentication/dto/logged-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 import { ChangePassword } from './dto/change-password.dto';
+import ConvertHelper from '../helper/convert.helper';
 
 @Controller('users')
 export class UserController {
@@ -48,12 +49,27 @@ export class UserController {
   @NoVerifiedEmail(true)
   async findOne(@Param('userId') userId: string): Promise<WebResponse<any>> {
     const userDetail: User = await this.userService.findOne(userId);
+    return {
+      result: {
+        data: await ConvertHelper.userPrismaIntoUserResponse(userDetail),
+      },
+    };
+  }
+
+  @Get('specific/:userId')
+  @NoVerifiedEmail(true)
+  async findOneSpecific(
+    @Param('userId') userId: string,
+  ): Promise<WebResponse<any>> {
+    const userDetail: User & { Mentor?: Mentor | null } =
+      await this.userService.findOne(userId);
     const userSpecificSchedule =
       await this.userService.handleFindOneSpecific(userDetail);
     const mergedObject = {
       userDetail,
       userSpecificSchedule,
     };
+
     return {
       result: {
         data: mergedObject,

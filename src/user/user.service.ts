@@ -17,6 +17,7 @@ import * as fs from 'node:fs';
 import { join } from 'path';
 import { ChangePassword } from './dto/change-password.dto';
 import { ZodError } from 'zod';
+import { MentorService } from '../mentor/mentor.service';
 
 @Injectable()
 export class UserService {
@@ -25,6 +26,7 @@ export class UserService {
     private readonly prismaService: PrismaService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly mentorService: MentorService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<string> {
@@ -261,7 +263,7 @@ export class UserService {
     });
   }
 
-  async handleFindOneSpecific(userPrisma: User) {
+  async handleFindOneSpecific(userPrisma: User & { Mentor?: Mentor | null }) {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const allOrderPrisma = await prismaTransaction.order.findMany({
         where: {
@@ -311,9 +313,19 @@ export class UserService {
           ),
         });
       }
+      let mentorSchedule = null;
+      let countMentorOrder = null;
+      if (userPrisma.Mentor !== null) {
+        const resultMentorSchedule =
+          await this.mentorService.findAllMentorSchedule(userPrisma.Mentor);
+        mentorSchedule = resultMentorSchedule.allMentorSchedule;
+        countMentorOrder = resultMentorSchedule.countMentorOrder;
+      }
       return {
         countOrder: countOrder,
         schedule: allUserSchedule,
+        mentorSchedule: mentorSchedule,
+        countMentorOrder: countMentorOrder,
       };
     });
   }
