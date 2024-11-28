@@ -280,6 +280,9 @@ export class UserService {
             },
           },
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
       const allUserSchedule = [];
       const countOrder = {
@@ -313,19 +316,23 @@ export class UserService {
           ),
         });
       }
-      let mentorSchedule = null;
+      let mentorSchedule = [];
       let countMentorOrder = null;
+      let lastFiveMentorOrders = [];
       if (userPrisma.Mentor !== null) {
         const resultMentorSchedule =
           await this.mentorService.findAllMentorSchedule(userPrisma.Mentor);
         mentorSchedule = resultMentorSchedule.allMentorSchedule;
         countMentorOrder = resultMentorSchedule.countMentorOrder;
+        lastFiveMentorOrders = resultMentorSchedule.lastFiveMentorOrders;
       }
       return {
         countOrder: countOrder,
+        countMentorOrder: countMentorOrder,
         schedule: allUserSchedule,
         mentorSchedule: mentorSchedule,
-        countMentorOrder: countMentorOrder,
+        lastFiveOrders: allOrderPrisma.slice(0, 5),
+        lastFiveMentorOrders: lastFiveMentorOrders.slice(0, 5),
       };
     });
   }

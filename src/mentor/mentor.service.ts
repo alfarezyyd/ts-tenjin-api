@@ -185,6 +185,9 @@ export class MentorService {
           assistance: true,
           user: true,
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
       const allMentorSchedule = [];
       const countMentorOrder = {
@@ -221,6 +224,7 @@ export class MentorService {
       return {
         countMentorOrder,
         allMentorSchedule,
+        lastFiveMentorOrders: allOrderPrisma.slice(0, 5),
       };
     });
   }
