@@ -78,6 +78,7 @@ export class GoogleAuthenticationService {
       gender: userPrisma.gender,
       telephone: userPrisma.telephone,
       mentorId: userPrisma.Mentor?.id?.toString() ?? null,
+      isExternal: true,
     };
   }
 

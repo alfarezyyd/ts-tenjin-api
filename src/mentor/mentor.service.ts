@@ -93,8 +93,12 @@ export class MentorService {
       });
       const payloadJwt = {
         uniqueId: currentUser.uniqueId,
+        name: userPrisma.name,
         email: currentUser.email,
+        gender: userPrisma.gender,
+        telephone: userPrisma.telephone,
         mentorId: mentorPrisma.id,
+        isExternal: currentUser.isExternal,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),
