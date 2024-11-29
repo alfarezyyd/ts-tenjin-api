@@ -36,4 +36,4 @@ DELETE FROM assistance_carts;
 DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM invoices;
-UPDATE users SET is_external = 1;
+UPDATE users SET telephone = null;

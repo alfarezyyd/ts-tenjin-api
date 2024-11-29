@@ -177,25 +177,34 @@ export class UserService {
         .catch(() => {
           throw new NotFoundException('User not found');
         });
-      const existingImagePath = join(
-        process.cwd(),
-        this.configService.get<string>('MULTER_DEST'),
-        'user-resources',
-        userPrisma.photoPath,
-      );
-      const isImageSame = await CommonHelper.compareImagesFromUpload(
-        existingImagePath,
-        photoFile,
-      );
-      let nameFile = userPrisma.photoPath;
-      if (!isImageSame) {
-        try {
-          fs.unlinkSync(existingImagePath);
-        } catch (err) {
-          if (err && userPrisma.photoPath !== null) {
-            throw new HttpException(`Error when trying to update image`, 500);
+      let nameFile = '';
+      if (userPrisma.photoPath !== null) {
+        const existingImagePath = join(
+          process.cwd(),
+          this.configService.get<string>('MULTER_DEST'),
+          'user-resources',
+          userPrisma.photoPath,
+        );
+        const isImageSame = await CommonHelper.compareImagesFromUpload(
+          existingImagePath,
+          photoFile,
+        );
+        nameFile = userPrisma.photoPath;
+        if (!isImageSame) {
+          try {
+            fs.unlinkSync(existingImagePath);
+          } catch (err) {
+            if (err) {
+              throw new HttpException(`Error when trying to update image`, 500);
+            }
           }
+          nameFile = await CommonHelper.handleSaveFile(
+            this.configService,
+            photoFile,
+            'user-resources',
+          );
         }
+      } else {
         nameFile = await CommonHelper.handleSaveFile(
           this.configService,
           photoFile,
@@ -210,6 +219,7 @@ export class UserService {
           ...validatedSettingGeneralDataUserDto, // Menyebarkan data baru untuk di-update
           gender: UserGender[validatedSettingGeneralDataUserDto.gender],
           photoPath: nameFile,
+          telephone: validatedSettingGeneralDataUserDto.telephone,
           emailVerifiedAt: null,
         },
       });

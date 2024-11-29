@@ -154,6 +154,7 @@ export class CategoryService {
                 user: {
                   select: {
                     id: true,
+                    uniqueId: true,
                     name: true,
                   },
                 },

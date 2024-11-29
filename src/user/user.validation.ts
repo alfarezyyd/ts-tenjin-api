@@ -29,7 +29,14 @@ export class UserValidation {
         UserGender,
       );
     }),
-    telephone: z.string().min(1).max(255),
+    telephone: z
+      .string()
+      .min(1)
+      .max(255)
+      .optional()
+      .transform((arg, ctx) => {
+        if (arg == 'null') return null;
+      }),
   });
 
   static readonly SETTING_CHANGE_PASSWORD = z
