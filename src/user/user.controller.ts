@@ -27,6 +27,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 import { ChangePassword } from './dto/change-password.dto';
 import ConvertHelper from '../helper/convert.helper';
+import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
 
 @Controller('users')
 export class UserController {
@@ -113,10 +114,10 @@ export class UserController {
       }),
     )
     photoFile: Express.Multer.File,
-  ): Promise<WebResponse<string>> {
+  ): Promise<WebResponse<ResponseAuthenticationDto>> {
     return {
       result: {
-        message: await this.userService.settingGeneralData(
+        data: await this.userService.settingGeneralData(
           settingGeneralDataUserDto,
           loggedUser,
           photoFile,

@@ -18,6 +18,8 @@ import { join } from 'path';
 import { ChangePassword } from './dto/change-password.dto';
 import { ZodError } from 'zod';
 import { MentorService } from '../mentor/mentor.service';
+import { JwtService } from '@nestjs/jwt';
+import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
 
 @Injectable()
 export class UserService {
@@ -27,6 +29,7 @@ export class UserService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly mentorService: MentorService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<string> {
@@ -159,7 +162,7 @@ export class UserService {
     settingGeneralDataUserDto: SettingGeneralDataUserDto,
     loggedUser: LoggedUser,
     photoFile: Express.Multer.File,
-  ): Promise<string> {
+  ): Promise<ResponseAuthenticationDto> {
     const validatedSettingGeneralDataUserDto = this.validationService.validate(
       UserValidation.SETTING_GENERAL_DATA,
       settingGeneralDataUserDto,
@@ -170,8 +173,8 @@ export class UserService {
           where: {
             uniqueId: loggedUser.uniqueId,
           },
-          select: {
-            photoPath: true,
+          include: {
+            Mentor: true,
           },
         })
         .catch(() => {
@@ -223,7 +226,18 @@ export class UserService {
           emailVerifiedAt: null,
         },
       });
-      return 'Success! settings user has been updated';
+      const payloadJwt = {
+        uniqueId: userPrisma.uniqueId,
+        name: userPrisma.name,
+        email: userPrisma.email,
+        gender: userPrisma.gender,
+        telephone: userPrisma.telephone,
+        mentorId: userPrisma.Mentor?.id?.toString() ?? null,
+        isExternal: userPrisma.isExternal,
+      };
+      return {
+        accessToken: await this.jwtService.signAsync(payloadJwt),
+      };
     });
   }
 
