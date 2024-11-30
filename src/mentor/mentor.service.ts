@@ -66,7 +66,7 @@ export class MentorService {
         imagePath: await CommonHelper.handleSaveFile(
           this.configService,
           uploadedFiles.curriculumVitae[0],
-          `mentor-resources/${mentorPrisma.id}`,
+          `mentor-resources/documents/${mentorPrisma.id}`,
         ),
         mentorId: mentorPrisma.id,
       });
@@ -74,7 +74,7 @@ export class MentorService {
         imagePath: await CommonHelper.handleSaveFile(
           this.configService,
           uploadedFiles.identityCard[0],
-          `mentor-resources/${mentorPrisma.id}`,
+          `mentor-resources/documents/${mentorPrisma.id}`,
         ),
         mentorId: mentorPrisma.id,
       });
@@ -83,7 +83,7 @@ export class MentorService {
         imagePath: await CommonHelper.handleSaveFile(
           this.configService,
           uploadedFiles.photo[0],
-          `mentor-resources/${mentorPrisma.id}`,
+          `mentor-resources/profile/${mentorPrisma.id}`,
         ),
         mentorId: mentorPrisma.id,
       });
