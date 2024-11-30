@@ -213,6 +213,9 @@ export class MentorService {
         allMentorSchedule.push({
           title: orderPrisma.assistance.topic,
           userName: orderPrisma.user.name,
+          meetingPlatform: orderPrisma.meetingPlatform,
+          meetingPasskey: orderPrisma.meetingPasskey,
+          meetingLink: orderPrisma.meetingLink,
           start: new Date(
             orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
           ),

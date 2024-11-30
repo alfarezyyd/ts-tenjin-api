@@ -332,6 +332,9 @@ export class UserService {
         allUserSchedule.push({
           title: orderPrisma.assistance.topic,
           mentorName: orderPrisma.assistance.mentor.user.name,
+          meetingPlatform: orderPrisma.meetingPlatform,
+          meetingPasskey: orderPrisma.meetingPasskey,
+          meetingLink: orderPrisma.meetingLink,
           start: new Date(
             orderPrisma.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
           ),
