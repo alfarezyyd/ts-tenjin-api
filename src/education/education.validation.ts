@@ -3,7 +3,7 @@ import { z, ZodType } from 'zod';
 export default class EducationValidation {
   static readonly SAVE: ZodType = z.object({
     name: z.string().max(255).min(5),
-    degree: z.string().max(255).min(5),
+    degree: z.string().max(255).min(3),
     studyField: z.string().max(255).min(5),
     startDate: z
       .string()
