@@ -213,6 +213,12 @@ enum OrderPaymentStatus {
   PAID
 }
 
+enum OrderCondition {
+  APPROVE
+  REJECT
+  WAITING
+}
+
 model Order {
   id                    String             @id @default(uuid()) @db.VarChar(255)
   assistantId           BigInt             @map("assistance_id") @db.UnsignedBigInt
@@ -228,6 +234,7 @@ model Order {
   transactionToken      String?            @map("transaction_token") @db.VarChar(255)
   orderStatus           OrderStatus        @default(PROCESSED) @map("order_status")
   orderPaymentStatus    OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
+  orderCondition        OrderCondition     @default(WAITING) @map("order_condition")
   meetingPlatform       String?            @map("meeting_platform")
   meetingPasskey        String?            @map("meeting_passkey")
   meetingLink           String?            @map("meeting_link")

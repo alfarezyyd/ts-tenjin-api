@@ -1,17 +1,14 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Param,
-  Patch,
   Post,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { MentorService } from './mentor.service';
-import { UpdateMentorDto } from './dto/update-mentor.dto';
 import { WebResponse } from '../model/web.response';
 import {
   RegisterMentorDto,
@@ -55,6 +52,36 @@ export class MentorController {
     };
   }
 
+  @Get('orders')
+  async findAllOrder(
+    @CurrentUser() currentUser: LoggedUser,
+  ): Promise<WebResponse<any>> {
+    return {
+      result: {
+        data: await this.mentorService.handleFindAllOrder(currentUser),
+      },
+    };
+  }
+
+  @Post('orders/booking')
+  async updateBookingCondition(
+    @Body()
+    updateBookingCondition: {
+      orderId: string;
+      bookingCondition: string;
+    },
+    @CurrentUser() currentUser: LoggedUser,
+  ) {
+    return {
+      result: {
+        data: await this.mentorService.handleBookingCondition(
+          currentUser,
+          updateBookingCondition,
+        ),
+      },
+    };
+  }
+
   @Public()
   @Get(':uniqueId')
   async findOne(
@@ -65,15 +92,5 @@ export class MentorController {
         data: await this.mentorService.findOne(uniqueId),
       },
     };
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMentorDto: UpdateMentorDto) {
-    return this.mentorService.update(+id, updateMentorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mentorService.remove(+id);
   }
 }

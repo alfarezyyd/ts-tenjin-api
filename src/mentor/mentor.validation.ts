@@ -20,4 +20,9 @@ export class MentorValidation {
     }),
     pin: z.string().length(6),
   });
+
+  static readonly UPDATE_BOOKING_CONDITION = z.object({
+    orderId: z.string().min(1),
+    bookingCondition: z.string().min(1),
+  });
 }

@@ -1,8 +1,7 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
-import { UpdateMentorDto } from './dto/update-mentor.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
-import { Mentor, OrderStatus, User } from '@prisma/client';
+import { Mentor, OrderCondition, OrderStatus, User } from '@prisma/client';
 import {
   RegisterMentorDto,
   RegisterMentorResourceDto,
@@ -232,11 +231,72 @@ export class MentorService {
     });
   }
 
-  update(id: number, updateMentorDto: UpdateMentorDto) {
-    return `This action updates a #${id} mentor`;
+  async handleFindAllOrder(loggedUser: LoggedUser) {
+    const allOrder = await this.prismaService.order.findMany({
+      where: {
+        mentorId: BigInt(loggedUser.mentorId),
+        orderCondition: OrderCondition.WAITING,
+      },
+      select: {
+        sessionStartTimestamp: true,
+        sessionEndTimestamp: true,
+        orderCondition: true,
+        id: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        assistance: {
+          select: {
+            topic: true,
+          },
+        },
+      },
+    });
+    Object.entries(allOrder).forEach(([key, value]) => {
+      value.sessionStartTimestamp = new Date(
+        value.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
+      );
+      value.sessionEndTimestamp = new Date(
+        value.sessionEndTimestamp.getTime() + 7 * 60 * 60 * 1000,
+      );
+    });
+    return allOrder;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} mentor`;
+  async handleBookingCondition(
+    currentUser: LoggedUser,
+    updateBookingCondition: {
+      orderId: string;
+      bookingCondition: string;
+    },
+  ) {
+    const validatedUpdateBookingCondition = this.validationService.validate(
+      MentorValidation.UPDATE_BOOKING_CONDITION,
+      updateBookingCondition,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.order
+        .findFirstOrThrow({
+          where: {
+            mentorId: BigInt(currentUser.mentorId),
+            id: updateBookingCondition.orderId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Order not found');
+        });
+      await prismaTransaction.order.update({
+        where: {
+          mentorId: BigInt(currentUser.mentorId),
+          id: updateBookingCondition.orderId,
+        },
+        data: {
+          orderCondition:
+            OrderCondition[validatedUpdateBookingCondition.bookingCondition],
+        },
+      });
+    });
   }
 }
