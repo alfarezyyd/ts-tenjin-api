@@ -37,4 +37,4 @@ DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM orders;
 UPDATE users SET telephone = null;
-UPDATE orders SET order_condition = "WAITING";
+UPDATE orders SET order_status = "CONFIRMED" WHERE id = '2d5fdd6d-eee7-4108-9f0a-434d5d71d028';

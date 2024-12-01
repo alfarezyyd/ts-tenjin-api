@@ -67,4 +67,19 @@ export class OrderController {
       },
     };
   }
+
+  @Get('finished/:orderId')
+  async updateOrderStatus(
+    @Param('orderId') orderId: string,
+    @CurrentUser() loggedUser: LoggedUser,
+  ) {
+    return {
+      result: {
+        data: await this.orderService.handleUpdateFinishedOrder(
+          orderId,
+          loggedUser,
+        ),
+      },
+    };
+  }
 }

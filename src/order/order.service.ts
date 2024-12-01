@@ -290,4 +290,61 @@ export class OrderService {
       console.log(orderPrisma);
     });
   }
+
+  async handleUpdateFinishedOrder(orderId: string, loggedUser: LoggedUser) {
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      const orderPrisma: Order = await prismaTransaction.order
+        .findFirstOrThrow({
+          where: {
+            user: {
+              uniqueId: loggedUser.uniqueId,
+            },
+            id: orderId,
+            orderStatus: {
+              not: OrderStatus.FINISHED,
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Order not found');
+        });
+      await prismaTransaction.order.update({
+        where: {
+          user: {
+            uniqueId: loggedUser.uniqueId,
+          },
+          id: orderId,
+        },
+        data: {
+          orderStatus: OrderStatus.FINISHED,
+        },
+      });
+      const mentorPrisma = await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            id: orderPrisma.mentorId,
+          },
+          include: {
+            user: {
+              select: {
+                totalBalance: true,
+              },
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Mentor not found');
+        });
+      await prismaTransaction.user.update({
+        where: {
+          id: mentorPrisma.userId,
+        },
+        data: {
+          totalBalance:
+            mentorPrisma.user.totalBalance +
+            BigInt(Math.round(orderPrisma.totalPrice.toNumber())),
+        },
+      });
+    });
+  }
 }
