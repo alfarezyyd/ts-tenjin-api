@@ -214,9 +214,10 @@ enum OrderPaymentStatus {
 }
 
 enum OrderCondition {
-  APPROVE
+  APPROVED
   REJECT
   WAITING
+  DONE
 }
 
 model Order {

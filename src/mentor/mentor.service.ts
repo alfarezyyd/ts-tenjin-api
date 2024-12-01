@@ -235,7 +235,9 @@ export class MentorService {
     const allOrder = await this.prismaService.order.findMany({
       where: {
         mentorId: BigInt(loggedUser.mentorId),
-        orderCondition: OrderCondition.WAITING,
+        orderCondition: {
+          not: OrderCondition.DONE,
+        },
       },
       select: {
         sessionStartTimestamp: true,
@@ -254,7 +256,7 @@ export class MentorService {
         },
       },
     });
-    Object.entries(allOrder).forEach(([key, value]) => {
+    Object.entries(allOrder).forEach(([, value]) => {
       value.sessionStartTimestamp = new Date(
         value.sessionStartTimestamp.getTime() + 7 * 60 * 60 * 1000,
       );
