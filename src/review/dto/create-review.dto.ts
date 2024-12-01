@@ -1,6 +1,6 @@
 export class CreateReviewDto {
   orderId: string;
-  assistantId: bigint;
+  assistantId: number;
   rating: number;
   review: string;
 }
