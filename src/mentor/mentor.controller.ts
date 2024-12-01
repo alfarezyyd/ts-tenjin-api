@@ -93,4 +93,26 @@ export class MentorController {
       },
     };
   }
+
+  @Post('orders/booking/:orderId')
+  async updateBookingMeetingLink(
+    @Param('orderId') orderId: string,
+    @CurrentUser() currentUser: LoggedUser,
+    @Body()
+    updateBookingMeetingLinkDto: {
+      meetingPlatform: string;
+      meetingPasskey: string;
+      meetingLink: string;
+    },
+  ) {
+    return {
+      result: {
+        data: await this.mentorService.handleUpdateBookingMeetingLink(
+          updateBookingMeetingLinkDto,
+          orderId,
+          currentUser,
+        ),
+      },
+    };
+  }
 }

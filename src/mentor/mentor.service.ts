@@ -249,6 +249,9 @@ export class MentorService {
             name: true,
           },
         },
+        meetingPlatform: true,
+        meetingPasskey: true,
+        meetingLink: true,
         assistance: {
           select: {
             topic: true,
@@ -297,6 +300,44 @@ export class MentorService {
         data: {
           orderCondition:
             OrderCondition[validatedUpdateBookingCondition.bookingCondition],
+        },
+      });
+    });
+  }
+
+  async handleUpdateBookingMeetingLink(
+    updateBookingMeetingLinkDto: {
+      meetingPlatform: string;
+      meetingPasskey: string;
+      meetingLink: string;
+    },
+    orderId: string,
+    currentUser: LoggedUser,
+  ) {
+    const validatedUpdateBookingMeeting = this.validationService.validate(
+      MentorValidation.UPDATE_BOOKING_MEETING_LINK,
+      updateBookingMeetingLinkDto,
+    );
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.order
+        .findFirstOrThrow({
+          where: {
+            id: orderId,
+            mentorId: BigInt(currentUser.mentorId),
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Order not found');
+        });
+      await prismaTransaction.order.update({
+        where: {
+          id: orderId,
+          mentorId: BigInt(currentUser.mentorId),
+        },
+        data: {
+          meetingPlatform: validatedUpdateBookingMeeting.meetingPlatform,
+          meetingPasskey: validatedUpdateBookingMeeting.meetingPasskey,
+          meetingLink: validatedUpdateBookingMeeting.meetingLink,
         },
       });
     });

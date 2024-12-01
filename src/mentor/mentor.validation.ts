@@ -25,4 +25,10 @@ export class MentorValidation {
     orderId: z.string().min(1),
     bookingCondition: z.string().min(1),
   });
+
+  static readonly UPDATE_BOOKING_MEETING_LINK = z.object({
+    meetingPlatform: z.string().min(1),
+    meetingPasskey: z.string().min(1),
+    meetingLink: z.string().min(1),
+  });
 }
