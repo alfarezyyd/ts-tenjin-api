@@ -39,4 +39,4 @@ DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM orders;
 UPDATE users SET password = '$2y$10$L1aGtEp.4dDHNaERy7akFuuefHHjAtugVmsWMnjjw/NISbcdEosii' WHERE id = 6;
-UPDATE orders SET order_status = "CONFIRMED" WHERE id = '2d5fdd6d-eee7-4108-9f0a-434d5d71d028';
+UPDATE reviews SET user_id = 1 WHERE id = 1;

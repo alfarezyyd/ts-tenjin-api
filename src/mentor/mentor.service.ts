@@ -126,6 +126,20 @@ export class MentorService {
           Assistance: {
             include: {
               category: true,
+              Review: {
+                take: 5,
+                orderBy: {
+                  id: 'desc',
+                },
+                include: {
+                  User: {
+                    select: {
+                      name: true,
+                      photoPath: true,
+                    },
+                  },
+                },
+              },
               AssistanceLanguage: {
                 include: {
                   language: {

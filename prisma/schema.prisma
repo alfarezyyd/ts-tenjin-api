@@ -40,6 +40,7 @@ model User {
   WithdrawRequest      WithdrawRequest[]
   Invoice              Invoice[]
   TopUpBalance         TopUpBalance[]
+  Review               Review[]
 
   @@map("users")
 }
@@ -254,6 +255,8 @@ model Review {
   Order       Order      @relation(fields: [orderId], references: [id])
   assistantId BigInt     @map("assistant_id") @db.UnsignedBigInt
   Assistance  Assistance @relation(fields: [assistantId], references: [id])
+  userId      BigInt     @map("user_id") @db.UnsignedBigInt
+  User        User       @relation(fields: [userId], references: [id])
   rating      Decimal    @db.Decimal(3, 2)
   review      String     @db.Text
   createdAt   DateTime   @default(now()) @map("created_at")
