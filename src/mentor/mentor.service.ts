@@ -1,7 +1,13 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
-import { Mentor, OrderCondition, OrderStatus, User } from '@prisma/client';
+import {
+  Mentor,
+  OrderCondition,
+  OrderStatus,
+  ResourceType,
+  User,
+} from '@prisma/client';
 import {
   RegisterMentorDto,
   RegisterMentorResourceDto,
@@ -68,6 +74,7 @@ export class MentorService {
           `mentor-resources/documents/${mentorPrisma.id}`,
         ),
         mentorId: mentorPrisma.id,
+        resourceType: ResourceType.DOCUMENT,
       });
       mentorResourcesPayload.push({
         imagePath: await CommonHelper.handleSaveFile(
@@ -76,6 +83,7 @@ export class MentorService {
           `mentor-resources/documents/${mentorPrisma.id}`,
         ),
         mentorId: mentorPrisma.id,
+        resourceType: ResourceType.DOCUMENT,
       });
 
       mentorResourcesPayload.push({

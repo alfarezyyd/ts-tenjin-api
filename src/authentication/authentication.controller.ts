@@ -1,13 +1,13 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  HttpStatus,
+  Get,
   HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { SignInDto } from './dto/sign-in.dto';
@@ -31,6 +31,7 @@ export class AuthenticationController {
   async signIn(
     @Body() signInDto: SignInDto,
   ): Promise<WebResponse<ResponseAuthenticationDto>> {
+    console.log(signInDto);
     return {
       result: {
         data: await this.authenticationService.signIn(signInDto),
