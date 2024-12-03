@@ -362,12 +362,18 @@ model MentorBankAccount {
   @@map("mentor_bank_accounts")
 }
 
+enum ResourceType {
+  IMAGE
+  DOCUMENT
+}
+
 model MentorResource {
-  id        BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
-  imagePath String? @map("image_path") @db.VarChar(255)
-  videoUrl  String? @map("video_url") @db.VarChar(255)
-  mentor    Mentor  @relation(fields: [mentorId], references: [id])
-  mentorId  BigInt  @map("mentor_id") @db.UnsignedBigInt
+  id           BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath    String?      @map("image_path") @db.VarChar(255)
+  videoUrl     String?      @map("video_url") @db.VarChar(255)
+  mentor       Mentor       @relation(fields: [mentorId], references: [id])
+  mentorId     BigInt       @map("mentor_id") @db.UnsignedBigInt
+  resourceType ResourceType @default(IMAGE) @map("resource_type")
 
   @@map("mentor_resources")
 }
