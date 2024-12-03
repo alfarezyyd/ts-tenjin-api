@@ -54,10 +54,14 @@ export class ReviewService {
           review: review,
           createdAt: new Date(),
           updatedAt: null,
-          userId: userPrismaId,
           Order: {
             connect: {
               id: validatedCreateReviewDto.orderId,
+            },
+          },
+          User: {
+            connect: {
+              id: userPrismaId.id,
             },
           },
           Assistance: {
