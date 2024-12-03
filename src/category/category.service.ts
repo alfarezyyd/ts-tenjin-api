@@ -123,13 +123,10 @@ export class CategoryService {
             `Category with ID ${categoryId} not found`,
           );
         });
-      fs.unlink(
+      fs.unlinkSync(
         `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
-        () => {
-          throw new HttpException('Error when trying to write icon', 500);
-        },
       );
-      prismaTransaction.category.delete({
+      await prismaTransaction.category.delete({
         where: {
           id: categoryId,
         },

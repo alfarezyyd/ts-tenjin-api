@@ -41,6 +41,7 @@ model User {
   Invoice              Invoice[]
   TopUpBalance         TopUpBalance[]
   Review               Review[]
+  isManagement         Boolean                @default(false) @map("is_management")
 
   @@map("users")
 }
