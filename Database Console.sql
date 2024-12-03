@@ -8,6 +8,7 @@ SELECT * FROM mentors;
 SELECT * FROM educations;
 SELECT * FROM skills;
 SELECT * FROM assistants;
+SELECT * FROM users WHERE email = 'adityaalfarezyrezy@gmail.com'
 SELECT * FROM assistance_resources;
 SELECT * FROM assistance_tags;
 SELECT * FROM assistance_languages;
@@ -37,5 +38,5 @@ DELETE FROM assistance_carts;
 DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM orders;
-UPDATE users SET telephone = null;
+UPDATE users SET password = '$2y$10$L1aGtEp.4dDHNaERy7akFuuefHHjAtugVmsWMnjjw/NISbcdEosii' WHERE id = 6;
 UPDATE orders SET order_status = "CONFIRMED" WHERE id = '2d5fdd6d-eee7-4108-9f0a-434d5d71d028';
