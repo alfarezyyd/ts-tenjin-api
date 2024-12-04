@@ -79,6 +79,7 @@ export class GoogleAuthenticationService {
       telephone: userPrisma.telephone,
       mentorId: userPrisma.Mentor?.id?.toString() ?? null,
       isExternal: true,
+      isManagement: userPrisma.isManagement,
     };
   }
 

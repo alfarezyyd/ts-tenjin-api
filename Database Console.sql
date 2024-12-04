@@ -39,5 +39,5 @@ DELETE FROM assistance_carts;
 DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM orders;
-UPDATE users SET password = '$2y$10$L1aGtEp.4dDHNaERy7akFuuefHHjAtugVmsWMnjjw/NISbcdEosii' WHERE id = 6;
+UPDATE users SET is_management = true WHERE id = 6;
 UPDATE reviews SET user_id = 1 WHERE id = 1;

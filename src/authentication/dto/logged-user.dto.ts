@@ -3,4 +3,5 @@ export default class LoggedUser {
   email: string;
   mentorId: string;
   isExternal: boolean;
+  isManagement: boolean;
 }

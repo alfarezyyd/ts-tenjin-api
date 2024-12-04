@@ -106,6 +106,7 @@ export class MentorService {
         telephone: userPrisma.telephone,
         mentorId: mentorPrisma.id,
         isExternal: currentUser.isExternal,
+        isManagement: currentUser.isManagement,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),

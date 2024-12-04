@@ -234,6 +234,7 @@ export class UserService {
         telephone: userPrisma.telephone,
         mentorId: userPrisma.Mentor?.id?.toString() ?? null,
         isExternal: userPrisma.isExternal,
+        isManagement: userPrisma.isManagement,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),

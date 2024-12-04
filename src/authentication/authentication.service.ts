@@ -46,6 +46,7 @@ export class AuthenticationService {
       telephone: user.telephone,
       mentorId: user.Mentor?.id?.toString() ?? null,
       isExternal: user.isExternal,
+      isManagement: user.isManagement,
     };
     return {
       accessToken: await this.jwtService.signAsync(payloadJwt),
@@ -101,6 +102,7 @@ export class AuthenticationService {
         telephone: validatedSignUpDto.telephone,
         mentorId: validatedSignUpDto.Mentor?.id?.toString() ?? null,
         isExternal: false,
+        isManagement: false,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),
