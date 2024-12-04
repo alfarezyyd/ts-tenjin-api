@@ -3,9 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { CreateLanguageDto } from './dto/create-language.dto';
@@ -42,9 +43,9 @@ export class LanguageController {
     return this.languageService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateLanguageDto: UpdateLanguageDto,
   ) {
     return {

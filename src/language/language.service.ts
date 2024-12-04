@@ -38,7 +38,7 @@ export class LanguageService {
       LanguageValidation.SAVE,
       updateLanguageDto,
     );
-    this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.language
         .findFirstOrThrow({
           where: {
@@ -56,8 +56,8 @@ export class LanguageService {
           id: id,
         },
       });
+      return `Success! language with id ${id} has been updated`;
     });
-    return `Success! language with id ${id} has been updated`;
   }
 
   remove(id: number) {
