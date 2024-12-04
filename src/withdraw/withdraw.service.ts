@@ -95,8 +95,16 @@ export class WithdrawService {
     });
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} withdraw`;
+  async findOne(currentUser: LoggedUser) {
+    return this.prismaService.withdrawRequest.findMany({
+      where: {
+        mentorId: BigInt(currentUser.mentorId),
+      },
+      include: {
+        user: true,
+        mentorBankAccount: true,
+      },
+    });
   }
 
   async handleConfirmWithdrawRequest(confirmWithdrawDto: {
@@ -118,6 +126,7 @@ export class WithdrawService {
         },
         data: {
           withdrawPaymentStatus: WithdrawPaymentStatus.SENT,
+          sentAt: new Date(),
         },
       });
       return 'Withdraw request successfully confirmed';

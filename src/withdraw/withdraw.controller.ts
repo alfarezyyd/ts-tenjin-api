@@ -47,11 +47,11 @@ export class WithdrawController {
     };
   }
 
-  @Get(':uniqueId')
-  async findOne(@Param('id') id: string) {
+  @Get('self')
+  async findOne(@CurrentUser() loggedUser: LoggedUser) {
     return {
       result: {
-        data: await this.withdrawService.findOne(+id),
+        data: await this.withdrawService.findOne(loggedUser),
       },
     };
   }
