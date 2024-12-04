@@ -157,7 +157,6 @@ enum AssistanceFormat {
 model Tag {
   id             Int              @id @default(autoincrement()) @db.UnsignedInt
   name           String           @db.VarChar(255)
-  icon           String           @db.VarChar(255)
   categoryId     Int              @map("category_id") @db.UnsignedInt
   category       Category         @relation(fields: [categoryId], references: [id])
   AssistanceTags AssistanceTags[]
