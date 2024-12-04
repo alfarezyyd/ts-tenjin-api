@@ -1,17 +1,17 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Put,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
   FileTypeValidator,
+  Get,
+  MaxFileSizeValidator,
+  Param,
+  ParseFilePipe,
   ParseIntPipe,
+  Post,
+  Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -20,7 +20,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { WebResponse } from '../model/web.response';
 import { Public } from 'src/authentication/decorator/set-metadata.decorator';
 import { Category } from '@prisma/client';
-import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 
 @Controller('categories')
 export class CategoryController {
@@ -68,22 +67,18 @@ export class CategoryController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return {
+      result: {
+        data: await this.categoryService.findOne(+id),
+      },
+    };
   }
 
   @Put(':categoryId')
   @UseInterceptors(FileInterceptor('logo'))
   async update(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5000 * 10 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
-      }),
-    )
-    logoFile: Express.Multer.File,
+    @UploadedFile() logoFile: Express.Multer.File,
     @Param('categoryId', ParseIntPipe) categoryId: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ): Promise<WebResponse<string>> {

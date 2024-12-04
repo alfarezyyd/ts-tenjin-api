@@ -30,6 +30,7 @@ export default class CommonHelper {
     firstImagePath: string,
     secondImageFile: Express.Multer.File,
   ) {
+    console.log(firstImagePath, secondImageFile);
     if (firstImagePath === null) {
       return true;
     }

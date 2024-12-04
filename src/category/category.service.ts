@@ -45,8 +45,14 @@ export class CategoryService {
     return this.prismaService.category.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: number) {
+    return this.prismaService.category
+      .findFirstOrThrow({
+        where: { id },
+      })
+      .catch(() => {
+        throw new NotFoundException('Category not found');
+      });
   }
 
   async update(
@@ -71,34 +77,38 @@ export class CategoryService {
             );
           });
 
-        const isImageSame = CommonHelper.compareImagesFromUpload(
-          `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
-          logoFile,
-        );
-
-        let generatedLogoFileName = null;
-        if (!isImageSame) {
-          fs.unlink(
+        let generatedLogoFileName = categoryPrisma.logo;
+        if (logoFile !== null) {
+          const isImageDifferent = CommonHelper.compareImagesFromUpload(
             `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
-            (err) => {
-              if (err) {
-                console.error('Error deleting old icon:', err);
-                throw new HttpException('Error when trying to write icon', 500);
-              }
-            },
-          );
-          generatedLogoFileName = CommonHelper.handleSaveFile(
-            this.configService,
             logoFile,
-            'category-icon',
           );
-        }
 
+          if (isImageDifferent) {
+            fs.unlink(
+              `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
+              (err) => {
+                if (err) {
+                  console.error('Error deleting old icon:', err);
+                  throw new HttpException(
+                    'Error when trying to write icon',
+                    500,
+                  );
+                }
+              },
+            );
+            generatedLogoFileName = await CommonHelper.handleSaveFile(
+              this.configService,
+              logoFile,
+              'category-icon',
+            );
+          }
+        }
         await prismaTransaction.category.update({
           where: { id: categoryPrisma.id },
           data: {
             ...validatedUpdateCategoryDto,
-            logo: generatedLogoFileName ?? categoryPrisma.logo,
+            logo: generatedLogoFileName,
           },
         });
       });
