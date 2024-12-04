@@ -1,15 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { WithdrawService } from './withdraw.service';
 import { CreateWithdrawDto } from './dto/create-withdraw.dto';
-import { UpdateWithdrawDto } from './dto/update-withdraw.dto';
 import { WebResponse } from '../model/web.response';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
@@ -33,9 +24,27 @@ export class WithdrawController {
     };
   }
 
+  @Post('confirm')
+  async confirmWithdrawRequest(
+    @Body() confirmWithdrawDto: { withdrawId: string },
+  ) {
+    console.log(confirmWithdrawDto);
+    return {
+      result: {
+        data: await this.withdrawService.handleConfirmWithdrawRequest(
+          confirmWithdrawDto,
+        ),
+      },
+    };
+  }
+
   @Get()
-  findAll() {
-    return this.withdrawService.findAll();
+  async findAll() {
+    return {
+      result: {
+        data: await this.withdrawService.findAll(),
+      },
+    };
   }
 
   @Get(':uniqueId')
@@ -45,18 +54,5 @@ export class WithdrawController {
         data: await this.withdrawService.findOne(+id),
       },
     };
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateWithdrawDto: UpdateWithdrawDto,
-  ) {
-    return this.withdrawService.update(+id, updateWithdrawDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.withdrawService.remove(+id);
   }
 }

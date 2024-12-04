@@ -25,6 +25,7 @@ SELECT * FROM chats;
 SELECT * FROM mentor_resources;
 SELECT * FROM mentor_bank_accounts;
 SELECT * FROM reviews;
+SELECT * FROM withdraw_requests;
 DELETE FROM mentor_bank_accounts;
 DELETE FROM mentor_addresses;
 DELETE FROM mentors;

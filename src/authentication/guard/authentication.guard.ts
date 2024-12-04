@@ -29,6 +29,7 @@ export class AuthenticationGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
+    console.log(request, token);
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -38,7 +39,8 @@ export class AuthenticationGuard implements CanActivate {
       request['user'] = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get('JWT_SECRET'),
       });
-    } catch {
+    } catch (error) {
+      console.log(error);
       throw new UnauthorizedException();
     }
     return true;

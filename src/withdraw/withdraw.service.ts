@@ -4,12 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateWithdrawDto } from './dto/create-withdraw.dto';
-import { UpdateWithdrawDto } from './dto/update-withdraw.dto';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { WithdrawValidation } from './withdraw.validation';
 import LoggedUser from '../authentication/dto/logged-user.dto';
-import { MentorBankAccount } from '@prisma/client';
+import { MentorBankAccount, WithdrawPaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class WithdrawService {
@@ -87,19 +86,41 @@ export class WithdrawService {
     });
   }
 
-  findAll() {
-    return `This action returns all withdraw`;
+  async findAll() {
+    return this.prismaService.withdrawRequest.findMany({
+      include: {
+        user: true,
+        mentorBankAccount: true,
+      },
+    });
   }
 
   async findOne(id: number) {
     return `This action returns a #${id} withdraw`;
   }
 
-  update(id: number, updateWithdrawDto: UpdateWithdrawDto) {
-    return `This action updates a #${id} withdraw`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} withdraw`;
+  async handleConfirmWithdrawRequest(confirmWithdrawDto: {
+    withdrawId: string;
+  }) {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.withdrawRequest
+        .findFirstOrThrow({
+          where: {
+            id: confirmWithdrawDto.withdrawId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Withdraw request not found');
+        });
+      await prismaTransaction.withdrawRequest.update({
+        where: {
+          id: confirmWithdrawDto.withdrawId,
+        },
+        data: {
+          withdrawPaymentStatus: WithdrawPaymentStatus.SENT,
+        },
+      });
+      return 'Withdraw request successfully confirmed';
+    });
   }
 }
