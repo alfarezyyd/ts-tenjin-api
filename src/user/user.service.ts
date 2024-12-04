@@ -214,6 +214,10 @@ export class UserService {
           'user-resources',
         );
       }
+      let newEmailVerifiedAt = null;
+      if (userPrisma.email === settingGeneralDataUserDto.email) {
+        newEmailVerifiedAt = userPrisma.emailVerifiedAt;
+      }
       await prismaTransaction.user.update({
         where: {
           uniqueId: loggedUser.uniqueId,
@@ -223,7 +227,7 @@ export class UserService {
           gender: UserGender[validatedSettingGeneralDataUserDto.gender],
           photoPath: nameFile,
           telephone: validatedSettingGeneralDataUserDto.telephone,
-          emailVerifiedAt: userPrisma.emailVerifiedAt,
+          emailVerifiedAt: newEmailVerifiedAt,
         },
       });
       const payloadJwt = {
