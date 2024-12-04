@@ -223,7 +223,7 @@ export class UserService {
           gender: UserGender[validatedSettingGeneralDataUserDto.gender],
           photoPath: nameFile,
           telephone: validatedSettingGeneralDataUserDto.telephone,
-          emailVerifiedAt: null,
+          emailVerifiedAt: userPrisma.emailVerifiedAt,
         },
       });
       const payloadJwt = {
