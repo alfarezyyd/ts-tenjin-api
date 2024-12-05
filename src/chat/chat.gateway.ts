@@ -171,7 +171,6 @@ export class ChatGateway
           messages: messagesPerUser.get(BigInt(relatedUserPrisma.id)) || [],
         });
       }
-      console.log(allRelatedUserPrisma);
       webSocketClient.emit('allRelatedUsers', allRelatedUser);
     });
   }
@@ -224,7 +223,6 @@ export class ChatGateway
     @ConnectedSocket() webSocketClient: Socket,
   ): Promise<void> {
     // Mendapatkan pengirim di redis
-    console.log(webSocketClient.handshake.headers['user-unique-id'] as string);
     const originChatSessionTrait: ChatSessionTrait = JSON.parse(
       await this.redisService
         .getClient()
@@ -240,7 +238,6 @@ export class ChatGateway
         .getClient()
         .hGet('onlineUsers', destinationUserUniqueId),
     );
-    console.log(originChatSessionTrait, destinationChatSessionTrait);
     let destinationUser = null;
     let originUser = null;
     await this.prismaService.$transaction(async (prismaTransaction) => {

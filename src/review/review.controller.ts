@@ -8,7 +8,6 @@ export class ReviewController {
 
   @Post()
   async create(@Body() createReviewDto: CreateReviewDto) {
-    console.log(createReviewDto);
     return {
       result: {
         data: await this.reviewService.create(createReviewDto),

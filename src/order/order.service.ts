@@ -39,7 +39,6 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<string> {
-    console.log(this.expressRequest['user']);
     const validatedCreateOrderDto = this.validationService.validate(
       OrderValidation.SAVE,
       createOrderDto,
@@ -80,7 +79,6 @@ export class OrderService {
         userId: userPrisma.id,
         createdAt: new Date(),
       };
-      console.log(createOrderPayload);
       delete createOrderPayload['sessionCount'];
       const newCreatedOrder: Order = await prismaTransaction.order.create({
         data: createOrderPayload,
@@ -287,7 +285,6 @@ export class OrderService {
         ],
         notes: invoicePrisma.note,
       };
-      console.log(orderPrisma);
     });
   }
 

@@ -223,11 +223,6 @@ export class ExperienceService {
               experienceId: experienceId,
             },
           });
-        console.log(
-          countAllExperienceResource,
-          deletedFilesName.length,
-          experienceResources.length,
-        );
         if (
           countAllExperienceResource === deletedFilesName.length &&
           experienceResources.length == 0

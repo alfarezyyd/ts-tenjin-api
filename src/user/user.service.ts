@@ -167,7 +167,6 @@ export class UserService {
       UserValidation.SETTING_GENERAL_DATA,
       settingGeneralDataUserDto,
     );
-    console.log(validatedSettingGeneralDataUserDto);
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
@@ -256,7 +255,6 @@ export class UserService {
       changePassword,
     );
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      console.log(validatedChangePassword);
       const userPrisma: User = await prismaTransaction.user
         .findFirstOrThrow({
           where: {

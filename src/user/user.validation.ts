@@ -35,7 +35,6 @@ export class UserValidation {
       .max(255)
       .optional()
       .transform((arg, ctx) => {
-        console.log(arg);
         if (arg == 'null') {
           return null;
         }

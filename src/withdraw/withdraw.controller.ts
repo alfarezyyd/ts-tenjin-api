@@ -28,7 +28,6 @@ export class WithdrawController {
   async confirmWithdrawRequest(
     @Body() confirmWithdrawDto: { withdrawId: string },
   ) {
-    console.log(confirmWithdrawDto);
     return {
       result: {
         data: await this.withdrawService.handleConfirmWithdrawRequest(

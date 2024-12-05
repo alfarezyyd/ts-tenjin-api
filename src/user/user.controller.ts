@@ -132,7 +132,6 @@ export class UserController {
     @Body() changePassword: ChangePassword,
     @CurrentUser() loggedUser: LoggedUser,
   ): Promise<WebResponse<boolean>> {
-    console.log(changePassword);
     return {
       result: {
         data: await this.userService.handleChangePassword(

@@ -31,7 +31,6 @@ export class AuthenticationController {
   async signIn(
     @Body() signInDto: SignInDto,
   ): Promise<WebResponse<ResponseAuthenticationDto>> {
-    console.log(signInDto);
     return {
       result: {
         data: await this.authenticationService.signIn(signInDto),

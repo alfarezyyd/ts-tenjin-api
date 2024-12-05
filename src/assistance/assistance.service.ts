@@ -96,10 +96,6 @@ export class AssistanceService {
             },
           },
         });
-      console.log(
-        allLanguagePrisma,
-        validatedCreateAssistanceDto.languages.size,
-      );
       if (
         allLanguagePrisma.length != validatedCreateAssistanceDto.languages.size
       ) {
@@ -219,7 +215,6 @@ export class AssistanceService {
       AssistanceValidation.UPDATE,
       updateAssistanceDto,
     );
-    console.log(validatedUpdateAssistanceDto);
 
     await this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor

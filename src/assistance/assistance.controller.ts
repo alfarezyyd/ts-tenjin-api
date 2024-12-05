@@ -46,7 +46,6 @@ export class AssistanceController {
     @Body() createAssistanceDto: CreateAssistanceDto,
     @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
-    console.log('Resource Uploaded :' + assistanceResources);
     return {
       result: {
         message: await this.assistanceService.store(
@@ -101,7 +100,6 @@ export class AssistanceController {
     @Body() updateAssistanceDto: UpdateAssistanceDto,
     @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
-    console.log(assistanceResources);
     return {
       result: {
         message: await this.assistanceService.update(
