@@ -11,7 +11,7 @@ export default class CommonHelper {
     singleFile: Express.Multer.File,
     folderName: string,
   ) {
-    const generatedSingleFileName = `${uuid()}-${singleFile.originalname}`;
+    const generatedSingleFileName = `${uuid()}-${await this.sanitizeFileName(singleFile.originalname)}`;
     const folderPath = `${configService.get<string>('MULTER_DEST')}/${folderName}/`;
     await fsPromises.mkdir(folderPath, { recursive: true });
     fs.writeFile(
@@ -47,5 +47,13 @@ export default class CommonHelper {
     const max = Math.pow(10, lengthOfPassword);
     const randomNumber = crypto.randomInt(0, max);
     return randomNumber.toString().padStart(lengthOfPassword, '0');
+  }
+
+  static async sanitizeFileName(fileName) {
+    // Mengganti spasi dengan tanda hubung dan menghapus karakter yang tidak valid
+    return fileName
+      .replace(/\s+/g, '-') // Ganti spasi dengan -
+      .replace(/[^\w\-\.]+/g, '') // Hapus karakter selain huruf, angka, dan tanda - dan .
+      .toLowerCase(); // Ubah menjadi lowercase
   }
 }

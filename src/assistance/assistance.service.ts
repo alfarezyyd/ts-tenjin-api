@@ -215,7 +215,6 @@ export class AssistanceService {
       AssistanceValidation.UPDATE,
       updateAssistanceDto,
     );
-
     await this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor
         .findFirstOrThrow({
@@ -305,17 +304,8 @@ export class AssistanceService {
         data: allAssistanceResourcePayload,
       });
       if (deletedFilesName !== undefined && deletedFilesName.length > 0) {
-        const allDeletedFilesName =
-          await prismaTransaction.assistanceResource.findMany({
-            where: {
-              assistantId: assistantId,
-              imagePath: {
-                in: deletedFilesName,
-              },
-            },
-          });
-
-        for (const deletedFileName of allDeletedFilesName) {
+        for (const deletedFileName of deletedFilesName) {
+          console.log(deletedFileName);
           fs.stat(
             `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
             function (err) {
@@ -339,6 +329,14 @@ export class AssistanceService {
                 }
               },
             );
+            await prismaTransaction.assistanceResource.deleteMany({
+              where: {
+                assistantId: assistantId,
+                imagePath: {
+                  in: deletedFilesName,
+                },
+              },
+            });
           }
         }
       }
