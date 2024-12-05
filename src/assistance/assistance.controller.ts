@@ -46,6 +46,7 @@ export class AssistanceController {
     @Body() createAssistanceDto: CreateAssistanceDto,
     @UploadedFiles() assistanceResources: Array<Express.Multer.File>,
   ): Promise<WebResponse<string>> {
+    console.log(createAssistanceDto);
     return {
       result: {
         message: await this.assistanceService.store(

@@ -9,7 +9,7 @@ SELECT * FROM educations;
 SELECT * FROM skills;
 SELECT * FROM assistants;
 SELECT * FROM users WHERE email = 'adityaalfarezyrezy@gmail.com'
-SELECT * FROM assistance_resources;
+SELECT * FROM assistanceresources;
 SELECT * FROM assistance_tags;
 SELECT * FROM assistance_languages;
 SELECT * FROM orders;
