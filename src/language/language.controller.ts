@@ -1,12 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Put,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Post,
+  Put,
 } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { CreateLanguageDto } from './dto/create-language.dto';
@@ -56,7 +56,12 @@ export class LanguageController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.languageService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    console.log(id);
+    return {
+      result: {
+        data: await this.languageService.remove(+id),
+      },
+    };
   }
 }

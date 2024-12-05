@@ -60,7 +60,23 @@ export class LanguageService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} language`;
+  async remove(id: number) {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.language
+        .findFirstOrThrow({
+          where: {
+            id: id,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Langauge not found');
+        });
+      await prismaTransaction.language.delete({
+        where: {
+          id: id,
+        },
+      });
+      return `Success! tag with id ${id} removed`;
+    });
   }
 }
