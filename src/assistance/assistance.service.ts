@@ -215,7 +215,7 @@ export class AssistanceService {
       AssistanceValidation.UPDATE,
       updateAssistanceDto,
     );
-    await this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.mentor
         .findFirstOrThrow({
           where: {
@@ -340,6 +340,16 @@ export class AssistanceService {
           }
         }
       }
+      if (
+        validatedUpdateAssistanceDto.categoryId !==
+        updateAssistancePrisma.categoryId
+      ) {
+        await prismaTransaction.assistanceTags.deleteMany({
+          where: {
+            assistantId: updateAssistancePrisma.id,
+          },
+        });
+      }
       const filteredNewTag = Array.from(tagId).filter(
         (tagId) => !allTagPrisma.some((tag) => tag.id === tagId),
       );
@@ -367,8 +377,8 @@ export class AssistanceService {
       await prismaTransaction.assistanceLanguage.createMany({
         data: assistanceLanguagesInsertPayload,
       });
+      return 'Success! assistance has been updated';
     });
-    return 'Success! assistance has been updated';
   }
 
   async remove(id: bigint) {
