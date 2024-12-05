@@ -34,6 +34,18 @@ const updateExperienceSchema = createExperienceSchema.extend({
 });
 
 export default class ExperienceValidation {
-  static readonly CREATE: ZodType = createExperienceSchema;
+  static readonly CREATE: ZodType = createExperienceSchema.superRefine(
+    (arg, ctx) => {
+      const start = new Date(arg.startDate);
+      const end = new Date(arg.endDate);
+      if (start > end) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['startDate'], // Bisa juga diubah ke "endDate" tergantung preferensi
+          message: 'Start date cannot be after end date',
+        });
+      }
+    },
+  );
   static readonly UPDATE: ZodType = updateExperienceSchema;
 }

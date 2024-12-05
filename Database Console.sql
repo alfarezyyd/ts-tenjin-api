@@ -14,6 +14,7 @@ SELECT * FROM assistance_tags;
 SELECT * FROM assistance_languages;
 SELECT * FROM orders;
 SELECT * FROM experiences;
+
 SELECT * FROM experience_resources;
 SELECT * FROM tags;
 SELECT * FROM languages;
@@ -30,7 +31,7 @@ DELETE FROM mentor_bank_accounts;
 DELETE FROM mentor_addresses;
 DELETE FROM mentors;
 DELETE FROM experience_resources;
-DELETE FROM experiences;
+DELETE FROM experiences WHERE id IN (1,2);
 DELETE FROM orders;
 DELETE FROM assistance_languages;
 DELETE FROM orders;
