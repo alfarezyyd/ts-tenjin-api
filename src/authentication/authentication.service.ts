@@ -47,6 +47,7 @@ export class AuthenticationService {
       mentorId: user.Mentor?.id?.toString() ?? null,
       isExternal: user.isExternal,
       isManagement: user.isManagement,
+      photoPath: user.photoPath,
     };
     return {
       accessToken: await this.jwtService.signAsync(payloadJwt),
@@ -103,6 +104,7 @@ export class AuthenticationService {
         mentorId: validatedSignUpDto.Mentor?.id?.toString() ?? null,
         isExternal: false,
         isManagement: false,
+        photoPath: null,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),

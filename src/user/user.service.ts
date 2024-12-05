@@ -239,6 +239,7 @@ export class UserService {
         mentorId: userPrisma.Mentor?.id?.toString() ?? null,
         isExternal: userPrisma.isExternal,
         isManagement: userPrisma.isManagement,
+        photoPath: userPrisma.photoPath,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),

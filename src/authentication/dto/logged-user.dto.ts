@@ -4,4 +4,5 @@ export default class LoggedUser {
   mentorId: string;
   isExternal: boolean;
   isManagement: boolean;
+  photoPath: string;
 }

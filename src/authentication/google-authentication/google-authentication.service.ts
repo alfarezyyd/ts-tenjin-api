@@ -80,6 +80,7 @@ export class GoogleAuthenticationService {
       mentorId: userPrisma.Mentor?.id?.toString() ?? null,
       isExternal: true,
       isManagement: userPrisma.isManagement,
+      photoPath: userPrisma.photoPath,
     };
   }
 

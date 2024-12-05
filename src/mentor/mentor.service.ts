@@ -107,6 +107,7 @@ export class MentorService {
         mentorId: mentorPrisma.id,
         isExternal: currentUser.isExternal,
         isManagement: currentUser.isManagement,
+        photoPath: currentUser.photoPath,
       };
       return {
         accessToken: await this.jwtService.signAsync(payloadJwt),
