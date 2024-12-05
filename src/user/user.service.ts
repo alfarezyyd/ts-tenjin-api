@@ -167,6 +167,7 @@ export class UserService {
       UserValidation.SETTING_GENERAL_DATA,
       settingGeneralDataUserDto,
     );
+    console.log(validatedSettingGeneralDataUserDto);
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
@@ -218,7 +219,7 @@ export class UserService {
       if (userPrisma.email === settingGeneralDataUserDto.email) {
         newEmailVerifiedAt = userPrisma.emailVerifiedAt;
       }
-      await prismaTransaction.user.update({
+      const newUserPrisma = await prismaTransaction.user.update({
         where: {
           uniqueId: loggedUser.uniqueId,
         },
@@ -232,10 +233,10 @@ export class UserService {
       });
       const payloadJwt = {
         uniqueId: userPrisma.uniqueId,
-        name: userPrisma.name,
-        email: userPrisma.email,
-        gender: userPrisma.gender,
-        telephone: userPrisma.telephone,
+        name: newUserPrisma.name,
+        email: newUserPrisma.email,
+        gender: newUserPrisma.gender,
+        telephone: newUserPrisma.telephone,
         mentorId: userPrisma.Mentor?.id?.toString() ?? null,
         isExternal: userPrisma.isExternal,
         isManagement: userPrisma.isManagement,

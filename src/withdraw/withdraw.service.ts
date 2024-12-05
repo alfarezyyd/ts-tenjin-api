@@ -98,7 +98,9 @@ export class WithdrawService {
   async findOne(currentUser: LoggedUser) {
     return this.prismaService.withdrawRequest.findMany({
       where: {
-        mentorId: BigInt(currentUser.mentorId),
+        user: {
+          uniqueId: currentUser.uniqueId,
+        },
       },
       include: {
         user: true,
