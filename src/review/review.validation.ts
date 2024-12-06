@@ -5,7 +5,7 @@ export default class ReviewValidation {
     orderId: z.coerce.string(),
     assistantId: z.coerce.number().gte(1),
     rating: z.coerce.number().gte(0),
-    review: z.coerce.string(),
+    review: z.coerce.string().optional(),
   });
 
   static readonly DELETE = z.object({
