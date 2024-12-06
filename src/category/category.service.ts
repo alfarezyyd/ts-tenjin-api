@@ -146,7 +146,40 @@ export class CategoryService {
   }
 
   async handleFindAllCategoryWithMentor() {
-    return this.prismaService.category.findMany({
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const trendingAssistances = await this.prismaService.order.groupBy({
+      by: ['assistantId'],
+      where: {
+        createdAt: {
+          gte: sevenDaysAgo,
+        },
+      },
+      _count: {
+        assistantId: true,
+      },
+      orderBy: {
+        _count: {
+          assistantId: 'desc',
+        },
+      },
+      take: 5,
+    });
+
+    // Ambil detail Assistance berdasarkan id dari hasil groupBy
+    const trendingAssistanceDetails =
+      await this.prismaService.assistance.findMany({
+        where: {
+          id: {
+            in: trendingAssistances.map((t) => t.assistantId), // Hanya ambil Assistance yang sesuai
+          },
+        },
+        include: {
+          mentor: true, // Sertakan relasi jika perlu (misal mentor, category)
+          category: true,
+        },
+      });
+    const assistancePerCategory = await this.prismaService.category.findMany({
       include: {
         Assistance: {
           take: 5,
@@ -154,6 +187,7 @@ export class CategoryService {
             id: true,
             topic: true,
             price: true,
+            categoryId: true,
             durationMinutes: true,
             mentor: {
               select: {
@@ -174,5 +208,37 @@ export class CategoryService {
         },
       },
     });
+    return {
+      trendingAssistanceDetails,
+      assistancePerCategory,
+    };
+  }
+
+  async findAllByCategory(id: number) {
+    const categoryPrisma: Category = await this.prismaService.category
+      .findFirstOrThrow({
+        where: {
+          id: id,
+        },
+        include: {},
+      })
+      .catch(() => {
+        throw new NotFoundException('Category not found');
+      });
+
+    return {
+      category: categoryPrisma,
+      assistance: await this.prismaService.assistance.findMany({
+        where: {
+          categoryId: id,
+        },
+        include: {
+          AssistanceResource: {
+            take: 1,
+          },
+          mentor: true,
+        },
+      }),
+    };
   }
 }

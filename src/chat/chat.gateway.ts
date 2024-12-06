@@ -223,21 +223,22 @@ export class ChatGateway
     @ConnectedSocket() webSocketClient: Socket,
   ): Promise<void> {
     // Mendapatkan pengirim di redis
-    const originChatSessionTrait: ChatSessionTrait = JSON.parse(
-      await this.redisService
-        .getClient()
-        .hGet(
-          'onlineUsers',
-          webSocketClient.handshake.headers['user-unique-id'] as string,
-        ),
-    );
-
+    const originChatSessionTrait =
+      await this.prismaService.user.findFirstOrThrow({
+        where: {
+          uniqueId: webSocketClient.handshake.headers[
+            'user-unique-id'
+          ] as string,
+        },
+      });
+    const destinationChatSessionTrait =
+      await this.prismaService.user.findFirstOrThrow({
+        where: {
+          uniqueId: destinationUserUniqueId,
+        },
+      });
     // Mendapatkan penerima di redis
-    const destinationChatSessionTrait: ChatSessionTrait = JSON.parse(
-      await this.redisService
-        .getClient()
-        .hGet('onlineUsers', destinationUserUniqueId),
-    );
+
     let destinationUser = null;
     let originUser = null;
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -245,8 +246,8 @@ export class ChatGateway
         where: {
           uniqueId: {
             in: [
-              originChatSessionTrait.userUniqueId,
-              destinationChatSessionTrait.userUniqueId,
+              originChatSessionTrait.uniqueId,
+              destinationChatSessionTrait.uniqueId,
             ],
           },
         },
@@ -259,11 +260,11 @@ export class ChatGateway
 
       // Memisahkan origin dan destination user
       originUser = userPrisma.find(
-        (user) => user.uniqueId === originChatSessionTrait.userUniqueId,
+        (user) => user.uniqueId === originChatSessionTrait.uniqueId,
       );
 
       destinationUser = userPrisma.find(
-        (user) => user.uniqueId === destinationChatSessionTrait.userUniqueId,
+        (user) => user.uniqueId === destinationChatSessionTrait.uniqueId,
       );
       const chatPrisma = await prismaTransaction.chat.create({
         data: {

@@ -75,6 +75,16 @@ export class CategoryController {
     };
   }
 
+  @Get('assistance/:id')
+  @Public()
+  async findAllByCategoryId(@Param('id', ParseIntPipe) id: number) {
+    return {
+      result: {
+        data: await this.categoryService.findAllByCategory(id),
+      },
+    };
+  }
+
   @Put(':categoryId')
   @UseInterceptors(FileInterceptor('logo'))
   async update(

@@ -13,6 +13,7 @@ SELECT * FROM assistance_resources;
 SELECT * FROM assistance_tags;
 SELECT * FROM assistance_languages;
 SELECT * FROM orders;
+UPDATE orders SET order_status = 'CONFIRMED', order_payment_status = 'PAID', order_condition = 'WAITING' WHERE id = '16ad53fb-85ef-4b42-a1a0-50b53d30b59d'
 SELECT * FROM experiences;
 
 SELECT * FROM experience_resources;
