@@ -35,7 +35,7 @@ async function bootstrap() {
     app = await NestFactory.create(AppModule, { httpsOptions });
   }
   app.enableCors({
-    origin: 'http://localhost:3000', // Allow requests from this origin
+    origin: ['http://localhost:3000', 'https://tenjin-lake.vercel.app/'], // Allow requests from this origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
