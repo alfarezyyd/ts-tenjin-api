@@ -9,13 +9,11 @@ import {
 import { GoogleAuthenticationService } from './google-authentication.service';
 import { Public } from '../decorator/set-metadata.decorator';
 import { NoVerifiedEmail } from '../decorator/set-no-verified-email.decorator';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('authentication/google')
 export class GoogleAuthenticationController {
   constructor(
     private readonly googleAuthenticationService: GoogleAuthenticationService,
-    private readonly configService: ConfigService,
   ) {}
 
   @Public()
@@ -46,7 +44,7 @@ export class GoogleAuthenticationController {
     const generatedJWTToken =
       await this.googleAuthenticationService.generateJwtToken(jwtPayload);
     return {
-      url: `${this.configService.get<string>('CLIENT_BASE_URL')}/auth/login?token=${generatedJWTToken}`,
+      url: `http://localhost:3000/auth/login?token=${generatedJWTToken}`,
     };
   }
 }
