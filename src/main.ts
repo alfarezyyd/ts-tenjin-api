@@ -44,7 +44,7 @@ async function bootstrap() {
   };
   app.useWebSocketAdapter(new IoAdapter(app));
 
-  await app.listen(3001);
+  await app.listen(443, '0.0.0.0');
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
