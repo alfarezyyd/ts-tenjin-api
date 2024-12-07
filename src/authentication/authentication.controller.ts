@@ -51,20 +51,22 @@ export class AuthenticationController {
     };
   }
 
+  @Public()
   @NoVerifiedEmail(true)
   @Get('generate-otp')
-  async generateOneTimePasswordVerification(
-    @CurrentUser() currentUser: LoggedUser,
-  ): Promise<WebResponse<string>> {
+  async generateOneTimePasswordVerification(generateOtpDto: {
+    email: string;
+  }): Promise<WebResponse<string>> {
     return {
       result: {
         data: await this.authenticationService.generateOneTimePasswordVerification(
-          currentUser,
+          generateOtpDto,
         ),
       },
     };
   }
 
+  @Public()
   @NoVerifiedEmail(true)
   @Post('verify-otp/:oneTimePassword')
   async verifyOneTimePasswordToken(

@@ -112,9 +112,9 @@ export class AuthenticationService {
     });
   }
 
-  async generateOneTimePasswordVerification(
-    currentUser: LoggedUser,
-  ): Promise<string> {
+  async generateOneTimePasswordVerification(generateOtpDto: {
+    email: string;
+  }): Promise<string> {
     const generatedOneTimePassword = await this.prismaService.$transaction(
       async (prismaTransaction) => {
         const generatedOneTimePassword =
@@ -126,7 +126,7 @@ export class AuthenticationService {
         const userPrisma: User = await prismaTransaction.user
           .findFirstOrThrow({
             where: {
-              uniqueId: currentUser['uniqueId'],
+              email: generateOtpDto.email,
             },
           })
           .catch(() => {
@@ -144,7 +144,7 @@ export class AuthenticationService {
     );
     await this.mailerService.sendMail({
       from: this.configService.get<string>('EMAIL_USERNAME'),
-      to: currentUser['email'],
+      to: generateOtpDto.email,
       subject: 'One Time Password Verification',
       text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
     });
@@ -207,6 +207,7 @@ export class AuthenticationService {
       );
     const generatedOneTimePassword =
       await CommonHelper.generateOneTimePassword();
+    console.log(generatedOneTimePassword);
     const hashedOneTimePassword = await bcrypt.hash(
       generatedOneTimePassword,
       10,

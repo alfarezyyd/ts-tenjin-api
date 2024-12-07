@@ -1,9 +1,8 @@
-import * as fs from 'node:fs';
 import { v4 as uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
-import { HttpException } from '@nestjs/common';
 import * as fsPromises from 'fs/promises';
 import * as crypto from 'crypto';
+import * as path from 'node:path';
 
 export default class CommonHelper {
   static async handleSaveFile(
@@ -11,18 +10,20 @@ export default class CommonHelper {
     singleFile: Express.Multer.File,
     folderName: string,
   ) {
-    const generatedSingleFileName = `${uuid()}-${await this.sanitizeFileName(singleFile.originalname)}`;
-    const folderPath = `${configService.get<string>('MULTER_DEST')}/${folderName}/`;
-    await fsPromises.mkdir(folderPath, { recursive: true });
-    fs.writeFile(
-      folderPath + generatedSingleFileName,
-      singleFile.buffer,
-      (err) => {
-        if (err) {
-          throw new HttpException(err, 500);
-        }
-      },
+    const multerDest = configService.get<string>('MULTER_DEST');
+    // Gunakan path.join untuk memastikan path relatif atau absolut
+    const folderPath = path.join(
+      process.cwd(), // Root proyek
+      multerDest,
+      folderName,
     );
+
+    const generatedSingleFileName = `${uuid()}-${await this.sanitizeFileName(singleFile.originalname)}`;
+    await fsPromises.mkdir(folderPath, { recursive: true });
+
+    const fullPath = path.join(folderPath, generatedSingleFileName);
+
+    await fsPromises.writeFile(fullPath, singleFile.buffer);
     return generatedSingleFileName;
   }
 
