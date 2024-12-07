@@ -10,7 +10,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import PrismaService from './prisma.service';
 import ValidationService from './validation.service';
 import ElasticSearchService from './elastic-search.service';
-import { RedisService } from './redis.service';
 import { MulterService } from './multer.service';
 import { AxiosService } from './axios.service';
 import { MidtransService } from './midtrans.service';
@@ -61,14 +60,13 @@ import { MidtransService } from './midtrans.service';
       useClass: AxiosService,
     }),
   ],
-  providers: [PrismaService, ValidationService, RedisService, MidtransService],
+  providers: [PrismaService, ValidationService, MidtransService],
   exports: [
     PrismaService,
     ValidationService,
     MulterModule,
     ElasticsearchModule,
     HttpModule,
-    RedisService,
     MidtransService,
   ],
 })
