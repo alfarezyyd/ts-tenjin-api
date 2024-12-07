@@ -175,8 +175,15 @@ export class CategoryService {
           },
         },
         include: {
-          mentor: true, // Sertakan relasi jika perlu (misal mentor, category)
+          mentor: {
+            include: {
+              user: true,
+            },
+          }, // Sertakan relasi jika perlu (misal mentor, category)
           category: true,
+          AssistanceResource: {
+            take: 1,
+          },
         },
       });
     const assistancePerCategory = await this.prismaService.category.findMany({

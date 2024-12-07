@@ -12,12 +12,7 @@ import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { Server, Socket } from 'socket.io';
-import { RedisService } from '../common/redis.service';
 import PrismaService from '../common/prisma.service';
-import {
-  ChatSessionTrait,
-  ChatSessionTraitBuilder,
-} from './trait/chat-session.trait';
 import { Chat, ChatStatus } from '@prisma/client';
 import { NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -43,23 +38,12 @@ export class ChatGateway
 
   constructor(
     private readonly chatService: ChatService,
-    private readonly redisService: RedisService,
     private readonly prismaService: PrismaService,
   ) {}
 
   afterInit(webSocketServer: Server) {}
 
   async handleConnection(webSocketClient: Socket) {
-    const sessionId = webSocketClient.handshake.headers['session-id'] as string;
-    if (sessionId) {
-      const chatSessionTrait: ChatSessionTrait = JSON.parse(
-        await this.redisService.getClient().hGet('onlineUsers', sessionId),
-      );
-      webSocketClient.handshake.headers['session-id'] = sessionId;
-      webSocketClient.handshake.headers['user-unique-id'] =
-        chatSessionTrait.userUniqueId;
-      webSocketClient.handshake.headers['email'] = chatSessionTrait.email;
-    }
     const email = webSocketClient.handshake.headers['email'] as string;
     const userUniqueId = webSocketClient.handshake.headers[
       'user-unique-id'
@@ -103,20 +87,6 @@ export class ChatGateway
       webSocketClient.handshake.headers['session-id'] = uuidv4();
       webSocketClient.handshake.headers['user'] = userUniqueId;
       webSocketClient.handshake.headers['email'] = email;
-      const newChatSessionTraitBuilder = new ChatSessionTraitBuilder()
-        .setSessionId(webSocketClient.handshake.headers['session-id'] as string)
-        .setUserUniqueId(userUniqueId)
-        .setEmail(email)
-        .setUserId(userPrisma.id)
-        .setName(userPrisma.name);
-
-      await this.redisService
-        .getClient()
-        .hSet(
-          'onlineUsers',
-          userUniqueId,
-          JSON.stringify(newChatSessionTraitBuilder),
-        );
 
       const allMessageFromUser: Chat[] = await prismaTransaction.chat.findMany({
         where: {
@@ -187,12 +157,6 @@ export class ChatGateway
         webSocketClient.handshake.headers['user-unique-id'] as string,
       );
       // update the connection status of the session
-      await this.redisService
-        .getClient()
-        .hDel(
-          'onlineUsers',
-          webSocketClient.handshake.headers['user-unique-id'] as string,
-        );
     }
   }
 
@@ -200,21 +164,7 @@ export class ChatGateway
   async handleJoin(
     @MessageBody('name') name: string,
     @ConnectedSocket() webSocketClient: Socket,
-  ): Promise<void> {
-    await this.redisService
-      .getClient()
-      .hSet('onlineUsers', name, webSocketClient.id);
-
-    webSocketClient.broadcast.emit('channelMessage', {
-      user: 'server',
-      text: `${name} has joined the chat`,
-    });
-
-    const onlineUsers = await this.redisService
-      .getClient()
-      .hGetAll('onlineUsers');
-    webSocketClient.emit('users', onlineUsers);
-  }
+  ): Promise<void> {}
 
   @SubscribeMessage('privateMessage')
   async handlePrivateMessage(
@@ -275,15 +225,25 @@ export class ChatGateway
         },
       });
       if (originUser && destinationUser) {
+        webSocketClient.nsp.to(originUser.uniqueId).emit('privateMessage', {
+          originUserName: originUser.name,
+          originUserUniqueId: originUser.uniqueId,
+          destinationUserUniqueId: destinationUser.uniqueId,
+          message: {
+            isSender: true,
+            message: chatPrisma.payloadMessage,
+            timestamp: chatPrisma.createdAt,
+            status: chatPrisma.status,
+          },
+        });
         webSocketClient.nsp
-          .to(originUser.uniqueId)
           .to(destinationUser.uniqueId)
           .emit('privateMessage', {
             originUserName: originUser.name,
             originUserUniqueId: originUser.uniqueId,
             destinationUserUniqueId: destinationUser.uniqueId,
             message: {
-              isSender: originUser.id === chatPrisma.originUserId,
+              isSender: false,
               message: chatPrisma.payloadMessage,
               timestamp: chatPrisma.createdAt,
               status: chatPrisma.status,
@@ -292,7 +252,7 @@ export class ChatGateway
       } else {
         webSocketClient.emit('message', {
           user: 'system',
-          text: `User ${destinationUser['name']} is not online`,
+          text: `User ${destinationUser['name']} is not exists`,
         });
       }
     });
