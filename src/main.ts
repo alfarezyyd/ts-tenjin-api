@@ -6,11 +6,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as fs from 'node:fs';
+import { ConfigService } from '@nestjs/config';
 
 declare const module: any;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  let app = await NestFactory.create(AppModule);
 
   // Ambil ConfigService
   const configService = app.get(ConfigService);
