@@ -5,16 +5,40 @@ import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as fs from 'node:fs';
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Ambil ConfigService
+  const configService = app.get(ConfigService);
+
+  // Cek environment
+  const environment = configService.get<string>('ENVIRONMENT');
+  let httpsOptions = undefined;
+
+  if (environment !== 'DEVELOPMENT') {
+    httpsOptions = {
+      key: fs.readFileSync('/etc/letsencrypt/live/tenjin.web.id/privkey.pem'),
+      cert: fs.readFileSync(
+        '/etc/letsencrypt/live/tenjin.web.id/fullchain.pem',
+      ),
+    };
+  }
+
+  // Jika HTTPS diperlukan, buat ulang app dengan HTTPS options
+  if (httpsOptions) {
+    await app.close(); // Tutup instance sebelumnya
+    app = await NestFactory.create(AppModule, { httpsOptions });
+  }
   app.enableCors({
     origin: 'http://localhost:3000', // Allow requests from this origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
   // Exception Filter
   app.useGlobalFilters(new PrismaExceptionFilter());
   app.useGlobalFilters(new ValidationExceptionFilter());
