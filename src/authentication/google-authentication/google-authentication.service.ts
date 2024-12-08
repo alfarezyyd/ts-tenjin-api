@@ -69,6 +69,7 @@ export class GoogleAuthenticationService {
       userPrisma.Mentor = {
         id: null,
         userId: null,
+        bio: null,
       };
     }
     return {

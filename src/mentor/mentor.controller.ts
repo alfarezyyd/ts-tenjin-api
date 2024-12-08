@@ -82,6 +82,15 @@ export class MentorController {
     };
   }
 
+  @Get('settings')
+  async findOneSettings(@CurrentUser() currentUser: LoggedUser) {
+    return {
+      result: {
+        data: await this.mentorService.handleFindOneSetting(currentUser),
+      },
+    };
+  }
+
   @Public()
   @Get(':uniqueId')
   async findOne(

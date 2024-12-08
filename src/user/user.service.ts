@@ -20,6 +20,7 @@ import { ZodError } from 'zod';
 import { MentorService } from '../mentor/mentor.service';
 import { JwtService } from '@nestjs/jwt';
 import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
+import { SettingMentorInformationDto } from './dto/setting-mentor-information.dto';
 
 @Injectable()
 export class UserService {
@@ -366,6 +367,101 @@ export class UserService {
         lastFiveOrders: allOrderPrisma.slice(0, 5),
         lastFiveMentorOrders: lastFiveMentorOrders.slice(0, 5),
       };
+    });
+  }
+
+  async settingMentorInformation(
+    settingMentorInformation: SettingMentorInformationDto,
+    loggedUser: LoggedUser,
+    photoFile: Array<Express.Multer.File>,
+  ) {
+    const validatedSettingMentorInformation = this.validationService.validate(
+      UserValidation.MENTOR_INFORMATION,
+      settingMentorInformation,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.mentor
+        .findFirstOrThrow({
+          where: {
+            id: BigInt(loggedUser.mentorId),
+            user: {
+              uniqueId: loggedUser.uniqueId,
+            },
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Mentor not found.');
+        });
+      if (
+        validatedSettingMentorInformation.deletedFilesName !== undefined &&
+        validatedSettingMentorInformation.deletedFilesName.length > 0
+      ) {
+        for (const deletedFileName of validatedSettingMentorInformation.deletedFilesName) {
+          fs.stat(
+            `${this.configService.get<string>('MULTER_DEST')}/mentor-resources/profile/${loggedUser.mentorId}/${deletedFileName}`,
+            function (err) {
+              if (err) {
+                throw new NotFoundException(
+                  `File with fileName ${deletedFileName} not found`,
+                );
+              }
+            },
+          );
+
+          fs.unlink(
+            `${this.configService.get<string>('MULTER_DEST')}/mentor-resources/profile/${loggedUser.mentorId}/${deletedFileName}`,
+            (err) => {
+              if (err) {
+                throw new HttpException(
+                  `Error when trying to change file`,
+                  500,
+                );
+              }
+            },
+          );
+        }
+        await prismaTransaction.mentorResource.deleteMany({
+          where: {
+            mentorId: BigInt(loggedUser.mentorId),
+            imagePath: {
+              in: validatedSettingMentorInformation.deletedFilesName as string[],
+            },
+          },
+        });
+      }
+      if (photoFile.length > 0) {
+        const allGeneratedFileName = [];
+        for (const photoElement of photoFile) {
+          const generatedFileName = await CommonHelper.handleSaveFile(
+            this.configService,
+            photoElement,
+            `mentor-resources/profile/${loggedUser.mentorId}`,
+          );
+          allGeneratedFileName.push(generatedFileName);
+        }
+        const mappedGeneratedFileName = allGeneratedFileName.map((fileName) => {
+          return {
+            imagePath: fileName,
+            videoUrl: null,
+            mentorId: BigInt(loggedUser.mentorId),
+          };
+        });
+        await prismaTransaction.mentorResource.createMany({
+          data: mappedGeneratedFileName,
+        });
+      }
+      await prismaTransaction.mentor.update({
+        where: {
+          id: BigInt(loggedUser.mentorId),
+          user: {
+            uniqueId: loggedUser.uniqueId,
+          },
+        },
+        data: {
+          bio: validatedSettingMentorInformation.bio,
+        },
+      });
+      return true;
     });
   }
 }

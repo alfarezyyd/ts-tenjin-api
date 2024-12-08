@@ -65,4 +65,9 @@ export class UserValidation {
       message: 'Passwords do not match',
       path: ['confirmPassword'], // Menentukan field yang akan mendapatkan pesan error
     });
+
+  static readonly MENTOR_INFORMATION = z.object({
+    bio: z.string().min(1),
+    deletedFilesName: z.array(z.string()).optional(),
+  });
 }

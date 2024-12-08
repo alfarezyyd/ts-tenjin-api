@@ -366,4 +366,25 @@ export class MentorService {
       });
     });
   }
+
+  async handleFindOneSetting(currentUser: LoggedUser) {
+    return this.prismaService.mentor
+      .findFirstOrThrow({
+        where: {
+          id: BigInt(currentUser.mentorId),
+        },
+        include: {
+          MentorResource: {
+            where: {
+              resourceType: ResourceType.IMAGE,
+            },
+            skip: 1,
+          },
+          MentorAddress: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Mentor not found');
+      });
+  }
 }

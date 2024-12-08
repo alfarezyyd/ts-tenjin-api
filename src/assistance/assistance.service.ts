@@ -316,27 +316,25 @@ export class AssistanceService {
             },
           );
 
-          for (const deletedFileName of deletedFilesName) {
-            fs.unlink(
-              `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
-              (err) => {
-                if (err) {
-                  throw new HttpException(
-                    `Error when trying to change file`,
-                    500,
-                  );
-                }
+          fs.unlink(
+            `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
+            (err) => {
+              if (err) {
+                throw new HttpException(
+                  `Error when trying to change file`,
+                  500,
+                );
+              }
+            },
+          );
+          await prismaTransaction.assistanceResource.deleteMany({
+            where: {
+              assistantId: assistantId,
+              imagePath: {
+                in: deletedFilesName,
               },
-            );
-            await prismaTransaction.assistanceResource.deleteMany({
-              where: {
-                assistantId: assistantId,
-                imagePath: {
-                  in: deletedFilesName,
-                },
-              },
-            });
-          }
+            },
+          });
         }
       }
       if (

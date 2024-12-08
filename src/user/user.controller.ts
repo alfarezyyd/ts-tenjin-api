@@ -12,6 +12,7 @@ import {
   Post,
   Put,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -23,11 +24,12 @@ import { Public } from '../authentication/decorator/set-metadata.decorator';
 import { SettingGeneralDataUserDto } from './dto/setting-general-data-user.dto';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
 import LoggedUser from '../authentication/dto/logged-user.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 import { ChangePassword } from './dto/change-password.dto';
 import ConvertHelper from '../helper/convert.helper';
 import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
+import { SettingMentorInformationDto } from './dto/setting-mentor-information.dto';
 
 @Controller('users')
 export class UserController {
@@ -127,7 +129,6 @@ export class UserController {
   }
 
   @Put('/settings/change-password')
-  @NoVerifiedEmail(true)
   async settingChangePassword(
     @Body() changePassword: ChangePassword,
     @CurrentUser() loggedUser: LoggedUser,
@@ -137,6 +138,34 @@ export class UserController {
         data: await this.userService.handleChangePassword(
           changePassword,
           loggedUser,
+        ),
+      },
+    };
+  }
+
+  @Put('/settings/mentor-information')
+  @UseInterceptors(FilesInterceptor('photo'))
+  async settingMentorInformation(
+    @Body() settingMentorInformation: SettingMentorInformationDto,
+    @CurrentUser() loggedUser: LoggedUser,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5000 * 10 * 10 * 10 }),
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)$/ }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    photoFile: Array<Express.Multer.File>,
+  ): Promise<WebResponse<boolean>> {
+    console.log(settingMentorInformation, photoFile);
+    return {
+      result: {
+        data: await this.userService.settingMentorInformation(
+          settingMentorInformation,
+          loggedUser,
+          photoFile,
         ),
       },
     };
