@@ -305,7 +305,6 @@ export class AssistanceService {
       });
       if (deletedFilesName !== undefined && deletedFilesName.length > 0) {
         for (const deletedFileName of deletedFilesName) {
-          console.log(deletedFileName);
           fs.stat(
             `${this.configService.get<string>('MULTER_DEST')}/assistants/${this.expressRequest['user']['mentorId']}/${assistantId}/${deletedFileName}`,
             function (err) {

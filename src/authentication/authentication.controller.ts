@@ -71,7 +71,6 @@ export class AuthenticationController {
     @Body() verifyOtpDto: { email: string },
     @Param('oneTimePassword') oneTimePassword: string,
   ): Promise<WebResponse<boolean>> {
-    console.log(verifyOtpDto);
     return {
       result: {
         data: await this.authenticationService.verifyOneTimePasswordToken(

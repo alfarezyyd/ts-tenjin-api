@@ -57,7 +57,6 @@ export class LanguageController {
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
-    console.log(id);
     return {
       result: {
         data: await this.languageService.remove(+id),

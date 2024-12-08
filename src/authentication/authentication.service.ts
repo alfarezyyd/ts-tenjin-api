@@ -118,7 +118,6 @@ export class AuthenticationService {
       async (prismaTransaction) => {
         const generatedOneTimePassword =
           await CommonHelper.generateOneTimePassword();
-        console.log(generatedOneTimePassword);
         const hashedGeneratedOneTimePassword = await bcrypt.hash(
           generatedOneTimePassword,
           10,
