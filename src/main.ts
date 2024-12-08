@@ -7,6 +7,7 @@ import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as fs from 'node:fs';
 import { ConfigService } from '@nestjs/config';
+import * as process from 'node:process';
 
 declare const module: any;
 
@@ -68,8 +69,7 @@ async function bootstrap() {
     return this.toString();
   };
   app.useWebSocketAdapter(new IoAdapter(app));
-
-  await app.listen(8080, '0.0.0.0');
+  await app.listen(3001, '0.0.0.0');
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());

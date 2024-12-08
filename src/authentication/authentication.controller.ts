@@ -17,8 +17,6 @@ import SignUpDto from './dto/sign-up.dto';
 import { WebResponse } from '../model/web.response';
 import { ResponseAuthenticationDto } from './dto/response-authentication';
 import { NoVerifiedEmail } from './decorator/set-no-verified-email.decorator';
-import { CurrentUser } from './decorator/current-user.decorator';
-import LoggedUser from './dto/logged-user.dto';
 
 @Controller('authentication/self')
 export class AuthenticationController {
@@ -53,10 +51,10 @@ export class AuthenticationController {
 
   @Public()
   @NoVerifiedEmail(true)
-  @Get('generate-otp')
-  async generateOneTimePasswordVerification(generateOtpDto: {
-    email: string;
-  }): Promise<WebResponse<string>> {
+  @Post('generate-otp')
+  async generateOneTimePasswordVerification(
+    @Body() generateOtpDto: { email: string },
+  ): Promise<WebResponse<string>> {
     return {
       result: {
         data: await this.authenticationService.generateOneTimePasswordVerification(
@@ -70,28 +68,36 @@ export class AuthenticationController {
   @NoVerifiedEmail(true)
   @Post('verify-otp/:oneTimePassword')
   async verifyOneTimePasswordToken(
-    @CurrentUser() currentUser: LoggedUser,
+    @Body() verifyOtpDto: { email: string },
     @Param('oneTimePassword') oneTimePassword: string,
   ): Promise<WebResponse<boolean>> {
+    console.log(verifyOtpDto);
     return {
       result: {
         data: await this.authenticationService.verifyOneTimePasswordToken(
-          currentUser,
+          verifyOtpDto.email,
           oneTimePassword,
         ),
       },
     };
   }
 
-  @NoVerifiedEmail(true)
   @Public()
-  @Post('forgot-password')
-  async forgotPassword(
-    @Body() { email }: { email: string },
-  ): Promise<WebResponse<string>> {
+  @NoVerifiedEmail(true)
+  @Post('reset-password')
+  async resetPassword(
+    @Body()
+    resetPasswordDto: {
+      email: string;
+      password: string;
+      confirmPassword: string;
+    },
+  ): Promise<WebResponse<boolean>> {
     return {
       result: {
-        data: await this.authenticationService.getForgotPasswordToken(email),
+        data: await this.authenticationService.handleResetPassword(
+          resetPasswordDto,
+        ),
       },
     };
   }

@@ -21,7 +21,7 @@ export class NoVerifiedEmailGuard implements CanActivate {
       NO_VERIFIED_EMAIL,
       [context.getHandler(), context.getClass()],
     );
-
+    console.log(noVerifiedEmail);
     // Jika decorator `noVerifiedEmail` ada dan di-set ke true, izinkan masuk
     if (noVerifiedEmail) {
       return true;

@@ -27,5 +27,19 @@ export default class AuthenticationValidation {
       message: 'Passwords do not match',
       path: ['confirmPassword'], // Menentukan field yang akan mendapatkan pesan error
     });
-  static readonly FORGOT_PASSWORD: ZodType = z.string().email();
+  static readonly RESET_PASSWORD: ZodType = z
+    .object({
+      email: z.string().min(1).max(100),
+      password: z.string().min(1).max(100),
+      confirmPassword: z.string().min(1).max(100),
+    })
+    .superRefine((arg, ctx) => {
+      if (arg.password !== arg.confirmPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['confirmPassword'], // Bisa juga diubah ke "endDate" tergantung preferensi
+          message: 'Confirm password different with password',
+        });
+      }
+    });
 }
