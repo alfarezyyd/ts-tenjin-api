@@ -31,4 +31,12 @@ export class MentorValidation {
     meetingPasskey: z.string().optional(),
     meetingLink: z.string().min(1),
   });
+
+  static readonly UPDATE_MENTOR_BANK_ACCOUNT = z.object({
+    id: z.coerce.number().min(1),
+    accountHolderName: z.string().min(1).max(255),
+    bankName: z.string().min(1).max(255),
+    accountNumber: z.string().min(1).max(255),
+    paymentRecipientEmail: z.string().min(1).max(255),
+  });
 }

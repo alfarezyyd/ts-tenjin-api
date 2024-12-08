@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Put,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import LoggedUser from '../authentication/dto/logged-user.dto';
 import { NoVerifiedEmail } from '../authentication/decorator/set-no-verified-email.decorator';
 import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
 import { Public } from 'src/authentication/decorator/set-metadata.decorator';
+import { UpdateBankAccountMentorDto } from './dto/update-bank-account-mentor.dto';
 
 @Controller('mentors')
 export class MentorController {
@@ -87,6 +89,33 @@ export class MentorController {
     return {
       result: {
         data: await this.mentorService.handleFindOneSetting(currentUser),
+      },
+    };
+  }
+
+  @Get('settings/mentor-account')
+  async findMentorAccount(
+    @CurrentUser() currentUser: LoggedUser,
+  ): Promise<WebResponse<any>> {
+    return {
+      result: {
+        data: await this.mentorService.handleFindMentorAccount(currentUser),
+      },
+    };
+  }
+
+  @Put('settings/mentor-account')
+  async updateMentorAccount(
+    @Body() updateBankAccountMentorDto: UpdateBankAccountMentorDto,
+    @CurrentUser()
+    currentUser: LoggedUser,
+  ): Promise<WebResponse<any>> {
+    return {
+      result: {
+        data: await this.mentorService.handleUpdateMentorAccount(
+          currentUser,
+          updateBankAccountMentorDto,
+        ),
       },
     };
   }

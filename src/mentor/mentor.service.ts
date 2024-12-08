@@ -17,6 +17,7 @@ import { MentorValidation } from './mentor.validation';
 import CommonHelper from '../helper/common.helper';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateBankAccountMentorDto } from './dto/update-bank-account-mentor.dto';
 
 @Injectable()
 export class MentorService {
@@ -386,5 +387,43 @@ export class MentorService {
       .catch(() => {
         throw new NotFoundException('Mentor not found');
       });
+  }
+
+  async handleFindMentorAccount(loggedUser: LoggedUser) {
+    return this.prismaService.mentorBankAccount.findFirstOrThrow({
+      where: {
+        mentorId: BigInt(loggedUser.mentorId),
+      },
+    });
+  }
+
+  async handleUpdateMentorAccount(
+    currentUser: LoggedUser,
+    updateBankAccountMentorDto: UpdateBankAccountMentorDto,
+  ) {
+    const validatedUpdateBankAccount = this.validationService.validate(
+      MentorValidation.UPDATE_MENTOR_BANK_ACCOUNT,
+      updateBankAccountMentorDto,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.mentorBankAccount
+        .findFirstOrThrow({
+          where: {
+            mentorId: BigInt(currentUser.mentorId),
+            id: validatedUpdateBankAccount.id,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Mentor bank account not found');
+        });
+      await prismaTransaction.mentorBankAccount.update({
+        where: {
+          mentorId: BigInt(currentUser.mentorId),
+          id: validatedUpdateBankAccount.id,
+        },
+        data: validatedUpdateBankAccount,
+      });
+      return true;
+    });
   }
 }
