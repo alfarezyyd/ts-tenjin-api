@@ -69,7 +69,7 @@ async function bootstrap() {
     return this.toString();
   };
   app.useWebSocketAdapter(new IoAdapter(app));
-  await app.listen(3001, '0.0.0.0');
+  await app.listen(8080, '0.0.0.0');
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
