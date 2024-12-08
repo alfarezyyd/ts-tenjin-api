@@ -243,7 +243,11 @@ export class CategoryService {
           AssistanceResource: {
             take: 1,
           },
-          mentor: true,
+          mentor: {
+            include: {
+              user: true,
+            },
+          },
         },
       }),
     };

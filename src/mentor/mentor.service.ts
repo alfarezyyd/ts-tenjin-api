@@ -164,7 +164,11 @@ export class MentorService {
               AssistanceResource: true,
             },
           },
-          MentorResource: true,
+          MentorResource: {
+            where: {
+              resourceType: ResourceType.IMAGE,
+            },
+          },
           Experience: {
             take: 1,
             orderBy: {
@@ -175,12 +179,6 @@ export class MentorService {
             take: 1,
             orderBy: {
               endDate: 'desc',
-            },
-          },
-          MentorAddress: {
-            select: {
-              district: true,
-              province: true,
             },
           },
         },
