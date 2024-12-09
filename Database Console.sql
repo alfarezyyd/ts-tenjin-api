@@ -23,7 +23,6 @@ SELECT * FROM mentors;
 SELECT * FROM mentor_addresses;
 SELECT * FROM chats;
 SELECT * FROM mentor_resources;
-DELETE FROM mentor_resources WHERE id = 8;
 SELECT * FROM mentor_bank_accounts;
 SELECT * FROM reviews;
 SELECT * FROM withdraw_requests;

@@ -155,7 +155,7 @@ export class ExperienceService {
           },
         })
         .catch(() => {
-          throw new NotFoundException(`Experience not found`);
+          throw new HttpException(`Experience not found`, 404);
         });
       const allExperienceResource =
         await prismaTransaction.experienceResource.findMany({
