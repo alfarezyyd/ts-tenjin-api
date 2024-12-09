@@ -13,6 +13,7 @@ SELECT * FROM assistance_tags;
 SELECT * FROM assistance_languages;
 SELECT * FROM orders;
 SELECT * FROM experiences;
+SELECT * FROM users;
 
 SELECT * FROM experience_resources;
 SELECT * FROM tags;
@@ -38,3 +39,6 @@ DELETE FROM assistance_carts;
 DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM orders;
+DELETE FROM categories;
+
+UPDATE users SET is_management = 1 WHERE id = 3;

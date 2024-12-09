@@ -84,7 +84,7 @@ export class CategoryService {
             logoFile,
           );
 
-          if (isImageDifferent) {
+          if (!isImageDifferent) {
             fs.unlink(
               `${this.configService.get<string>('MULTER_DEST')}/category-icon/${categoryPrisma.logo}`,
               (err) => {
