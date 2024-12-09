@@ -477,4 +477,38 @@ export class MentorService {
       },
     });
   }
+
+  async handleRejectBooking(
+    rejectBookingDto: {
+      orderId: string;
+      reason: string;
+    },
+    currentUser: LoggedUser,
+  ) {
+    const validatedRejectBooking = this.validationService.validate(
+      MentorValidation.REJECT_BOOKING,
+      rejectBookingDto,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.order
+        .findFirstOrThrow({
+          where: {
+            id: validatedRejectBooking.orderId,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Order not found');
+        });
+      await prismaTransaction.order.update({
+        where: {
+          id: validatedRejectBooking.orderId,
+        },
+        data: {
+          orderStatus: OrderStatus.CANCELLED,
+          orderCondition: OrderCondition.REJECT,
+        },
+      });
+      return true;
+    });
+  }
 }

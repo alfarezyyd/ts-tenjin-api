@@ -133,6 +133,25 @@ export class MentorController {
     };
   }
 
+  @Post(`orders/booking/reject`)
+  async rejectBooking(
+    @Body()
+    rejectBookingDto: {
+      orderId: string;
+      reason: string;
+    },
+    @CurrentUser() currentUser: LoggedUser,
+  ) {
+    return {
+      result: {
+        data: await this.mentorService.handleRejectBooking(
+          rejectBookingDto,
+          currentUser,
+        ),
+      },
+    };
+  }
+
   @Public()
   @NoVerifiedEmail(true)
   @Get('experiences/:userUniqueId')

@@ -39,4 +39,9 @@ export class MentorValidation {
     accountNumber: z.string().min(1).max(255),
     paymentRecipientEmail: z.string().min(1).max(255),
   });
+
+  static readonly REJECT_BOOKING = z.object({
+    orderId: z.string().min(1),
+    reason: z.string().min(1),
+  });
 }
