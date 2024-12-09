@@ -307,6 +307,7 @@ export class UserService {
                   user: true,
                 },
               },
+              category: true,
             },
           },
         },
@@ -323,6 +324,7 @@ export class UserService {
       for (const orderPrisma of allOrderPrisma) {
         switch (orderPrisma.orderStatus) {
           case OrderStatus.FINISHED:
+          case OrderStatus.REVIEWED:
             countOrder.completed++;
             break;
           case OrderStatus.PROCESSED:

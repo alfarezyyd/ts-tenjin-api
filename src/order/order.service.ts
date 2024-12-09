@@ -75,7 +75,8 @@ export class OrderService {
       const createOrderPayload: Order = {
         ...validatedCreateOrderDto,
         totalPrice:
-          validatedCreateOrderDto.sessionCount * assistancePrisma.price,
+          validatedCreateOrderDto.sessionCount *
+          (assistancePrisma.price * assistancePrisma.price * 0.11),
         userId: userPrisma.id,
         createdAt: new Date(),
       };
