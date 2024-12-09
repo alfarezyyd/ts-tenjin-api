@@ -265,7 +265,9 @@ export class MentorService {
       where: {
         mentorId: BigInt(loggedUser.mentorId),
         orderCondition: {
-          not: OrderCondition.DONE,
+          not: {
+            in: [OrderCondition.REJECT, OrderCondition.DONE],
+          },
         },
       },
       select: {
