@@ -337,40 +337,33 @@ export class AssistanceService {
           });
         }
       }
-      if (
-        validatedUpdateAssistanceDto.categoryId !==
-        updateAssistancePrisma.categoryId
-      ) {
-        await prismaTransaction.assistanceTags.deleteMany({
-          where: {
-            assistantId: updateAssistancePrisma.id,
-          },
-        });
-      }
-      const filteredNewTag = Array.from(tagId).filter(
-        (tagId) => !allTagPrisma.some((tag) => tag.id === tagId),
-      );
-      const assistanceTagsInsertPayload = Array.from(filteredNewTag).map(
-        (value) => ({
+      console.log(tagId);
+      await prismaTransaction.assistanceTags.deleteMany({
+        where: {
+          assistantId: updateAssistancePrisma.id,
+        },
+      });
+      const mappedTags = Array.from(tagId).map((value) => {
+        return {
           assistantId: updateAssistancePrisma.id,
           tagId: value as number,
+        };
+      });
+      await prismaTransaction.assistanceTags.createMany({
+        data: mappedTags,
+      });
+
+      await prismaTransaction.assistanceLanguage.deleteMany({
+        where: {
+          assistantId: updateAssistancePrisma.id,
+        },
+      });
+      const assistanceLanguagesInsertPayload = Array.from(languages).map(
+        (value) => ({
+          assistantId: updateAssistancePrisma.id,
+          languageId: value as number,
         }),
       );
-      await prismaTransaction.assistanceTags.createMany({
-        data: assistanceTagsInsertPayload,
-      });
-      const filteredNewLanguage = Array.from(languages).filter(
-        (language) =>
-          !allLanguagePrisma.some(
-            (languagePrisma) => languagePrisma.id === language,
-          ),
-      );
-      const assistanceLanguagesInsertPayload = Array.from(
-        filteredNewLanguage,
-      ).map((value) => ({
-        assistantId: updateAssistancePrisma.id,
-        languageId: value as number,
-      }));
       await prismaTransaction.assistanceLanguage.createMany({
         data: assistanceLanguagesInsertPayload,
       });
