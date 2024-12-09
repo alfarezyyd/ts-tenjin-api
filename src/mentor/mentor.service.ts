@@ -125,6 +125,11 @@ export class MentorService {
           },
         },
         include: {
+          _count: {
+            select: {
+              Order: true,
+            },
+          },
           user: true,
           Assistance: {
             include: {
@@ -169,6 +174,7 @@ export class MentorService {
               resourceType: ResourceType.IMAGE,
             },
           },
+          MentorAddress: true,
           Experience: {
             take: 1,
             orderBy: {
@@ -422,6 +428,53 @@ export class MentorService {
         data: validatedUpdateBankAccount,
       });
       return true;
+    });
+  }
+
+  async handleFindMentorEducation(userUniqueId: string) {
+    const mentorPrisma = await this.prismaService.mentor
+      .findFirstOrThrow({
+        where: {
+          user: {
+            uniqueId: userUniqueId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Mentor not found');
+      });
+    return this.prismaService.education.findMany({
+      where: {
+        mentorId: mentorPrisma.id,
+      },
+    });
+  }
+
+  async handleFindMentorExperience(userUniqueId: string) {
+    const mentorPrisma = await this.prismaService.mentor
+      .findFirstOrThrow({
+        where: {
+          user: {
+            uniqueId: userUniqueId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Mentor not found');
+      });
+    return this.prismaService.experience.findMany({
+      where: {
+        mentorId: mentorPrisma.id,
+      },
+      include: {
+        ExperienceResource: true,
+      },
     });
   }
 }

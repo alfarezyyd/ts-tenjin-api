@@ -121,6 +121,30 @@ export class MentorController {
   }
 
   @Public()
+  @NoVerifiedEmail(true)
+  @Get('educations/:userUniqueId')
+  async fetchMentorEducation(
+    @Param('userUniqueId') userUniqueId: string,
+  ): Promise<WebResponse<any>> {
+    return {
+      result: {
+        data: await this.mentorService.handleFindMentorEducation(userUniqueId),
+      },
+    };
+  }
+
+  @Public()
+  @NoVerifiedEmail(true)
+  @Get('experiences/:userUniqueId')
+  async fetchMentorExperience(@Param('userUniqueId') userUniqueId: string) {
+    return {
+      result: {
+        data: await this.mentorService.handleFindMentorExperience(userUniqueId),
+      },
+    };
+  }
+
+  @Public()
   @Get(':uniqueId')
   async findOne(
     @Param('uniqueId') uniqueId: string,
