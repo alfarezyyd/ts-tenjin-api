@@ -144,10 +144,7 @@ export class MentorController {
   ) {
     return {
       result: {
-        data: await this.mentorService.handleRejectBooking(
-          rejectBookingDto,
-          currentUser,
-        ),
+        data: await this.mentorService.handleRejectBooking(rejectBookingDto),
       },
     };
   }

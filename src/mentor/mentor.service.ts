@@ -19,6 +19,7 @@ import CommonHelper from '../helper/common.helper';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UpdateBankAccountMentorDto } from './dto/update-bank-account-mentor.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class MentorService {
@@ -27,6 +28,7 @@ export class MentorService {
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async create(
@@ -358,12 +360,24 @@ export class MentorService {
       MentorValidation.UPDATE_BOOKING_MEETING_LINK,
       updateBookingMeetingLinkDto,
     );
-    this.prismaService.$transaction(async (prismaTransaction) => {
-      await prismaTransaction.order
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      const orderPrisma = await prismaTransaction.order
         .findFirstOrThrow({
           where: {
             id: orderId,
             mentorId: BigInt(currentUser.mentorId),
+          },
+          include: {
+            user: {
+              select: {
+                email: true,
+              },
+            },
+            assistance: {
+              select: {
+                topic: true,
+              },
+            },
           },
         })
         .catch(() => {
@@ -379,6 +393,31 @@ export class MentorService {
           meetingPasskey: validatedUpdateBookingMeeting.meetingPasskey,
           meetingLink: validatedUpdateBookingMeeting.meetingLink,
         },
+      });
+      await this.mailerService.sendMail({
+        from: this.configService.get<string>('EMAIL_USERNAME'),
+        to: orderPrisma.user.email,
+        subject: `Meeting ${orderPrisma.assistance.topic}`,
+        html: `
+    <h1>Informasi Meeting</h1>
+    <p>Infomrasi meeting Anda telah diperbarui oleh Mentor. Perhatikan dengan baik dan seksaman</p>
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th style="padding: 8px; background-color: #f4f4f4;">Meeting Platform</th>
+          <th style="padding: 8px; background-color: #f4f4f4;">Meeting Passkey</th>
+          <th style="padding: 8px; background-color: #f4f4f4;">Meeting Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px; text-align: center;">${validatedUpdateBookingMeeting.meetingPlatform}</td>
+          <td style="padding: 8px; text-align: center;">${validatedUpdateBookingMeeting.meetingPasskey}</td>
+          <td style="padding: 8px; text-align: center;">${validatedUpdateBookingMeeting.meetingLink}</td>
+        </tr>
+      </tbody>
+    </table>
+  `,
       });
     });
   }
@@ -489,13 +528,10 @@ export class MentorService {
     });
   }
 
-  async handleRejectBooking(
-    rejectBookingDto: {
-      orderId: string;
-      reason: string;
-    },
-    currentUser: LoggedUser,
-  ) {
+  async handleRejectBooking(rejectBookingDto: {
+    orderId: string;
+    reason: string;
+  }) {
     const validatedRejectBooking = this.validationService.validate(
       MentorValidation.REJECT_BOOKING,
       rejectBookingDto,

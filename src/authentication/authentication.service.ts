@@ -145,8 +145,27 @@ export class AuthenticationService {
       from: this.configService.get<string>('EMAIL_USERNAME'),
       to: generateOtpDto.email,
       subject: 'One Time Password Verification',
-      text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
+      html: `
+    <h1>Verifikasi OTP</h1>
+    <p>Bang! ini kode OTP nya:</p>
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th style="padding: 8px; background-color: #f4f4f4;">Kode OTP</th>
+          <th style="padding: 8px; background-color: #f4f4f4;">Berlaku Hingga</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px; text-align: center;">${generatedOneTimePassword}</td>
+          <td style="padding: 8px; text-align: center;">${new Date(new Date().getTime() + 10 * 60 * 1000)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Harap jangan membagikan kode ini kepada siapa pun.</p>
+  `,
     });
+
     return `Successfully send one time password`;
   }
 
