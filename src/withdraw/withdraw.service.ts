@@ -25,6 +25,8 @@ export class WithdrawService {
       WithdrawValidation.CREATE,
       createWithdrawDto,
     );
+    console.log(createWithdrawDto);
+    console.log(validatedCreateWithdrawDto);
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const mentorPrisma = await prismaTransaction.mentor
         .findFirstOrThrow({
@@ -73,12 +75,13 @@ export class WithdrawService {
             BigInt(validatedCreateWithdrawDto.totalBalance),
         },
       });
+      console.log(validatedCreateWithdrawDto);
       await prismaTransaction.withdrawRequest.create({
         data: {
           userId: mentorPrisma.userId,
           mentorId: mentorPrisma.id,
           mentorBankAccountId: mentorBankAccount.id,
-          totalBalance: validatedCreateWithdrawDto.totaBalance,
+          totalBalance: validatedCreateWithdrawDto.totalBalance,
         },
       });
 

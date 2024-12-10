@@ -41,5 +41,6 @@ DELETE FROM assistance_resources;
 DELETE FROM assistants;
 DELETE FROM orders;
 DELETE FROM categories;
+DELETE FROM withdraw_requests;
 
-UPDATE users SET total_balance = 0;
+UPDATE users SET total_balance = 100000;
