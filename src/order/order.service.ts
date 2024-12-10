@@ -320,6 +320,9 @@ export class OrderService {
           totalBalance:
             mentorPrisma.user.totalBalance +
             BigInt(Math.round(orderPrisma.totalPrice.toNumber())),
+          totalProfit:
+            mentorPrisma.user.totalBalance +
+            BigInt(Math.round(orderPrisma.totalPrice.toNumber())),
         },
       });
     });

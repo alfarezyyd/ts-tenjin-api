@@ -31,6 +31,7 @@ model User {
   photoPath            String?                @map("photo_path") @db.VarChar(255)
   isExternal           Boolean                @default(false) @map("is_external")
   totalBalance         BigInt                 @default(0) @map("total_balance") @db.UnsignedBigInt
+  totalProfit          BigInt                 @default(0) @map("total_profit") @db.UnsignedBigInt
   Mentor               Mentor?
   Order                Order[]
   Cart                 Cart?
