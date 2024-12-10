@@ -31,7 +31,7 @@ export class OrderValidation {
         .transform((value) => value.toISOString()),
       minutesDurations: z.number().min(1),
       sessionCount: z.number().min(1).max(100),
-      note: z.optional(z.string().min(1)),
+      note: z.optional(z.string()),
     })
     .refine(
       (data) => {

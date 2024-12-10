@@ -32,6 +32,7 @@ DELETE FROM mentor_addresses;
 DELETE FROM mentors;
 DELETE FROM experience_resources;
 DELETE FROM orders;
+DELETE FROM reviews;
 DELETE FROM assistance_languages;
 DELETE FROM orders;
 DELETE FROM assistance_tags;
@@ -41,4 +42,4 @@ DELETE FROM assistants;
 DELETE FROM orders;
 DELETE FROM categories;
 
-UPDATE orders SET order_status = 'CONFIRMED' WHERE id = 'cc9358e7-ee91-4a4b-87be-cc0a711e24f0';
+UPDATE users SET total_balance = 0;

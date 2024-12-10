@@ -270,7 +270,7 @@ export class OrderService {
 
   async handleUpdateFinishedOrder(orderId: string, loggedUser: LoggedUser) {
     this.prismaService.$transaction(async (prismaTransaction) => {
-      const orderPrisma: Order = await prismaTransaction.order
+      const orderPrisma = await prismaTransaction.order
         .findFirstOrThrow({
           where: {
             user: {
@@ -280,6 +280,17 @@ export class OrderService {
             orderStatus: {
               not: OrderStatus.FINISHED,
             },
+          },
+          select: {
+            id: true,
+            totalPrice: true,
+            assistance: {
+              select: {
+                price: true,
+              },
+            },
+            quantity: true,
+            mentorId: true,
           },
         })
         .catch(() => {
@@ -305,6 +316,7 @@ export class OrderService {
             user: {
               select: {
                 totalBalance: true,
+                totalProfit: true,
               },
             },
           },
@@ -319,10 +331,14 @@ export class OrderService {
         data: {
           totalBalance:
             mentorPrisma.user.totalBalance +
-            BigInt(Math.round(orderPrisma.totalPrice.toNumber())),
+            BigInt(
+              Math.round(orderPrisma.assistance.price * orderPrisma.quantity),
+            ),
           totalProfit:
-            mentorPrisma.user.totalBalance +
-            BigInt(Math.round(orderPrisma.totalPrice.toNumber())),
+            mentorPrisma.user.totalProfit +
+            BigInt(
+              Math.round(orderPrisma.assistance.price * orderPrisma.quantity),
+            ),
         },
       });
     });

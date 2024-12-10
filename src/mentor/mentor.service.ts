@@ -273,6 +273,11 @@ export class MentorService {
         orderPaymentStatus: {
           not: OrderPaymentStatus.NOT_YET_PAID,
         },
+        orderStatus: {
+          not: {
+            in: [OrderStatus.FINISHED, OrderStatus.REVIEWED],
+          },
+        },
       },
       select: {
         sessionStartTimestamp: true,
