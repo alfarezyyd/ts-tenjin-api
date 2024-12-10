@@ -76,9 +76,10 @@ export class OrderService {
         ...validatedCreateOrderDto,
         totalPrice:
           validatedCreateOrderDto.sessionCount *
-          (assistancePrisma.price * assistancePrisma.price * 0.11),
+          (assistancePrisma.price + assistancePrisma.price * 0.11),
         userId: userPrisma.id,
         createdAt: new Date(),
+        quantity: validatedCreateOrderDto.sessionCount,
       };
       delete createOrderPayload['sessionCount'];
       const newCreatedOrder: Order = await prismaTransaction.order.create({
@@ -186,7 +187,7 @@ export class OrderService {
               id: paymentNotificationPayload.order_id,
             },
             data: {
-              orderStatus: OrderStatus.FINISHED,
+              orderStatus: OrderStatus.PROCESSED,
               orderPaymentStatus: OrderPaymentStatus.PAID,
             },
           });
@@ -264,28 +265,6 @@ export class OrderService {
           note: orderPrisma.note,
         },
       });
-      const invoicePayload = {
-        order_id: orderPrisma.id,
-        invoice_number: invoicePrisma.id,
-        due_date: invoicePrisma.dueDate,
-        invoice_date: invoicePrisma.invoiceDate,
-        customer_details: {
-          id: userPrisma.uniqueId,
-          name: userPrisma.name,
-          email: userPrisma.email,
-          phone: userPrisma.telephone,
-        },
-        payment_type: invoicePrisma.paymentType.toString().toLowerCase(),
-        item_details: [
-          {
-            item_id: assistancePrisma.id,
-            description: assistancePrisma.topic,
-            quantity: 1,
-            price: orderPrisma.totalPrice,
-          },
-        ],
-        notes: invoicePrisma.note,
-      };
     });
   }
 

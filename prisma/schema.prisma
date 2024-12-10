@@ -239,6 +239,7 @@ model Order {
   orderStatus           OrderStatus        @default(PROCESSED) @map("order_status")
   orderPaymentStatus    OrderPaymentStatus @default(NOT_YET_PAID) @map("order_payment_status")
   orderCondition        OrderCondition     @default(WAITING) @map("order_condition")
+  quantity              Int                @default(1) @db.UnsignedInt
   meetingPlatform       String?            @map("meeting_platform")
   meetingPasskey        String?            @map("meeting_passkey")
   meetingLink           String?            @map("meeting_link")

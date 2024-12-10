@@ -41,4 +41,4 @@ DELETE FROM assistants;
 DELETE FROM orders;
 DELETE FROM categories;
 
-UPDATE users SET is_management = 1 WHERE id = 3;
+UPDATE orders SET order_status = 'CONFIRMED' WHERE id = 'cc9358e7-ee91-4a4b-87be-cc0a711e24f0';

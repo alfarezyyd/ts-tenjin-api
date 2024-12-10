@@ -4,6 +4,7 @@ import ValidationService from '../common/validation.service';
 import {
   Mentor,
   OrderCondition,
+  OrderPaymentStatus,
   OrderStatus,
   ResourceType,
   User,
@@ -268,6 +269,9 @@ export class MentorService {
           not: {
             in: [OrderCondition.REJECT, OrderCondition.DONE],
           },
+        },
+        orderPaymentStatus: {
+          not: OrderPaymentStatus.NOT_YET_PAID,
         },
       },
       select: {
