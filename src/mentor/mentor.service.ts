@@ -128,11 +128,6 @@ export class MentorService {
           },
         },
         include: {
-          _count: {
-            select: {
-              Order: true,
-            },
-          },
           user: true,
           Assistance: {
             include: {
@@ -170,6 +165,11 @@ export class MentorService {
                 },
               },
               AssistanceResource: true,
+              _count: {
+                select: {
+                  Order: true,
+                },
+              },
             },
           },
           MentorResource: {
