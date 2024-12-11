@@ -89,144 +89,27 @@ export class ReviewService {
     return `This action returns all review`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} review`;
+  async findOne(moreReviewDto: {
+    mentorUniqueId: string;
+    assistantId: number;
+    lastReviewId: number;
+  }) {
+    console.log(moreReviewDto.lastReviewId);
+    return this.prismaService.review.findMany({
+      where: {
+        Assistance: {
+          id: moreReviewDto.assistantId,
+          mentor: {
+            user: {
+              uniqueId: moreReviewDto.mentorUniqueId,
+            },
+          },
+        },
+        id: {
+          gte: BigInt(moreReviewDto.lastReviewId + 1),
+        },
+      },
+      take: 10,
+    });
   }
-
-  // async update(
-  //   reviewId: bigint,
-  //   imageResources: Array<Express.Multer.File>,
-  //   updateReviewDto: UpdateReviewDto,
-  // ) {
-  //   const validatedUpdateReviewDto = this.validationService.validate(
-  //     ReviewValidation.SAVE,
-  //     updateReviewDto,
-  //   );
-  //   return this.prismaService.$transaction(async (prismaTransaction) => {
-  //     await prismaTransaction.user
-  //       .findFirstOrThrow({
-  //         where: {
-  //           uniqueId: this.expressRequest['user']['uniqueId'],
-  //         },
-  //         select: {
-  //           Order: {
-  //             where: {
-  //               id: validatedUpdateReviewDto.orderId,
-  //             },
-  //           },
-  //         },
-  //       })
-  //       .catch(() => {
-  //         throw new NotFoundException(
-  //           `User with unique id ${this.expressRequest['user']['uniqueId']} not found`,
-  //         );
-  //       });
-  //     await prismaTransaction.review
-  //       .findFirstOrThrow({
-  //         where: {
-  //           id: reviewId,
-  //           Order: {
-  //             assistantId: validatedUpdateReviewDto.assistantId,
-  //             userId: this.expressRequest['user']['uniqueId'],
-  //           },
-  //         },
-  //       })
-  //       .catch(() => {
-  //         throw new NotFoundException(`Review not found`);
-  //       });
-  //     await prismaTransaction.review.update({
-  //       where: {
-  //         id: reviewId,
-  //       },
-  //       data: {
-  //         ...validatedUpdateReviewDto,
-  //       },
-  //     });
-  //     await prismaTransaction.reviewResource.deleteMany({
-  //       where: {
-  //         imagePath: {
-  //           in: validatedUpdateReviewDto.removedResourcePaths,
-  //         },
-  //       },
-  //     });
-  //     for (const removedResourcePath of validatedUpdateReviewDto.removedResourcePaths) {
-  //       fs.unlink(
-  //         `${this.configService.get<string>('MULTER_DEST')}
-  //         /review-resources/${validatedUpdateReviewDto.orderId}/${validatedUpdateReviewDto.assistantId}/${removedResourcePath}`,
-  //         () => {
-  //           throw new HttpException(
-  //             `Error when trying to delete resource`,
-  //             500,
-  //           );
-  //         },
-  //       );
-  //     }
-  //     const pathImageResources = [];
-  //     for (const imageResource of imageResources) {
-  //       const pathImageResource = await CommonHelper.handleSaveFile(
-  //         this.configService,
-  //         imageResource,
-  //         `review-resources/${validatedUpdateReviewDto.orderId}/${validatedUpdateReviewDto.assistantId}/`,
-  //       );
-  //       pathImageResources.push({
-  //         imagePath: pathImageResource,
-  //         reviewId: reviewId,
-  //       });
-  //     }
-  //     await prismaTransaction.reviewResource.createMany({
-  //       data: pathImageResources,
-  //     });
-  //     return `Success! review has been updated`;
-  //   });
-  // }
-
-  // async remove(reviewId: bigint, deleteReviewDto: DeleteReviewDto) {
-  //   const validatedDeleteReviewDto = this.validationService.validate(
-  //     ReviewValidation.DELETE,
-  //     deleteReviewDto,
-  //   );
-  //   return this.prismaService.$transaction(async (prismaTransaction) => {
-  //     const orderPrisma = await prismaTransaction.order
-  //       .findFirst({
-  //         where: {
-  //           id: validatedDeleteReviewDto.orderId,
-  //           assistantId: validatedDeleteReviewDto.assistantId,
-  //           user: {
-  //             uniqueId: this.expressRequest['user']['uniqueId'],
-  //           },
-  //         },
-  //         select: {
-  //           id: true,
-  //           assistantId: true,
-  //           userId: true,
-  //         },
-  //       })
-  //       .catch(() => {
-  //         throw new NotFoundException(
-  //           'Order with the specified details not found',
-  //         );
-  //       });
-  //
-  //     await prismaTransaction.review.findFirstOrThrow({
-  //       where: {
-  //         id: reviewId,
-  //         Order: {
-  //           id: orderPrisma.id,
-  //           assistantId: orderPrisma.assistantId,
-  //         },
-  //       },
-  //     });
-  //
-  //     await prismaTransaction.review.deleteMany({
-  //       where: {
-  //         id: reviewId,
-  //         Order: {
-  //           id: orderPrisma.id,
-  //           assistantId: orderPrisma.assistantId,
-  //         },
-  //       },
-  //     });
-  //     return `Success! review has been deleted`;
-  //   });
-  // }
 }
