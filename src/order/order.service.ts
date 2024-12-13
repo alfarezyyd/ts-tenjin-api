@@ -123,19 +123,23 @@ export class OrderService {
   }
 
   findOne(transactionToken: string) {
-    return this.prismaService.order.findFirstOrThrow({
-      where: {
-        transactionToken,
-      },
-      include: {
-        mentor: {
-          include: {
-            user: true,
-          },
+    return this.prismaService.order
+      .findFirstOrThrow({
+        where: {
+          transactionToken,
         },
-        assistance: true,
-      },
-    });
+        include: {
+          mentor: {
+            include: {
+              user: true,
+            },
+          },
+          assistance: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Order not found');
+      });
   }
 
   async findAllByUserId(loggedUser: LoggedUser): Promise<
