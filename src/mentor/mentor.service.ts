@@ -537,15 +537,38 @@ export class MentorService {
       rejectBookingDto,
     );
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      await prismaTransaction.order
+      const orderPrisma = await prismaTransaction.order
         .findFirstOrThrow({
           where: {
             id: validatedRejectBooking.orderId,
+          },
+          include: {
+            assistance: true,
+            user: {
+              select: {
+                email: true,
+                name: true,
+                totalBalance: true,
+              },
+            },
           },
         })
         .catch(() => {
           throw new NotFoundException('Order not found');
         });
+      console.log(orderPrisma);
+      await prismaTransaction.user.update({
+        where: {
+          id: orderPrisma.userId,
+        },
+        data: {
+          totalBalance:
+            orderPrisma.user.totalBalance +
+            BigInt(
+              Math.round(orderPrisma.assistance.price * orderPrisma.quantity),
+            ),
+        },
+      });
       await prismaTransaction.order.update({
         where: {
           id: validatedRejectBooking.orderId,
@@ -554,6 +577,15 @@ export class MentorService {
           orderStatus: OrderStatus.CANCELLED,
           orderCondition: OrderCondition.REJECT,
         },
+      });
+      await this.mailerService.sendMail({
+        from: this.configService.get<string>('EMAIL_USERNAME'),
+        to: orderPrisma.user.email,
+        subject: `Informasi Meeting ${orderPrisma.assistance.topic}`,
+        html: `
+    <h1>Penolakan Asistensi Diajukan Oleh Mentor</h1>
+    <p>Mohon maaf, ${orderPrisma.user.name} pemesanan asistensi Anda ditolak oleh mentor, total saldo telah dikembalikan pada akun Anda</p>
+  `,
       });
       return true;
     });
