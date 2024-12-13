@@ -43,24 +43,24 @@ model User {
   TopUpBalance         TopUpBalance[]
   Review               Review[]
   isManagement         Boolean                @default(false) @map("is_management")
+  UserBankAccount      UserBankAccount[]
 
   @@map("users")
 }
 
 model Mentor {
-  id                BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
-  user              User                @relation(fields: [userId], references: [id])
-  userId            BigInt              @unique @map("user_id") @db.UnsignedBigInt
-  bio               String?             @db.Text
-  Experience        Experience[]
-  Education         Education[]
-  Skill             Skill[]
-  Assistance        Assistance[]
-  Order             Order[]
-  MentorAddress     MentorAddress?
-  MentorBankAccount MentorBankAccount[]
-  MentorResource    MentorResource[]
-  WithdrawRequest   WithdrawRequest[]
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  user            User              @relation(fields: [userId], references: [id])
+  userId          BigInt            @unique @map("user_id") @db.UnsignedBigInt
+  bio             String?           @db.Text
+  Experience      Experience[]
+  Education       Education[]
+  Skill           Skill[]
+  Assistance      Assistance[]
+  Order           Order[]
+  MentorAddress   MentorAddress?
+  MentorResource  MentorResource[]
+  WithdrawRequest WithdrawRequest[]
 
   @@map("mentors")
 }
@@ -355,17 +355,17 @@ model MentorAddress {
   @@map("mentor_addresses")
 }
 
-model MentorBankAccount {
+model UserBankAccount {
   id                    BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
-  mentorId              BigInt            @map("mentor_id") @db.UnsignedBigInt
-  Mentor                Mentor            @relation(fields: [mentorId], references: [id])
+  userId                BigInt            @map("user_id") @db.UnsignedBigInt
+  User                  User              @relation(fields: [userId], references: [id])
   accountHolderName     String            @map("account_holder_name") @db.VarChar(255)
   bankName              String            @map("bank_name") @db.VarChar(255)
   accountNumber         String            @map("account_number") @db.VarChar(255)
   paymentRecipientEmail String            @map("payment_recipient_email") @db.VarChar(255)
   WithdrawRequest       WithdrawRequest[]
 
-  @@map("mentor_bank_accounts")
+  @@map("user_bank_accounts")
 }
 
 enum ResourceType {
@@ -409,8 +409,8 @@ model WithdrawRequest {
   userId                BigInt                @map("user_id") @db.UnsignedBigInt
   mentor                Mentor                @relation(fields: [mentorId], references: [id])
   mentorId              BigInt                @map("mentor_id") @db.UnsignedBigInt
-  mentorBankAccount     MentorBankAccount     @relation(fields: [mentorBankAccountId], references: [id])
-  mentorBankAccountId   BigInt                @map("mentor_bank_account_id") @db.UnsignedBigInt
+  userBankAccount       UserBankAccount       @relation(fields: [userBankAccountId], references: [id])
+  userBankAccountId     BigInt                @map("user_bank_account_id") @db.UnsignedBigInt
   totalBalance          Int                   @default(0) @map("total_balance") @db.UnsignedInt
   withdrawPaymentStatus WithdrawPaymentStatus @default(PROCESSED) @map("withdraw_payment_status")
   createdAt             DateTime              @default(now()) @map("created_at")
