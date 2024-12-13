@@ -190,6 +190,11 @@ export class MentorService {
               endDate: 'desc',
             },
           },
+          _count: {
+            select: {
+              Order: true,
+            },
+          },
         },
       })
       .catch(() => {
