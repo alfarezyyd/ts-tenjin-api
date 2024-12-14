@@ -347,4 +347,26 @@ export class OrderService {
       });
     });
   }
+
+  async fetchOrderSchedule(mentorId: number, currentUser: LoggedUser) {
+    return this.prismaService.order.findMany({
+      where: {
+        mentorId: BigInt(mentorId),
+        user: {
+          uniqueId: currentUser.uniqueId,
+        },
+        orderStatus: {
+          notIn: [
+            OrderStatus.REVIEWED,
+            OrderStatus.FINISHED,
+            OrderStatus.CANCELLED,
+          ],
+        },
+      },
+      select: {
+        sessionStartTimestamp: true,
+        sessionEndTimestamp: true,
+      },
+    });
+  }
 }

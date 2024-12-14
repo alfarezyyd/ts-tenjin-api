@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { WebResponse } from '../model/web.response';
@@ -31,6 +38,18 @@ export class OrderController {
     await this.orderService.handlePaymentNotification(
       paymentNotificationPayload,
     );
+  }
+
+  @Get('schedule/:mentorId')
+  async getOrderSchedule(
+    @Param('mentorId', ParseIntPipe) mentorId: number,
+    @CurrentUser() currentUser: LoggedUser,
+  ) {
+    return {
+      result: {
+        data: await this.orderService.fetchOrderSchedule(mentorId, currentUser),
+      },
+    };
   }
 
   @Get()
