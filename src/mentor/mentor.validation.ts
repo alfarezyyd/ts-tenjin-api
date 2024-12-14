@@ -12,7 +12,7 @@ export class MentorValidation {
       district: z.string().min(1).max(100),
       province: z.string().min(1).max(100),
     }),
-    mentorBankAccount: z.object({
+    userBankAccount: z.object({
       accountHolderName: z.string().min(1).max(200),
       bankName: z.string().min(1).max(200),
       accountNumber: z.string().min(1).max(200),
@@ -33,7 +33,7 @@ export class MentorValidation {
   });
 
   static readonly UPDATE_MENTOR_BANK_ACCOUNT = z.object({
-    id: z.coerce.number().min(1),
+    id: z.optional(z.coerce.number().min(1)),
     accountHolderName: z.string().min(1).max(255),
     bankName: z.string().min(1).max(255),
     accountNumber: z.string().min(1).max(255),

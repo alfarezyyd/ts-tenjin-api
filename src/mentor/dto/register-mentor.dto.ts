@@ -1,7 +1,7 @@
 export class RegisterMentorDto {
   mentorAddress: mentorAddressDto;
   pin: string;
-  mentorBankAccount: mentorBankAccountDto;
+  userBankAccount: userBankAccountDto;
 }
 
 class mentorAddressDto {
@@ -15,7 +15,7 @@ class mentorAddressDto {
   province: string;
 }
 
-class mentorBankAccountDto {
+class userBankAccountDto {
   accountHolderName: string;
   bankName: string;
   accountNumber: string;

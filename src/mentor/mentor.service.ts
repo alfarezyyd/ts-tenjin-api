@@ -64,10 +64,10 @@ export class MentorService {
           mentorId: mentorPrisma.id,
         },
       });
-      await prismaTransaction.mentorBankAccount.create({
+      await prismaTransaction.userBankAccount.create({
         data: {
-          ...validatedRegisterMentorDto.mentorBankAccount,
-          mentorId: mentorPrisma.id,
+          ...validatedRegisterMentorDto.userBankAccount,
+          userId: userPrisma.id,
         },
       });
       const mentorResourcesPayload = [];
@@ -449,11 +449,17 @@ export class MentorService {
   }
 
   async handleFindMentorAccount(loggedUser: LoggedUser) {
-    return this.prismaService.mentorBankAccount.findFirstOrThrow({
-      where: {
-        mentorId: BigInt(loggedUser.mentorId),
-      },
-    });
+    return this.prismaService.userBankAccount
+      .findFirstOrThrow({
+        where: {
+          User: {
+            uniqueId: loggedUser.uniqueId,
+          },
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('User not found');
+      });
   }
 
   async handleUpdateMentorAccount(
@@ -464,20 +470,43 @@ export class MentorService {
       MentorValidation.UPDATE_MENTOR_BANK_ACCOUNT,
       updateBankAccountMentorDto,
     );
+    console.log(validatedUpdateBankAccount);
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      await prismaTransaction.mentorBankAccount
+      if (!validatedUpdateBankAccount.id) {
+        await prismaTransaction.userBankAccount.create({
+          data: {
+            accountHolderName:
+              validatedUpdateBankAccount.accountHolderName as string,
+            bankName: validatedUpdateBankAccount.bankName as string,
+            accountNumber: validatedUpdateBankAccount.accountNumber as string,
+            paymentRecipientEmail:
+              validatedUpdateBankAccount.paymentRecipientEmail as string,
+            User: {
+              connect: {
+                uniqueId: currentUser.uniqueId,
+              },
+            },
+          },
+        });
+        return true;
+      }
+      await prismaTransaction.userBankAccount
         .findFirstOrThrow({
           where: {
-            mentorId: BigInt(currentUser.mentorId),
+            User: {
+              uniqueId: currentUser.uniqueId,
+            },
             id: validatedUpdateBankAccount.id,
           },
         })
         .catch(() => {
           throw new NotFoundException('Mentor bank account not found');
         });
-      await prismaTransaction.mentorBankAccount.update({
+      await prismaTransaction.userBankAccount.update({
         where: {
-          mentorId: BigInt(currentUser.mentorId),
+          User: {
+            uniqueId: currentUser.uniqueId,
+          },
           id: validatedUpdateBankAccount.id,
         },
         data: validatedUpdateBankAccount,

@@ -8,7 +8,7 @@ import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { WithdrawValidation } from './withdraw.validation';
 import LoggedUser from '../authentication/dto/logged-user.dto';
-import { MentorBankAccount, WithdrawPaymentStatus } from '@prisma/client';
+import { UserBankAccount, WithdrawPaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class WithdrawService {
@@ -49,11 +49,11 @@ export class WithdrawService {
         .catch(() => {
           throw new NotFoundException('Mentor data not found');
         });
-      const mentorBankAccount: MentorBankAccount =
-        await prismaTransaction.mentorBankAccount
+      const userBankAccount: UserBankAccount =
+        await prismaTransaction.userBankAccount
           .findFirstOrThrow({
             where: {
-              mentorId: mentorPrisma.id,
+              userId: mentorPrisma.user.id,
               id: validatedCreateWithdrawDto.bankAccountId,
             },
           })
@@ -80,7 +80,7 @@ export class WithdrawService {
         data: {
           userId: mentorPrisma.userId,
           mentorId: mentorPrisma.id,
-          mentorBankAccountId: mentorBankAccount.id,
+          userBankAccountId: userBankAccount.id,
           totalBalance: validatedCreateWithdrawDto.totalBalance,
         },
       });
@@ -93,7 +93,7 @@ export class WithdrawService {
     return this.prismaService.withdrawRequest.findMany({
       include: {
         user: true,
-        mentorBankAccount: true,
+        userBankAccount: true,
       },
     });
   }
@@ -107,7 +107,7 @@ export class WithdrawService {
       },
       include: {
         user: true,
-        mentorBankAccount: true,
+        userBankAccount: true,
       },
     });
   }
