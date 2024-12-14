@@ -7,7 +7,6 @@ import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as fs from 'node:fs';
 import { ConfigService } from '@nestjs/config';
-import * as process from 'node:process';
 
 declare const module: any;
 
