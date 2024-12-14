@@ -16,7 +16,7 @@ import CommonHelper from '../helper/common.helper';
 import * as fs from 'node:fs';
 import { join } from 'path';
 import { ChangePassword } from './dto/change-password.dto';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 import { MentorService } from '../mentor/mentor.service';
 import { JwtService } from '@nestjs/jwt';
 import { ResponseAuthenticationDto } from '../authentication/dto/response-authentication';
@@ -181,6 +181,32 @@ export class UserService {
         .catch(() => {
           throw new NotFoundException('User not found');
         });
+      const countPrisma = await prismaTransaction.user.count({
+        where: {
+          AND: [
+            {
+              telephone: validatedSettingGeneralDataUserDto.telephone,
+            },
+            {
+              id: {
+                not: userPrisma.id,
+              },
+            },
+          ],
+        },
+      });
+      if (
+        countPrisma > 0 &&
+        validatedSettingGeneralDataUserDto.telephone !== null
+      ) {
+        throw new z.ZodError([
+          {
+            path: ['telephone'], // Path yang menunjukkan masalah ada di field `email`
+            message: `Telephone has been registered before`, // Pesan error
+            code: 'custom', // Jenis error (custom karena tidak berasal dari validasi bawaan)
+          },
+        ]);
+      }
       let nameFile = '';
       if (userPrisma.photoPath !== null) {
         const existingImagePath = join(
