@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -19,6 +18,7 @@ import CommonHelper from '../helper/common.helper';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 
 @Injectable()
 export class AuthenticationService {
@@ -81,9 +81,13 @@ export class AuthenticationService {
         },
       });
       if (userPrisma) {
-        throw new BadRequestException(
-          `${signUpDto.email} has been registered before`,
-        );
+        throw new z.ZodError([
+          {
+            path: ['email'], // Path yang menunjukkan masalah ada di field `email`
+            message: `${signUpDto.email} has been registered before`, // Pesan error
+            code: 'custom', // Jenis error (custom karena tidak berasal dari validasi bawaan)
+          },
+        ]);
       }
       delete validatedSignUpDto['confirmPassword'];
       const uniqueId = uuidv4();
