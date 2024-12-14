@@ -407,8 +407,6 @@ model WithdrawRequest {
   id                    String                @id @default(uuid()) @db.VarChar(255)
   user                  User                  @relation(fields: [userId], references: [id])
   userId                BigInt                @map("user_id") @db.UnsignedBigInt
-  mentor                Mentor                @relation(fields: [mentorId], references: [id])
-  mentorId              BigInt                @map("mentor_id") @db.UnsignedBigInt
   userBankAccount       UserBankAccount       @relation(fields: [userBankAccountId], references: [id])
   userBankAccountId     BigInt                @map("user_bank_account_id") @db.UnsignedBigInt
   totalBalance          Int                   @default(0) @map("total_balance") @db.UnsignedInt
@@ -416,6 +414,8 @@ model WithdrawRequest {
   createdAt             DateTime              @default(now()) @map("created_at")
   updatedAt             DateTime              @default(now()) @map("updated_at")
   sentAt                DateTime?             @map("sent_at")
+  Mentor                Mentor?               @relation(fields: [mentorId], references: [id])
+  mentorId              BigInt?               @db.UnsignedBigInt
 
   @@map("withdraw_requests")
 }

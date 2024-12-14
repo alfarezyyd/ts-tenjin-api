@@ -25,63 +25,60 @@ export class WithdrawService {
       WithdrawValidation.CREATE,
       createWithdrawDto,
     );
-    console.log(createWithdrawDto);
-    console.log(validatedCreateWithdrawDto);
     return this.prismaService.$transaction(async (prismaTransaction) => {
-      const mentorPrisma = await prismaTransaction.mentor
+      const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
           where: {
-            user: {
-              uniqueId: loggedUser.uniqueId,
-            },
+            uniqueId: loggedUser.uniqueId,
           },
           select: {
             id: true,
-            userId: true,
-            user: {
-              select: {
-                id: true,
-                totalBalance: true,
-              },
-            },
+            totalBalance: true,
           },
         })
         .catch(() => {
-          throw new NotFoundException('Mentor data not found');
+          throw new NotFoundException('User  not found');
         });
       const userBankAccount: UserBankAccount =
         await prismaTransaction.userBankAccount
           .findFirstOrThrow({
             where: {
-              userId: mentorPrisma.user.id,
+              userId: userPrisma.id,
               id: validatedCreateWithdrawDto.bankAccountId,
             },
           })
           .catch(() => {
-            throw new NotFoundException('Mentor bank account data not found');
+            throw new NotFoundException(
+              'User bank account data not found, please change it in setting',
+            );
           });
-      if (
-        mentorPrisma.user.totalBalance < validatedCreateWithdrawDto.totalBalance
-      ) {
+      if (userPrisma.totalBalance < validatedCreateWithdrawDto.totalBalance) {
         throw new BadRequestException('Balance not sufficient');
       }
       await prismaTransaction.user.update({
         where: {
-          id: mentorPrisma.user.id,
+          id: userPrisma.id,
         },
         data: {
           totalBalance:
-            mentorPrisma.user.totalBalance -
+            userPrisma.totalBalance -
             BigInt(validatedCreateWithdrawDto.totalBalance),
         },
       });
       console.log(validatedCreateWithdrawDto);
       await prismaTransaction.withdrawRequest.create({
         data: {
-          userId: mentorPrisma.userId,
-          mentorId: mentorPrisma.id,
-          userBankAccountId: userBankAccount.id,
           totalBalance: validatedCreateWithdrawDto.totalBalance,
+          user: {
+            connect: {
+              id: userPrisma.id,
+            },
+          },
+          userBankAccount: {
+            connect: {
+              id: userBankAccount.id,
+            },
+          },
         },
       });
 
@@ -89,7 +86,9 @@ export class WithdrawService {
     });
   }
 
-  async findAll() {
+  async;
+
+  findAll() {
     return this.prismaService.withdrawRequest.findMany({
       include: {
         user: true,
