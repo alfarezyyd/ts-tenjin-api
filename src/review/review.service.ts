@@ -99,15 +99,13 @@ export class ReviewService {
       where: {
         Assistance: {
           id: moreReviewDto.assistantId,
-          mentor: {
-            user: {
-              uniqueId: moreReviewDto.mentorUniqueId,
-            },
-          },
         },
         id: {
-          gte: BigInt(moreReviewDto.lastReviewId + 1),
+          lt: BigInt(moreReviewDto.lastReviewId),
         },
+      },
+      include: {
+        User: true,
       },
       take: 10,
     });

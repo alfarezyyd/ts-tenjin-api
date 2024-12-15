@@ -14,7 +14,7 @@ SELECT * FROM assistance_languages;
 SELECT * FROM orders;
 SELECT * FROM experiences;
 SELECT * FROM users;
-UPDATE orders SET order_payment_status = 'PAID' WHERE id = '8f51fff3-3f6e-406c-bd1f-8cb641e5a610';
+UPDATE orders SET order_payment_status = 'PAID' WHERE id = 'f4e67501-343e-4ac2-93cc-b39550a0fc7f';
 SELECT * FROM experience_resources;
 SELECT * FROM tags;
 SELECT * FROM languages;
