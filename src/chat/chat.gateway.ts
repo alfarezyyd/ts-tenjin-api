@@ -138,6 +138,7 @@ export class ChatGateway
           userUniqueId: relatedUserPrisma.uniqueId,
           userId: relatedUserPrisma.id,
           name: relatedUserPrisma.name,
+          photoPath: relatedUserPrisma.photoPath,
           messages: messagesPerUser.get(BigInt(relatedUserPrisma.id)) || [],
         });
       }
@@ -205,6 +206,7 @@ export class ChatGateway
           id: true,
           uniqueId: true,
           name: true,
+          photoPath: true,
         },
       });
 
@@ -229,6 +231,7 @@ export class ChatGateway
           originUserName: originUser.name,
           originUserUniqueId: originUser.uniqueId,
           destinationUserUniqueId: destinationUser.uniqueId,
+          destinationProfilePath: destinationUser.photoPath,
           message: {
             isSender: true,
             message: chatPrisma.payloadMessage,
@@ -242,6 +245,7 @@ export class ChatGateway
             originUserName: originUser.name,
             originUserUniqueId: originUser.uniqueId,
             destinationUserUniqueId: destinationUser.uniqueId,
+            destinationProfilePath: destinationUser.photoPath,
             message: {
               isSender: false,
               message: chatPrisma.payloadMessage,
